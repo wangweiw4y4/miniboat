@@ -1,0 +1,87 @@
+<launch>
+
+    <!-- LAUNCH ARGUMENTS -->
+
+    <arg name="sim_node"                         default="false"/>
+    <arg name="use_ekf"                          default="false"/>
+    <arg name="serial_node"                      default="true"/>
+    <arg name="sensor_node"                      default="true"/>
+
+    <!-- sensors -->
+
+    <arg name="sensors"                          default="$(eval not (arg('sim_node')))"/>
+    <arg name="gps_node"                         default="$(arg sensors)"/>
+    <arg name="imu_launch"                       default="$(arg sensors)"/>
+    <arg name="lidar_launch"                     default="$(arg sensors)"/>
+    <arg name="pressure_sensor_node"             default="$(arg sensors)"/>
+    <arg name="pressure_sensor_serial_launch"    default="$(arg pressure_sensor_node)"/>
+    <arg name="intel_realsense_launch"           default="$(arg sensors)"/>
+    <arg name="camera_node"                      default="false"/>
+    <arg name="sensor_tf_launch"                 default="true"/>
+
+    <!-- control --> 
+
+    <arg name="csv_path_node"                    default="false"/>
+    
+    <arg name="mpc_node"                         default="false"/>
+    <arg name="command_node"                     default="true"/>
+    <arg name="joy_node"                         default="$(arg command_node)"/>
+
+    <!-- latching, tag detection and pid -->
+
+    <arg name="latching_launch"                  default="false"/>
+
+    <!-- logging -->
+    <!-- save a bagfile when launched. note: very disk usage heavy -->
+
+    <arg name="bag_node"	   		 default="false"/>
+    <arg name="sim_logging"        		 default="$(arg sim_node)"/>
+    <arg name="bag_dir"            		 value="$(eval env('HOME')+'/bagfiles/sim/' if(arg('sim_logging')) else env('HOME')+'/bagfiles/roboat/')"/>
+
+
+    <!-- ROS PARAMETERS -->
+
+    <rosparam command="load" file="$(find roboat_core)/config/main.yaml"/>
+    <rosparam command="load" file="$(find roboat_core)/config/system_dynamics.yaml" ns="system_dynamics"/>
+
+
+    <!-- ENVIRONMENT SETTINGS -->
+
+    <env name="ROSCONSOLE_CONFIG_FILE"  value="$(find roboat_core)/config/rosconsole.conf"/>
+    <env name="ROSCONSOLE_FORMAT"       value="${logger} | ${node} : ${message}"/>
+
+
+    <!-- GLOBAL REMAPS -->
+
+    <remap from="/gx5/imu/data"      to="/imu_raw"/>
+    <remap from="velodyne_points"   to="points_raw"/>
+
+    <remap if="$(eval not(arg('use_ekf')))" from="filtered_pose"  to="ndt_pose"/>
+    <remap if="$(eval not(arg('use_ekf')))" from="filtered_twist" to="estimate_twist"/>
+
+
+    <!-- INCLUDE FILES AND NODES -->
+
+    <node if="$(arg sim_node)"                 name="sim_node"                pkg="roboat_core"       type="sim_node"                   output="screen"/>
+    <node if="$(arg sensor_node)"              name="sensor_node"             pkg="roboat_core"       type="sensor_node"/>
+    <node if="$(arg serial_node)"              name="serial_node"             pkg="roboat_core"       type="serial_node"/>
+    <node if="$(arg gps_node)"                 name="gps_node"                pkg="roboat_core"       type="rtkgps_node"/>
+    <node if="$(arg mpc_node)"                 name="mpc_node"                pkg="roboat_core"       type="mpc_node"                   output="screen"/>
+    <node if="$(arg command_node)"             name="command_node"            pkg="roboat_core"       type="command_node"               output="screen"/>
+    <node if="$(arg pressure_sensor_node)"     name="pressure_sensor_node"    pkg="roboat_core"       type="pressure_sensor_node"       output="screen"/>
+    <node if="$(arg csv_path_node)"            name="csv_path_node"           pkg="roboat_core"       type="csv_path_node"/>
+    <node if="$(arg camera_node)"              name="camera_node"             pkg="usb_cam"           type="usb_cam_node"/>
+    <node if="$(arg joy_node)"                 name="joy_node"                pkg="joy"               type="joy_node"/>
+    <node if="$(arg bag_node)"		       name="robot_bag"               pkg="rosbag"            type="record"           args="-a -o $(arg bag_dir)" />
+
+    <include if="$(arg imu_launch)"                         file="$(find microstrain_mips)/launch/microstrain.launch"/>
+    <include if="$(arg lidar_launch)"                       file="$(find velodyne_pointcloud)/launch/VLP16_points.launch"/>
+    <include if="$(arg sensor_tf_launch)"                   file="$(find roboat_core)/launch/sensors/sensor_tf.launch"/>
+    <include if="$(arg pressure_sensor_serial_launch)"      file="$(find roboat_core)/launch/sensors/pressure_sensor_serial.launch"/>
+    <include if="$(arg intel_realsense_launch)"             file="$(find realsense2_camera)/launch/rs_rgbd.launch">
+      <arg name="color_width" value="848"/>
+    </include>
+    <include if="$(arg latching_launch)"                    file="$(find roboat_core)/launch/latching/latching.launch"/>
+
+
+</launch>

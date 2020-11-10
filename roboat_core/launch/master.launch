@@ -1,0 +1,39 @@
+<launch>
+
+    <!-- LAUNCH ARGUMENTS -->
+
+    <arg name="sim_node"                         default="false"/>
+    <arg name="serial_node"                      default="true"/>
+    <arg name="sensor_node"                      default="true"/>
+    <arg name="csv_path_node"                    default="false"/>
+    <arg name="mpc_node"                         default="true"/>
+    <arg name="command_node"                     default="true"/>
+    <arg name="joy_node"                         default="true"/>
+    <arg name="pid_node"                         default="false"/>
+    <arg name="bag_node"	   		             default="true"/>
+    
+
+    <!-- ROS PARAMETERS -->
+
+    <rosparam command="load" file="$(find roboat_core)/config/main.yaml"/>
+    <rosparam command="load" file="$(find roboat_core)/config/system_dynamics.yaml" ns="system_dynamics"/>
+
+
+    <!-- GLOBAL REMAPS -->
+
+    <!--<remap from="/imu/data"      to="/imu_raw"/>-->
+
+    <!-- INCLUDE FILES AND NODES -->
+
+    <node if="$(arg sim_node)"                 name="sim_node"                pkg="roboat_core"       type="sim_node"                   output="screen"/>
+    <node if="$(arg sensor_node)"              name="sensor_node"             pkg="roboat_core"       type="sensor_node"      output="screen"/>  
+    <node if="$(arg serial_node)"              name="serial_node"             pkg="roboat_core"       type="serial_node"/>
+    <node if="$(arg mpc_node)"                 name="mpc_node"                pkg="roboat_core"       type="mpc_node"                   output="screen"/>
+    <node if="$(arg command_node)"             name="command_node"            pkg="roboat_core"       type="command_node"               output="screen"/>
+    <node if="$(arg csv_path_node)"            name="csv_path_node"           pkg="roboat_core"       type="csv_path_node"/>
+    <node if="$(arg joy_node)"                 name="joy_node"                pkg="joy"               type="joy_node"/>
+    <node if="$(arg pid_node)"                 name="pid_node"                pkg="roboat_core"       type="pid_node"                   output="screen"/>
+    <node if="$(arg bag_node)"		           name="robot_bag"               pkg="rosbag"            type="record"           args="-a -o /home/ubuntu/bagfiles/" />
+
+
+</launch>

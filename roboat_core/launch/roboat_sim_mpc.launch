@@ -1,0 +1,7 @@
+<launch> 
+    <include file="$(find roboat_core)/launch/master.launch">
+        <arg name="sim_node"        value="true"/>
+        <arg name="mpc_node"        value="true"/>
+        <arg name="csv_path_node"   value="true"/>
+    </include>
+</launch>

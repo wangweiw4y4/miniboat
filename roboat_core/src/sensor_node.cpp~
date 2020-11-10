@@ -1,0 +1,245 @@
+//ROS
+#include "ros/ros.h"
+#include "std_msgs/String.h"
+#include "std_msgs/Float32MultiArray.h"
+#include "std_msgs/Float64MultiArray.h"
+#include <geometry_msgs/PoseStamped.h>
+#include <tf/transform_datatypes.h>
+
+//roboat
+#include <roboat_core/SensorFromMicroController.h>
+#include <math.h>
+
+//other
+#include <Eigen/Dense>
+
+#define SENSOR_BYTE_LENGTH 36
+#define XYT_BYTE_LENGTH 12
+#define SENSOR_BYTE_LENGTH_USE_GPS SENSOR_BYTE_LENGTH - XYT_BYTE_LENGTH
+
+#define AngularVelocityDirection -1 //for INO055
+//#define AngularVelocityDirection 1  //for 3DM-GX5-25
+/*3DM-GX5-25 IMU Data Format: IMU[0]~IMU[5]:Roll,Pitch,Yaw,Ax,Ay,Wz*/
+
+float lastX = 0;
+float lastY = 0;
+char firstposflag = 0;
+bool USE_GPS;
+double step;
+double SAMPLE_T;
+int ANGLE_DRIFT = 0;
+double KFstate_Pre[6];// x,y,vx,vy,ax,ay
+
+/* equation: Xk = Phi*Xk_prev + Noise */
+/* Phi represents the dynamics of the system: it is the motion equation*/
+double Phi[6][6] = { {1, 0, SAMPLE_T, 0, 0, 0},
+                     {0, 1, 0, SAMPLE_T, 0, 0},
+                     {0, 0, 1, 0, SAMPLE_T, 0},
+                     {0, 0, 0, 1, 0, SAMPLE_T},
+                     {0, 0, 0, 0, 1, 0},
+                     {0, 0, 0, 0, 0, 1}};
+
+/* The error matrix (or the confidence matrix): P states whether we should
+% give more weight to the new measurement or to the model estimate*/
+double sigma_model = 0.06;
+double PMatrix[6][6]= {{pow(sigma_model,2), 0, 0, 0, 0, 0},
+                       {0, pow(sigma_model,2), 0, 0, 0, 0},
+                       {0, 0, pow(sigma_model,2), 0, 0, 0},
+                       {0, 0, 0, pow(sigma_model,2), 0, 0},
+                       {0, 0, 0, 0, pow(sigma_model,2), 0},
+                       {0, 0, 0, 0, 0, pow(sigma_model,2)}};
+/*
+% Q is the process noise covariance. It represents the amount of
+% uncertainty in the model. In our case, we arbitrarily assume that the model is perfect (no
+% acceleration allowed for the train, or in other words - any acceleration is considered to be a noise)
+*/
+double sigma_system = 0.015;
+double QMatrix[6][6] =  {{pow(sigma_system,2), 0, 0, 0, 0, 0},
+                         {0, pow(sigma_system,2), 0, 0, 0, 0},
+                         {0, 0, pow(sigma_system,2), 0, 0, 0},
+                         {0, 0, 0, pow(sigma_system,2), 0, 0},
+                         {0, 0, 0, 0, pow(sigma_system,2), 0},
+                         {0, 0, 0, 0, 0, pow(sigma_system,2)}};
+
+/*
+% M is the measurement matrix.
+% We measure X, so M(1) = 1
+% We do not measure V, so M(2)= 0
+*/
+double MMatrix[6][6] = {{1, 0, 0, 0, 0, 0},
+                        {0, 1, 0, 0, 0, 0},
+                        {0, 0, 1, 0, 0, 0},
+                        {0, 0, 0, 1, 0, 0},
+                        {0, 0, 0, 0, 1, 0},
+                        {0, 0, 0, 0, 0, 1}};
+/*
+% R is the measurement noise covariance. Generally R and sigma_meas can
+% vary between samples.
+*/
+double sigma_meas_gps = 2;
+double sigma_meas_velocity_IMU = 0.05;
+double sigma_meas_acceleration_IMU = 0.01;
+double RMatrix[6][6] =  {{pow(sigma_meas_gps,2), 0, 0, 0, 0, 0},
+                         {0, pow(sigma_meas_gps,2), 0, 0, 0, 0},
+                         {0, 0, pow(sigma_meas_velocity_IMU,2), 0, 0, 0},
+                         {0, 0, 0, pow(sigma_meas_velocity_IMU,2), 0, 0},
+                         {0, 0, 0, 0, pow(sigma_meas_acceleration_IMU,2), 0},
+                         {0, 0, 0, 0, 0, pow(sigma_meas_acceleration_IMU,2)}};
+
+
+void matrixMultiply(double C[6][6], double A[6][6], double B[6][6]){
+
+    for(int m=0; m<6; m++)
+    {
+      for(int s=0; s<6; s++)
+      {
+        C[m][s]=0;//变量使用前记得初始化，否则结果具有不确定性
+        for(int n=0; n<6; n++)
+        {
+          C[m][s]+=A[m][n]*B[n][s];
+        }
+      }
+    }
+}
+
+double KFMeasurement[6];
+double AccelerationGlobal[2];
+
+static struct
+{
+/************Data Area**************/
+    float GPSData[3];
+    float IMUData[6];
+/************Data Area**************/
+}SensorFromLowerPacket;
+
+ros::Publisher state_pub;
+ros::Publisher pose_pub;
+ros::Subscriber rtkgps_sub;
+
+ros::Publisher GPSIMU_pub;
+
+
+std::vector<float> stateCalc(float GPSData[], float IMUData[])
+{
+    //state[0-5]:x,y,psai,u,v,r
+    std::vector<float> state(6);
+
+    state[0] = GPSData[1]/1000;
+    state[1] = GPSData[2]/1000;
+
+    float xdot = (state[0] - lastX)/SAMPLE_T;
+    float ydot = (state[1] - lastY)/SAMPLE_T;
+    if (xdot>0.2)
+    xdot=0.2;
+    if (xdot<-0.2)
+    xdot=-0.2;
+    if (ydot>0.2)
+    ydot=0.2;
+    if (ydot<-0.2)
+    ydot=-0.2;
+    if(firstposflag==0)
+    {
+      xdot=0;
+      ydot=0;
+      firstposflag=1;
+    }
+
+    state[2] = M_PI/180*(IMUData[2] - ANGLE_DRIFT);
+    if(state[2] < -M_PI){
+        state[2] += 2*M_PI;
+    }
+    if(state[2] > M_PI){
+        state[2] -= 2*M_PI;
+    }
+
+    state[3] = cos(state[2])*xdot + sin(state[2])*ydot;
+    state[4] = -sin(state[2])*xdot + cos(state[2])*ydot;
+    state[5] = AngularVelocityDirection*IMUData[5]*M_PI/180;
+
+    lastX = state[0];
+    lastY = state[1];
+
+    return state;
+}
+
+void rtkgpsCallback(const std_msgs::Float64MultiArray array)
+{
+    SensorFromLowerPacket.GPSData[1] = array.data[0];
+    SensorFromLowerPacket.GPSData[2] = array.data[1];
+}
+
+//callback function for the sensor topic
+void imuCallback(roboat_core::SensorFromMicroController SensorData)
+{
+    if(!USE_GPS){
+        memcpy(&SensorFromLowerPacket, &SensorData.SensorDataFromLower[0], SENSOR_BYTE_LENGTH);
+    } else{
+        //copy all sensor data after time, x and y
+        memcpy(&SensorFromLowerPacket.IMUData[0], &SensorData.SensorDataFromLower[XYT_BYTE_LENGTH], SENSOR_BYTE_LENGTH_USE_GPS);
+        //copy time
+        memcpy(&SensorFromLowerPacket, &SensorData.SensorDataFromLower[0], 4);
+    }
+
+    ROS_INFO("[SENSOR NODE]GPS and IMU data:%f,%f,%f,%f,%f,%f\n",SensorFromLowerPacket.GPSData[1],SensorFromLowerPacket.GPSData[2],SensorFromLowerPacket.IMUData[2], SensorFromLowerPacket.IMUData[3],SensorFromLowerPacket.IMUData[4],SensorFromLowerPacket.IMUData[5]);
+
+    std::vector<float> state = stateCalc(SensorFromLowerPacket.GPSData, SensorFromLowerPacket.IMUData);
+
+    //publish state
+    std_msgs::Float32MultiArray stateMsg;
+    stateMsg.data.resize(6);
+    stateMsg.data = state;
+    state_pub.publish(stateMsg);
+		
+	std_msgs::Float32MultiArray GPSIMUMsg;
+	GPSIMUMsg.data.resize(9);
+	
+/*	std::vector<double> gpsimu(9);
+	
+	for (int i=0;i++;i<3) {
+		gpsimu[i]= 3; //SensorFromLowerPacket.GPSData[i];
+	}
+	
+	for (int j=0;j++;j<6) {
+		gpsimu[j+3]= 3; //SensorFromLowerPacket.IMUData[j];
+	}*/
+	
+	memcpy(&GPSIMUMsg.data[0],&SensorFromLowerPacket.GPSData[0],36);
+	
+	GPSIMU_pub.publish(GPSIMUMsg);
+
+    //publish pose representation of state
+    geometry_msgs::PoseStamped poseMsg;
+    poseMsg.header.frame_id = "world";
+    poseMsg.pose.position.x = state[0];
+    poseMsg.pose.position.y = state[1];
+    poseMsg.pose.orientation = tf::createQuaternionMsgFromYaw(state[2]);
+    pose_pub.publish(poseMsg);
+}
+
+int main(int argc, char **argv)
+{
+    ros::init(argc, argv, "sensor_node");
+    ros::NodeHandle n;
+    n.param("system_dynamics/step", step, 0.1);
+    ros::Rate loop_rate(1/step);
+    ros::Time begin = ros::Time::now();
+
+    SAMPLE_T= step;
+
+
+    if(n.hasParam("IMU/ANGLE_DRIFT")) n.getParam("IMU/ANGLE_DRIFT", ANGLE_DRIFT);
+
+    ROS_ERROR("%d", ANGLE_DRIFT);
+
+    //subscribe the sensor topic and GPS if usingGPS
+    ros::Subscriber sub = n.subscribe("sensor", 10, imuCallback);
+    //rtkgps_sub = n.subscribe("rtkgps", 100, rtkgpsCallback);
+
+    state_pub = n.advertise<std_msgs::Float32MultiArray>("state", 10);
+    GPSIMU_pub = n.advertise<std_msgs::Float32MultiArray>("GPSIMU", 10);
+    pose_pub = n.advertise<geometry_msgs::PoseStamped>("pose", 10);
+
+    ros::spin();
+    return 0;
+} 
