@@ -152,8 +152,8 @@ void IMUFusionCallback(const marvelmind_nav::hedge_imu_fusion& hedge_imu_fusion_
    //twist.header.stamp.nsec =  (int) ((hedge_imu_fusion_msg.timestamp_ms%1000)*(10^6));	
 
    twist_beaconIMU.twist.linear.x = hedge_imu_fusion_msg.vx;
-   twist_beaconIMU.twist.linear.y = -hedge_imu_fusion_msg.vy;
-   twist_beaconIMU.twist.linear.z = -hedge_imu_fusion_msg.vz;
+   twist_beaconIMU.twist.linear.y = hedge_imu_fusion_msg.vy;
+   twist_beaconIMU.twist.linear.z = hedge_imu_fusion_msg.vz;
    
 
 
@@ -166,8 +166,8 @@ void IMUFusionCallback(const marvelmind_nav::hedge_imu_fusion& hedge_imu_fusion_
 
     twist_bno055.header.stamp = ros::Time::now();
     twist_bno055.twist.linear.x = hedge_imu_fusion_msg.vx;
-    twist_bno055.twist.linear.y = -hedge_imu_fusion_msg.vy;
-    twist_bno055.twist.linear.z = -hedge_imu_fusion_msg.vz;
+    twist_bno055.twist.linear.y = hedge_imu_fusion_msg.vy;
+    twist_bno055.twist.linear.z = hedge_imu_fusion_msg.vz;
     twist_bno055.twist.angular =  twist_bno055.twist.angular;
 
 }
@@ -213,10 +213,10 @@ int main(int argc, char **argv)
     {
       state[0] = pose_bno055.pose.position.x;
       state[1] = pose_bno055.pose.position.y;
-      state[2] = yaw_bno055;
+      state[2] = -yaw_bno055;
       state[3] = twist_bno055.twist.linear.x;
       state[4] = twist_bno055.twist.linear.y;
-      state[5] = twist_bno055.twist.angular.z;
+      state[5] = -twist_bno055.twist.angular.z;
     }
     else
      {

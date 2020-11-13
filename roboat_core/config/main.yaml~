@@ -1,5 +1,6 @@
 IMU: {
-  ANGLE_DRIFT: 0
+  ANGLE_DRIFT: 0,
+  USE_BNO055: 1
 }
 
 trajectory: {
@@ -7,7 +8,7 @@ trajectory: {
     init_x: 0,
     init_y: 0,
     angle_rotate: 0,
-    file: /paths/point2.csv,
+    file: /paths/point.csv,
     repeat: false
 }
 
@@ -15,7 +16,9 @@ trajectory: {
 PID: {
     P: 0.5,
     I: 0,
-    D: 10
+    D: 10,
+    req_theta: 0,
+    req_force: 0.25
 }
 
 port: {
@@ -23,7 +26,7 @@ port: {
 }
 
 joypad: {
-    max_force: 1
+    max_force: 0.5
 }
 
 sensor_covariance: {

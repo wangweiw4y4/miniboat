@@ -196,7 +196,8 @@ int main(int argc, char **argv)
       heading.data = state[2];
       heading_pub.publish(heading);
  
-      force =  velocity_control(req_theta, req_force)+ pid_control();
+    //  force =  velocity_control(req_theta, req_force)+ pid_control();
+       force =  pid_control();
      // ROS_INFO("velocity force:  %f,%f,%f,%f\n", force(0), force(1), force(2),force(3)); 
       
       roboat_core::Force forceMsg;

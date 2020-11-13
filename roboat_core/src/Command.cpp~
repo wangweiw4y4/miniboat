@@ -109,7 +109,7 @@ void Command::joyCallback(sensor_msgs::Joy msg)
 
 Command::Command(ros::NodeHandle n)
 {
-  Command::joy_max_force = 1;
+  Command::joy_max_force = 0.5;
 
   // publisher for command topic
   command_pub = n.advertise<roboat_core::CommandToMicroController>("/command", 100);
@@ -124,7 +124,7 @@ Command::Command(ros::NodeHandle n)
   ros::Subscriber mpc_sub = n.subscribe<roboat_core::Force>("/mpc_force", 5, boost::bind(&Command::forceCallback, this, _1, mpc_priority));
   ros::Rate loopRate(10);
 
-  n.param("joypad/max_force", Command::joy_max_force, 3.);
+  n.param("joypad/max_force", Command::joy_max_force, 0.5);
 
   while (ros::ok())
   {

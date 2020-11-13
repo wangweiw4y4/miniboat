@@ -26,22 +26,13 @@ DAMAGE.
 
 #include "ros/ros.h"
 #include "std_msgs/String.h"
-#include "marvelmind_nav/hedge_pos.h"
-#include "marvelmind_nav/hedge_pos_a.h"
-#include "marvelmind_nav/hedge_pos_ang.h"
-#include "marvelmind_nav/beacon_pos_a.h"
-#include "marvelmind_nav/hedge_imu_raw.h"
-#include "marvelmind_nav/hedge_imu_fusion.h"
-#include "marvelmind_nav/beacon_distance.h"
-#include "marvelmind_nav/hedge_telemetry.h"
-#include "marvelmind_nav/hedge_quality.h"
-#include "marvelmind_nav/marvelmind_waypoint.h"
-#include <visualization_msgs/Marker.h>
 
 #include <ros/package.h>
 #include "std_msgs/String.h"
 #include "std_msgs/Int16.h"
 #include <std_msgs/Float32MultiArray.h>
+#include <std_msgs/Float64.h>
+#include <std_msgs/Float64MultiArray.h>
 #include <std_msgs/Int16MultiArray.h>
 #include <geometry_msgs/PoseStamped.h>
 #include <geometry_msgs/Pose.h>
@@ -61,31 +52,11 @@ DAMAGE.
 #include <roboat_core/Force.h>
 
 
-#define ROS_NODE_NAME "pic_node"
-#define HEDGE_POSITION_TOPIC_NAME "hedge_pos"
-#define HEDGE_POSITION_ADDRESSED_TOPIC_NAME "hedge_pos_a"
-#define HEDGE_POSITION_WITH_ANGLE_TOPIC_NAME "hedge_pos_ang"
-
-#define BEACONS_POSITION_ADDRESSED_TOPIC_NAME "beacons_pos_a"
-
-#define HEDGE_IMU_RAW_TOPIC_NAME "hedge_imu_raw"
-#define HEDGE_IMU_FUSION_TOPIC_NAME "hedge_imu_fusion"
-
-#define BEACON_RAW_DISTANCE_TOPIC_NAME "beacon_raw_distance"
-
-#define HEDGE_TELEMETRY_TOPIC_NAME "hedge_telemetry"
-#define HEDGE_QUALITY_TOPIC_NAME "hedge_quality"
-#define MARVELMIND_WAYPOINT_TOPIC_NAME "marvelmind_waypoint"
-
-#define SCALE_HEDGE 3.0
-#define ROBOT_LENGTH 0.20;
+#define ROS_NODE_NAME "pid_node"
 
 
 #define PI 3.1415926
 
-ros::Publisher rviz_marker_pub;
-
-uint32_t rviz_shape;
 
 double orientation_qx;
 double orientation_qy;
@@ -93,269 +64,43 @@ double orientation_qz;
 double orientation_qw;
 
 
-
-geometry_msgs::PoseStamped pose;
-geometry_msgs::TwistStamped twist;
-
-
-double roll;
-double pitch;
-double yaw; 
-
-Eigen::MatrixXd R(3,4);
-Eigen::MatrixXd R_INV(4,3);
-Eigen::VectorXd torque(3);
-
-
-
-double pid_flag = 0;
-
-double P = 0.5;
-double I = 0;
-double D = 0;
-double ek;
-double ek_old;
-double e_total;
+double step;
+double control_effort;
 
 double req_theta = PI/4;
 double req_force = 0.25;
 std::vector<double> state(6);
 
-Eigen::VectorXd velocity_control(double theta, double req_force);
-
-typedef enum {objHedge, objBeacon} DrawObjectType;
-
-void showRvizObject(uint8_t address, float x, float y, float z, DrawObjectType obj) 
-{uint8_t lifeTime, i;
- 
-	if (rviz_marker_pub.getNumSubscribers() < 1) return;
-	
-	visualization_msgs::Marker marker;
-    // Set the frame ID and timestamp.  See the TF tutorials for information on these.
-    marker.header.frame_id = "/my_frame";
-    marker.header.stamp = ros::Time::now();
-
-    // Set the namespace and id for this marker.  This serves to create a unique ID
-    // Any marker sent with the same namespace and id will overwrite the old one
-    marker.ns = "basic_shapes";
-    marker.id = address;
-
-    // Set the marker type
-    marker.type = rviz_shape;
-
-    // Set the marker action.  Options are ADD, DELETE, and new in ROS Indigo: 3 (DELETEALL)
-    marker.action = visualization_msgs::Marker::ADD;
-
-    // Set the pose of the marker.  This is a full 6DOF pose relative to the frame/time specified in the header
-    marker.pose.position.x = x;
-    marker.pose.position.y = y;
-    marker.pose.position.z = z;
-    if (obj == objHedge)
-      {
-        marker.pose.orientation.x = orientation_qx;
-        marker.pose.orientation.y = orientation_qy;
-        marker.pose.orientation.z = orientation_qz;
-        marker.pose.orientation.w = orientation_qw;
-      }
-     else
-      {
-		marker.pose.orientation.x = 0.0;
-        marker.pose.orientation.y = 0.0;
-        marker.pose.orientation.z = 0.0;
-        marker.pose.orientation.w = 1.0;
-      }   
-
-    // Set the scale of the marker -- 1x1x1 here means 1m on a side
-    marker.scale.x = 0.05*SCALE_HEDGE;
-    marker.scale.y = 0.05*SCALE_HEDGE;
-    marker.scale.z = 0.02*SCALE_HEDGE;
-    // Set the color -- be sure to set alpha to something non-zero!
-    if (obj == objHedge)
-      {
-        marker.color.r = 0.0f;
-        marker.color.g = 0.0f;
-        marker.color.b = 1.0f;
-      }
-     else
-      {
-		marker.color.r = 0.0f;
-        marker.color.g = 1.0f;
-        marker.color.b = 0.0f;
-      }   
-    marker.color.a = 1.0;
-
-    if (obj == objHedge) lifeTime= 5;
-                    else lifeTime= 25;
-    marker.lifetime = ros::Duration(lifeTime);
-     
-    rviz_marker_pub.publish(marker);
+void statecallback(const std_msgs::Float64MultiArray & array_msg) {
+    for(int i = 0; i < 6; i++) 
+      state[i] = array_msg.data[i];
 }
 
-void hedgePosAngCallback(const marvelmind_nav::hedge_pos_ang& hedge_pos_msg)
+void controleffortcallback(const std_msgs::Float64 & control_msg)
 {
-  // ROS_INFO("Hedgehog data: Address= %d, timestamp= %d, X=%.3f  Y= %.3f  Z=%.3f  Angle: %.1f  flags=%d", 	
-		// 		(int) hedge_pos_msg.address, 
-		// 		(int) hedge_pos_msg.timestamp_ms, 
-		// 		(float) hedge_pos_msg.x_m, (float) hedge_pos_msg.y_m, (float) hedge_pos_msg.z_m,
-		// 		(float) hedge_pos_msg.angle,  
-		// 		(int) hedge_pos_msg.flags);
-				
-  if ((hedge_pos_msg.flags&(1<<0))==0)
-    {				
-      showRvizObject(hedge_pos_msg.address,hedge_pos_msg.x_m, hedge_pos_msg.y_m, hedge_pos_msg.z_m, objHedge);
-    }  
-}
-
-void beaconsPosCallback(const marvelmind_nav::beacon_pos_a& beacon_pos_msg)
-{
-  // ROS_INFO("Stationary beacon data: Address= %d, X=%.3f  Y= %.3f  Z=%.3f", 	
-		// 		(int) beacon_pos_msg.address, 
-		// 		(float) beacon_pos_msg.x_m, (float) beacon_pos_msg.y_m, (float) beacon_pos_msg.z_m);
-				
-  showRvizObject(beacon_pos_msg.address, beacon_pos_msg.x_m, beacon_pos_msg.y_m, beacon_pos_msg.z_m, objBeacon);
+   control_effort =control_msg.data;
 }
 
 
-void IMURawCallback(const marvelmind_nav::hedge_imu_raw& hedge_imu_raw_msg)
+
+Eigen::VectorXd pid_control()
 {
-	// ROS_INFO("Raw IMU: Timestamp: %08d, aX=%05d aY=%05d aZ=%05d  gX=%05d gY=%05d gZ=%05d  cX=%05d cY=%05d cZ=%05d", 	
-	// 			(int) hedge_imu_raw_msg.timestamp_ms,
-	// 			(int) hedge_imu_raw_msg.acc_x, (int) hedge_imu_raw_msg.acc_y, (int) hedge_imu_raw_msg.acc_z,
-	// 			(int) hedge_imu_raw_msg.gyro_x, (int) hedge_imu_raw_msg.gyro_y, (int) hedge_imu_raw_msg.gyro_z,
-	// 			(int) hedge_imu_raw_msg.compass_x, (int) hedge_imu_raw_msg.compass_y, (int) hedge_imu_raw_msg.compass_z);
-
-
-// 0.0175 dps/LSB
-   twist.twist.angular.x = hedge_imu_raw_msg.gyro_x * 0.0175 * PI / 180;
-   twist.twist.angular.y = -hedge_imu_raw_msg.gyro_y * 0.0175 * PI / 180;
-   twist.twist.angular.z = -hedge_imu_raw_msg.gyro_z * 0.0175 * PI / 180;
-
-
-}
-
-void IMUFusionCallback(const marvelmind_nav::hedge_imu_fusion& hedge_imu_fusion_msg)
-{
-	// ROS_INFO("IMU fusion: Timestamp: %08d, X=%.3f  Y= %.3f  Z=%.3f  q=%.3f,%.3f,%.3f,%.3f v=%.3f,%.3f,%.3f  a=%.3f,%.3f,%.3f", 	
-	// 			(int) hedge_imu_fusion_msg.timestamp_ms,
-	// 			(float) hedge_imu_fusion_msg.x_m, (float) hedge_imu_fusion_msg.y_m, (float) hedge_imu_fusion_msg.z_m,
-	// 			(float) hedge_imu_fusion_msg.qw, (float) hedge_imu_fusion_msg.qx, (float) hedge_imu_fusion_msg.qy, (float) hedge_imu_fusion_msg.qz,
-	// 			(float) hedge_imu_fusion_msg.vx, (float) hedge_imu_fusion_msg.vy, (float) hedge_imu_fusion_msg.vz,
-	// 			(float) hedge_imu_fusion_msg.ax, (float) hedge_imu_fusion_msg.ay, (float) hedge_imu_fusion_msg.az);
-
-
-   
-   orientation_qx= hedge_imu_fusion_msg.qx;
-   orientation_qy= hedge_imu_fusion_msg.qy;
-   orientation_qz= hedge_imu_fusion_msg.qz;
-   orientation_qw= hedge_imu_fusion_msg.qw;
-	
-   pose.header.stamp.sec =  (int) (hedge_imu_fusion_msg.timestamp_ms/1000);
-   pose.header.stamp.nsec =  (int) ((hedge_imu_fusion_msg.timestamp_ms%1000)*(10^6));					
-   
-   pose.pose.orientation.x= hedge_imu_fusion_msg.qx;
-   pose.pose.orientation.y= hedge_imu_fusion_msg.qy;
-   pose.pose.orientation.z= hedge_imu_fusion_msg.qz;
-   pose.pose.orientation.w= hedge_imu_fusion_msg.qw;
-    
-
-    pose.pose.position.x = hedge_imu_fusion_msg.x_m;
-    pose.pose.position.y = hedge_imu_fusion_msg.y_m; 
-    pose.pose.position.z = hedge_imu_fusion_msg.z_m;  
-    
-    tf::Matrix3x3 m;
-     m = tf::Matrix3x3(tf::Quaternion(pose.pose.orientation.x, pose.pose.orientation.y, pose.pose.orientation.z, pose.pose.orientation.w));
-     m.getRPY(roll, pitch, yaw);
-     yaw = -yaw;
-
-    ROS_INFO("yaw angle:  %f\n", yaw);
-
-     ek = 0 - yaw;
-
-   twist.header.stamp.sec =  (int) (hedge_imu_fusion_msg.timestamp_ms/1000);
-    twist.header.stamp.nsec =  (int) ((hedge_imu_fusion_msg.timestamp_ms%1000)*(10^6));	
-
-   twist.twist.linear.x = hedge_imu_fusion_msg.vx;
-   twist.twist.linear.y = -hedge_imu_fusion_msg.vy;
-   twist.twist.linear.z = -hedge_imu_fusion_msg.vz;
-
-
-   pid_flag = 1;
-   
-
-}
-
-void RawDistanceCallback(const marvelmind_nav::beacon_distance& beacon_raw_distance_msg)
-{
-	// ROS_INFO("Raw distance: %02d ==> %02d,  Distance= %.3f ", 	
-	// 			(int) beacon_raw_distance_msg.address_hedge,
-	// 			(int) beacon_raw_distance_msg.address_beacon,
-	// 			(float) beacon_raw_distance_msg.distance_m);
-}
-
-void telemetryCallback(const marvelmind_nav::hedge_telemetry& hedge_telemetry_msg)
-{
-	// ROS_INFO("Vbat= %.3f V, RSSI= %02d ", 	
-	// 			(float) hedge_telemetry_msg.battery_voltage,
-	// 			(int) hedge_telemetry_msg.rssi_dbm);
-}
-
-void qualityCallback(const marvelmind_nav::hedge_quality& hedge_quality_msg)
-{
-// 	ROS_INFO("Quality: Address= %d,  Quality= %02d %% ", 	
-// 				(int) hedge_quality_msg.address,
-// 				(int) hedge_quality_msg.quality_percents);
-// 
-}
-
-void waypointCallback(const marvelmind_nav::marvelmind_waypoint& marvelmind_waypoint_msg)
-{
-	int n= marvelmind_waypoint_msg.item_index+1;
-    // ROS_INFO("Waypoint %03d/%03d: Type= %03d,  Param1= %05d, Param2= %05d, Param3= %05d ", 	
-				// (int) n,
-				// (int) marvelmind_waypoint_msg.total_items, marvelmind_waypoint_msg.movement_type,
-				// marvelmind_waypoint_msg.param1, marvelmind_waypoint_msg.param2, marvelmind_waypoint_msg.param3);
-}
-
-
-/*void stateCallback(const std_msgs::Float32MultiArray array) {
-    for(int i=0; i<6; i++) 
-    state[i] = array.data[i];
-    
-    yaw= state[2];
-    ek = 0 - yaw;    
-    
-    
-}*/
-
-
-Eigen::VectorXd pid_control(double ek)
-{
-  double PID_output = P * ek + D * (ek - ek_old); 
-  if (ek!=0)
-  {
-    ROS_INFO("PID input:  %f\n", ek);
-    ROS_INFO("PID output: %f\n", PID_output);  
-  } 
   Eigen::VectorXd force(4);
   
- // force = R_INV * torque;
- 
- if ( PID_output > 0 || PID_output == 0)
+ if ( control_effort > 0 || control_effort == 0)
  {   
- 	force(0) = std::min(0.5 * PID_output, 2.0);
+ 	  force(0) = std::min(0.5 * control_effort, 1.0);
   	force(1) = 0;
   	force(2) = 0;
-  	force(3) = std::min(0.5 * PID_output, 2.0);
+  	force(3) = std::min(0.5 * control_effort, 1.0);
  } 
  else
  {
- 	force(0) = 0;
-  	force(1) = std::min( - 0.5 * PID_output, 2.0);
-  	force(2) = std::min( - 0.5 * PID_output, 2.0);
+ 	  force(0) = 0;
+  	force(1) = std::min( - 0.5 * control_effort, 1.0);
+  	force(2) = std::min( - 0.5 * control_effort, 1.0);
   	force(3) = 0;
  }
-
-  ek_old = ek;
   return force;
 }
 
@@ -398,20 +143,16 @@ Eigen::VectorXd velocity_control(double theta, double req_force)
  }
  else
  {
- 	force(0) = 0 ;
+ 	  force(0) = 0 ;
     force(1) = 0 ;
     force(2) = 0 ;
     force(3) = 0 ;
  }
  
-ROS_INFO("velocity force:  %f,%f,%f,%f\n", force(0), force(1), force(2),force(3)); 
+//ROS_INFO("velocity force:  %f,%f,%f,%f\n", force(0), force(1), force(2),force(3)); 
   return force;
 }
 
-
-/**
- * Test subscriber node for getting data from Marvelmind publishers nodes
- */
 int main(int argc, char **argv)
 {
 	
@@ -420,108 +161,49 @@ int main(int argc, char **argv)
   
   // ROS node reference 
   ros::NodeHandle rosNode;
-
-
-  // if (n.hasParam("PID/Px")) n.getParam("PID/Px", P_3(0, 0));
-  // if (n.hasParam("PID/Py")) n.getParam("PID/Py", P_3(1, 1));
-  // if (n.hasParam("PID/Pz")) n.getParam("PID/Pz", P_3(2, 2));
-  // if (n.hasParam("PID/Dx")) n.getParam("PID/Dx", D_3(0, 0));
-  // if (n.hasParam("PID/Dy")) n.getParam("PID/Dy", D_3(1, 1));
-  // if (n.hasParam("PID/Dz")) n.getParam("PID/Dz", D_3(2, 2));
-
-  if (rosNode.hasParam("PID/P")) rosNode.getParam("PID/P", P);
-  if (rosNode.hasParam("PID/I")) rosNode.getParam("PID/I", I);
-  if (rosNode.hasParam("PID/D")) rosNode.getParam("PID/D", D);
   if (rosNode.hasParam("PID/req_theta")) rosNode.getParam("PID/req_theta", req_theta);
   if (rosNode.hasParam("PID/req_force")) rosNode.getParam("PID/req_force", req_force);
   
   
-  
+ 
 
-  // publisher for force topic
-  ros::Publisher force_pub = rosNode.advertise<roboat_core::Force>("pid_force", 10);  
-  ros::Publisher pose_pub = rosNode.advertise<geometry_msgs::PoseStamped>("beacon_pose", 10); 
-  ros::Publisher twist_pub = rosNode.advertise<geometry_msgs::TwistStamped>("beacon_twist", 10); 
+  ros::Publisher setpoint_pub = rosNode.advertise<std_msgs::Float64>("setpoint", 1);
+
+  ros::Publisher heading_pub = rosNode.advertise<std_msgs::Float64>("heading", 1);
+    // publisher for force topic
+  ros::Publisher force_pub = rosNode.advertise<roboat_core::Force>("pid_force", 1); 
 
 
   // Declare need to subscribe data from topic
-  ros::Subscriber subHedgeWithAngle = rosNode.subscribe(HEDGE_POSITION_WITH_ANGLE_TOPIC_NAME, 1000, hedgePosAngCallback);
-  //ros::Subscriber subHedge = rosNode.subscribe(HEDGE_POSITION_ADDRESSED_TOPIC_NAME, 1000, hedgePosCallback);
-  //ros::Subscriber subHedge_noaddress = rosNode.subscribe(HEDGE_POSITION_TOPIC_NAME, 1000, hedgePos_noaddressCallback);
-  ros::Subscriber subBeacons = rosNode.subscribe(BEACONS_POSITION_ADDRESSED_TOPIC_NAME, 1000, beaconsPosCallback);
-  ros::Subscriber subIMURaw = rosNode.subscribe(HEDGE_IMU_RAW_TOPIC_NAME, 1000, IMURawCallback);
-  ros::Subscriber subIMUFusion = rosNode.subscribe(HEDGE_IMU_FUSION_TOPIC_NAME, 1000, IMUFusionCallback);
-  ros::Subscriber subRawDistance = rosNode.subscribe(BEACON_RAW_DISTANCE_TOPIC_NAME, 1000, RawDistanceCallback);
-  ros::Subscriber subTelemetry = rosNode.subscribe(HEDGE_TELEMETRY_TOPIC_NAME, 1000, telemetryCallback);
-  ros::Subscriber subQuality = rosNode.subscribe(HEDGE_QUALITY_TOPIC_NAME, 1000, qualityCallback);
-  ros::Subscriber subWaypoint = rosNode.subscribe(MARVELMIND_WAYPOINT_TOPIC_NAME, 1000, waypointCallback);
-  
-  // ros::Subscriber substate = rosNode.subscribe("state", 10, stateCallback);
-    
-  // Declare publisher for rviz visualization
-  rviz_marker_pub = rosNode.advertise<visualization_msgs::Marker>("visualization_marker", 1);
-  // Set our initial shape type to be a cube
-  rviz_shape = visualization_msgs::Marker::CUBE;
+  ros::Subscriber substate = rosNode.subscribe("state", 1, statecallback);
+  ros::Subscriber subcontroleffort = rosNode.subscribe("control_effort", 1, controleffortcallback);
 
 
-
-/*R(0,0)=sqrt(2)/2;
-R(0,1)=sqrt(2)/2;
-R(0,2)=-sqrt(2)/2;
-R(0,3)=-sqrt(2)/2;
-R(1,0)=sqrt(2)/2;
-R(1,1)=-sqrt(2)/2;
-R(1,2)=sqrt(2)/2;
-R(1,3)=-sqrt(2)/2;
-R(2,0)=sqrt(2)/2*ROBOT_LENGTH;
-R(2,1)=-sqrt(2)/2*ROBOT_LENGTH;
-R(2,2)=-sqrt(2)/2*ROBOT_LENGTH;
-R(2,3)=sqrt(2)/2*ROBOT_LENGTH;
-
-
-R_INV = R.completeOrthogonalDecomposition().pseudoInverse();
-
-torque(0) = 1;
-torque(1) = 0;
-torque(2) = 0;*/
-
-
-
-
-
-
-  ros::Rate loop_rate(10);
-
+  rosNode.param("system_dynamics/step", step, 0.1);
+  ros::Rate loop_rate(1/step);
+  ros::Time begin = ros::Time::now();
   Eigen::VectorXd force = Eigen::VectorXd::Zero(4);
 
   while (ros::ok())
   {
-       ros::spinOnce();
-    //if(pid_flag)
-    //{
-
-      //force = pid_control(ek);
-      //force =  velocity_control(req_theta, req_force);
-    //  force =  velocity_control(req_theta, req_force)+ pid_control(ek);
+      ros::spinOnce();
+        
+        std_msgs::Float64 setpoint; //Heading angle reference
+        setpoint.data = 0.0;
+      setpoint_pub.publish(setpoint);  
+ 
+      std_msgs::Float64 heading; //Heading angle reference
+      heading.data = state[2];
+      heading_pub.publish(heading);
+ 
+    //  force =  velocity_control(req_theta, req_force)+ pid_control();
+       force =  pid_control();
      // ROS_INFO("velocity force:  %f,%f,%f,%f\n", force(0), force(1), force(2),force(3)); 
+      
       roboat_core::Force forceMsg;
-
-
-      // Send the command to the lower level controller
       Eigen::VectorXd::Map(&forceMsg.data[0], force.size()) = force;
       force_pub.publish(forceMsg);
 
-    //  pid_flag = false;
-    //}
-
-
-    geometry_msgs::PoseStamped poseMsg;
-    poseMsg = pose; 
-    pose_pub.publish(poseMsg);
-
-    geometry_msgs::TwistStamped twistMsg;
-    twistMsg = twist; 
-    twist_pub.publish(twistMsg);
 
     loop_rate.sleep();
   }

@@ -8,7 +8,7 @@
     	<arg name="mpc_node"                         default="true"/>
     	<arg name="command_node"                     default="true"/>
     	<arg name="joy_node"                         default="true"/>
-        <arg name="pid_node"                         default="true"/>
+        <arg name="pid_node"                         default="false"/>
     	<arg name="bag_node"	   		             default="false"/>
     </include>
     
