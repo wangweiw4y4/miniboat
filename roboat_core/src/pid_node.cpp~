@@ -63,6 +63,15 @@ double orientation_qy;
 double orientation_qz;
 double orientation_qw;
 
+double P = 0.5;
+double I = 0;
+double D = 0;
+double ek;
+double ek_old;
+double e_total;
+
+
+
 
 double step;
 double control_effort;
@@ -83,22 +92,57 @@ void controleffortcallback(const std_msgs::Float64 & control_msg)
 
 
 
+Eigen::VectorXd pid_control2(double ek)
+{
+  double PID_output = P * ek + D * (ek - ek_old); 
+  if (ek!=0)
+  {
+    ROS_INFO("PID input:  %f\n", ek);
+    ROS_INFO("PID output: %f\n", PID_output);  
+  } 
+  Eigen::VectorXd force(4);
+  
+ // force = R_INV * torque;
+ 
+ if ( PID_output > 0 || PID_output == 0)
+ {   
+ 	force(0) = std::min(0.5 * PID_output, 2.0);
+  	force(1) = 0;
+  	force(2) = 0;
+  	force(3) = std::min(0.5 * PID_output, 2.0);
+ } 
+ else
+ {
+ 	force(0) = 0;
+  	force(1) = std::min( - 0.5 * PID_output, 2.0);
+  	force(2) = std::min( - 0.5 * PID_output, 2.0);
+  	force(3) = 0;
+ }
+
+  ek_old = ek;
+  return force;
+}
+
+
+
+
+
 Eigen::VectorXd pid_control()
 {
   Eigen::VectorXd force(4);
   
  if ( control_effort > 0 || control_effort == 0)
  {   
- 	  force(0) = std::min(0.5 * control_effort, 1.0);
+ 	  force(0) = std::min(control_effort, 1.0);
   	force(1) = 0;
   	force(2) = 0;
-  	force(3) = std::min(0.5 * control_effort, 1.0);
+  	force(3) = std::min(control_effort, 1.0);
  } 
  else
  {
  	  force(0) = 0;
-  	force(1) = std::min( - 0.5 * control_effort, 1.0);
-  	force(2) = std::min( - 0.5 * control_effort, 1.0);
+  	force(1) = std::min( - control_effort, 1.0);
+  	force(2) = std::min( - control_effort, 1.0);
   	force(3) = 0;
  }
   return force;
@@ -164,7 +208,9 @@ int main(int argc, char **argv)
   if (rosNode.hasParam("PID/req_theta")) rosNode.getParam("PID/req_theta", req_theta);
   if (rosNode.hasParam("PID/req_force")) rosNode.getParam("PID/req_force", req_force);
   
-  
+    if (rosNode.hasParam("PID/P")) rosNode.getParam("PID/P", P);
+  if (rosNode.hasParam("PID/I")) rosNode.getParam("PID/I", I);
+  if (rosNode.hasParam("PID/D")) rosNode.getParam("PID/D", D);
  
 
   ros::Publisher setpoint_pub = rosNode.advertise<std_msgs::Float64>("setpoint", 1);
@@ -187,6 +233,8 @@ int main(int argc, char **argv)
   while (ros::ok())
   {
       ros::spinOnce();
+       
+     ek = 0 - state[2];
         
         std_msgs::Float64 setpoint; //Heading angle reference
         setpoint.data = 0.0;
@@ -197,7 +245,8 @@ int main(int argc, char **argv)
       heading_pub.publish(heading);
  
     //  force =  velocity_control(req_theta, req_force)+ pid_control();
-       force =  pid_control();
+    //   force =  velocity_control(req_theta, req_force)+ pid_control2(ek);
+       force =  velocity_control(req_theta, req_force)
      // ROS_INFO("velocity force:  %f,%f,%f,%f\n", force(0), force(1), force(2),force(3)); 
       
       roboat_core::Force forceMsg;

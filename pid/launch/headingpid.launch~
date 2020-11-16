@@ -1,15 +1,15 @@
 <launch>
     <node name="headingcontrol" pkg="pid" type="controller" output="screen" >
-      <param name="Kp" value="0.5" />
-      <param name="Ki" value="0.0" />
-      <param name="Kd" value="0.0" />
+      <param name="Kp" value="0.06" />
+      <param name="Ki" value="0.000" />
+      <param name="Kd" value="0.5" />
       <param name="upper_limit" value="1" />
       <param name="lower_limit" value="-1" />
       <param name="windup_limit" value="1" />
       <param name="angle_error" value="true"/>
       <param name="cutoff_frequency" value="-1" />
-      <param name="max_loop_frequency" value="105.0" />
-      <param name="min_loop_frequency" value="95.0" />
+      <param name="max_loop_frequency" value="10.0" />
+      <param name="min_loop_frequency" value="10.0" />
       <param name="setpoint_timeout" value="-1.0" />
      </node>
 
