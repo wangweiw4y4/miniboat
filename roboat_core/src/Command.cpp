@@ -75,13 +75,56 @@ void Command::joyCallback(sensor_msgs::Joy msg)
               force[0] = - Command::joy_max_force * msg.axes[0];
               force[1] = 0;
         }
-
-    }
+        
+        // start using the joypad command force
+    command_priority = 0;
+    ROS_DEBUG("[COMMAND_NODE] joypad force received start");    
+     }
+        
+   }     
+/*    else if (msg.buttons[5] == 1)
+  {     
+       
+      if (msg.axes[3]>0 || msg.axes[3] ==0)
+     {  
+              force[1] = Command::joy_max_force * msg.axes[3];
+              force[3] = Command::joy_max_force * msg.axes[3];
+        		 force[0] = 0;
+            force[2] = 0;
+     }
+       if (msg.axes[3] <0)
+        {
+              force[0] = -Command::joy_max_force * msg.axes[3];
+              force[2] = -Command::joy_max_force * msg.axes[3];
+              force[1] = 0;
+              force[3] = 0;
+        }  
+        
+         // start using the joypad command force
+    command_priority = 0;
+    ROS_DEBUG("[COMMAND_NODE] joypad force received start");   
+     }   
+   else if (msg.buttons[0] == 1)
+  {     
+     if(msg.axes[4]>0 || msg.axes[4] ==0)
+     {    
+        force[0] = Command::joy_max_force * msg.axes[4];
+        force[1] = Command::joy_max_force * msg.axes[4];
+        force[2] = 0;
+        force[3] = 0;
+     }
+       if (msg.axes[4]<0)
+      {
+        force[0] = 0;
+        force[1] = 0;
+        force[2] = - Command::joy_max_force * msg.axes[4];
+        force[3] = - Command::joy_max_force * msg.axes[4];
+       }   
 
     // start using the joypad command force
     command_priority = 0;
     ROS_DEBUG("[COMMAND_NODE] joypad force received start");
-  }
+  }*/
   else
   {
     // stop using the joypad command force
@@ -89,27 +132,11 @@ void Command::joyCallback(sensor_msgs::Joy msg)
     ROS_DEBUG("[COMMAND_NODE] joypad force received end");
   }
 
-  std_msgs::UInt16 latch_msg, latch_override_msg;
-  bool latch, unlatch;
-
-  //enable or disable latch override
-  latch_override_msg.data=msg.buttons[5];
-  latch_override_pub.publish(latch_override_msg);
-
-  latch = msg.buttons[0];
-  unlatch = msg.buttons[1];
-
-  if(latch || unlatch)
-  {
-    latch_msg.data = latch && !unlatch;
-    latch_pub.publish(latch_msg);
-  }
-
 }
 
 Command::Command(ros::NodeHandle n)
 {
-  Command::joy_max_force = 0.5;
+  Command::joy_max_force = 0.25;
 
   // publisher for command topic
   command_pub = n.advertise<roboat_core::CommandToMicroController>("/command", 1);
@@ -119,12 +146,13 @@ Command::Command(ros::NodeHandle n)
 
   // force subscriber topics for MPC and joypad
   const int pid_priority = 1, mpc_priority = 2;
-  ros::Subscriber joy_sub = n.subscribe("/joy", 1, &Command::joyCallback, this);
+  ros::Subscriber joy_sub = n.subscribe("/joy", 10, &Command::joyCallback, this);
   ros::Subscriber pid_sub = n.subscribe<roboat_core::Force>("/pid_force", 1, boost::bind(&Command::forceCallback, this, _1, pid_priority));
   ros::Subscriber mpc_sub = n.subscribe<roboat_core::Force>("/mpc_force", 1, boost::bind(&Command::forceCallback, this, _1, mpc_priority));
   ros::Rate loopRate(10);
-
-  n.param("joypad/max_force", Command::joy_max_force, 0.5);
+ 
+ 
+   if (n.hasParam("joypad/max_force")) n.getParam("joypad/max_force", Command::joy_max_force);
 
   while (ros::ok())
   {

@@ -106,16 +106,16 @@ Eigen::VectorXd pid_control2(double ek)
  
  if ( PID_output > 0 || PID_output == 0)
  {   
- 	force(0) = std::min(0.5 * PID_output, 2.0);
+ 	force(0) = std::min(0.5 * PID_output, 1.0);
   	force(1) = 0;
   	force(2) = 0;
-  	force(3) = std::min(0.5 * PID_output, 2.0);
+  	force(3) = std::min(0.5 * PID_output, 1.0);
  } 
  else
  {
  	force(0) = 0;
-  	force(1) = std::min( - 0.5 * PID_output, 2.0);
-  	force(2) = std::min( - 0.5 * PID_output, 2.0);
+  	force(1) = std::min( - 0.5 * PID_output, 1.0);
+  	force(2) = std::min( - 0.5 * PID_output, 1.0);
   	force(3) = 0;
  }
 
@@ -187,7 +187,7 @@ Eigen::VectorXd velocity_control(double theta, double req_force)
  }
  else
  {
- 	  force(0) = 0 ;
+    force(0) = 0 ;
     force(1) = 0 ;
     force(2) = 0 ;
     force(3) = 0 ;
@@ -245,8 +245,8 @@ int main(int argc, char **argv)
       heading_pub.publish(heading);
  
     //  force =  velocity_control(req_theta, req_force)+ pid_control();
-    //   force =  velocity_control(req_theta, req_force)+ pid_control2(ek);
-       force =  velocity_control(req_theta, req_force)
+       force =  pid_control2(ek);
+   //    force =  velocity_control(req_theta, req_force);
      // ROS_INFO("velocity force:  %f,%f,%f,%f\n", force(0), force(1), force(2),force(3)); 
       
       roboat_core::Force forceMsg;

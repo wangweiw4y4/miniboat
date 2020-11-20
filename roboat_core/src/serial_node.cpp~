@@ -35,7 +35,7 @@ int main(int argc, char** argv)
   // publish sensor topic
   ros::Publisher sensor_pub = n.advertise<roboat_core::SensorFromMicroController>("sensor", 10);
 
-  n.param("/port/serial", port, std::string("/dev/ttyUSB0"));
+  n.param("/port/serial", port, std::string("/dev/ttyAMA0"));
   n.param("/system_dynamics/step", step, 0.1);
 
   try
@@ -66,7 +66,7 @@ int main(int argc, char** argv)
   {
     if (ros_ser.available())
     {
-      ROS_INFO("[SERIAL NODE]loop - serial available");
+      //ROS_INFO("[SERIAL NODE]loop - serial available");
       roboat_core::SensorFromMicroController SensorData;
 
       size_t SensorFrameSize;
@@ -80,14 +80,13 @@ int main(int argc, char** argv)
       ReceivingPacket.DataLength = SensorFrame[3];
       memcpy(&ReceivingPacket, SensorFrame, ReceivingPacket.DataLength + UARTHEARDER_NUMBER);
 
-      // printf("Read:%x,%x,%x,%x,%x,%x,%x,%x,%x,%x\n",SensorFrame[0],SensorFrame[1],SensorFrame[2],SensorFrame[3],SensorFrame[4],SensorFrame[5],SensorFrame[6],SensorFrame[7],SensorFrame[8],SensorFrame[40]);
       if ((ReceivingPacket.StartByte == STARTBYTE) && (ReceivingPacket.EndByte == ENDBYTE) &&
           (ReceivingPacket.RobotID == ROBOT_ID))
       {
-        ROS_INFO("[SERIAL NODE]GPS and IMU data:%f,%f,%f,%f,%f,%f,%f,%f\n", ReceivingPacket.GPSData[1],
-                 ReceivingPacket.GPSData[2], ReceivingPacket.IMUData[0], ReceivingPacket.IMUData[1],
-                 ReceivingPacket.IMUData[2], ReceivingPacket.IMUData[3], ReceivingPacket.IMUData[4],
-                 ReceivingPacket.IMUData[5]);
+        //ROS_INFO("[SERIAL NODE]GPS and IMU data:%f,%f,%f,%f,%f,%f,%f,%f\n", ReceivingPacket.GPSData[1],
+        //         ReceivingPacket.GPSData[2], ReceivingPacket.IMUData[0], ReceivingPacket.IMUData[1],
+         //        ReceivingPacket.IMUData[2], ReceivingPacket.IMUData[3], ReceivingPacket.IMUData[4],
+         //        ReceivingPacket.IMUData[5]);
 
         memcpy(&SensorData.SensorDataFromLower[0], &SensorFrame[UARTHEARDER_NUMBER - 1], ReceivingPacket.DataLength);
         sensor_pub.publish(SensorData);

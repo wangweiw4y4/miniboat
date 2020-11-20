@@ -1,6 +1,6 @@
 IMU: {
   ANGLE_DRIFT: 0,
-  USE_BNO055: 1
+  USE_BNO055: 0
 }
 
 trajectory: {
@@ -14,9 +14,9 @@ trajectory: {
 
 
 PID: {
-    P: 0.1,
+    P: 0.5,
     I: 0,
-    D: 0.2,
+    D: 2,
     req_theta: 1,
     req_force: 0.25
 }
