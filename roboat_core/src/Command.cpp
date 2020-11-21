@@ -44,7 +44,6 @@ void Command::joyCallback(sensor_msgs::Joy msg)
 {
   if (msg.buttons[4] == 1)
   { 
-
     if(msg.axes[1]>0 || msg.axes[1] ==0)
      {    
         force[0] = Command::joy_max_force * msg.axes[1];
@@ -82,61 +81,17 @@ void Command::joyCallback(sensor_msgs::Joy msg)
      }
         
    }     
-/*    else if (msg.buttons[5] == 1)
-  {     
-       
-      if (msg.axes[3]>0 || msg.axes[3] ==0)
-     {  
-              force[1] = Command::joy_max_force * msg.axes[3];
-              force[3] = Command::joy_max_force * msg.axes[3];
-        		 force[0] = 0;
-            force[2] = 0;
-     }
-       if (msg.axes[3] <0)
-        {
-              force[0] = -Command::joy_max_force * msg.axes[3];
-              force[2] = -Command::joy_max_force * msg.axes[3];
-              force[1] = 0;
-              force[3] = 0;
-        }  
-        
-         // start using the joypad command force
-    command_priority = 0;
-    ROS_DEBUG("[COMMAND_NODE] joypad force received start");   
-     }   
-   else if (msg.buttons[0] == 1)
-  {     
-     if(msg.axes[4]>0 || msg.axes[4] ==0)
-     {    
-        force[0] = Command::joy_max_force * msg.axes[4];
-        force[1] = Command::joy_max_force * msg.axes[4];
-        force[2] = 0;
-        force[3] = 0;
-     }
-       if (msg.axes[4]<0)
-      {
-        force[0] = 0;
-        force[1] = 0;
-        force[2] = - Command::joy_max_force * msg.axes[4];
-        force[3] = - Command::joy_max_force * msg.axes[4];
-       }   
-
-    // start using the joypad command force
-    command_priority = 0;
-    ROS_DEBUG("[COMMAND_NODE] joypad force received start");
-  }*/
   else
   {
     // stop using the joypad command force
     command_priority = stop_force_priority;
     ROS_DEBUG("[COMMAND_NODE] joypad force received end");
   }
-
 }
 
 Command::Command(ros::NodeHandle n)
 {
-  Command::joy_max_force = 0.25;
+  Command::joy_max_force = 0.5;
 
   // publisher for command topic
   command_pub = n.advertise<roboat_core::CommandToMicroController>("/command", 1);
