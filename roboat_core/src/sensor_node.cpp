@@ -55,8 +55,14 @@ double orientation_qy;
 double orientation_qz;
 double orientation_qw;
 
+double ANGLE_DRIFT_BNO055 = 0;
+int BNO055_ANGLE_Calibration_Count=0;
+int BNO055_Calibration_Finish =0;
 
-int ANGLE_DRIFT = 0;
+double ANGLE_DRIFT_BEACONIMU= 0;
+int BEACONIMU_ANGLE_Calibration_Count=0;
+int BEACONIMU_Calibration_Finish =0;
+
 int USE_BNO055 = 1;
 
 
@@ -85,8 +91,28 @@ void bno055callback(const sensor_msgs::Imu::ConstPtr& imu_raw)
         m = tf::Matrix3x3(
         tf::Quaternion(imu_raw->orientation.x, imu_raw->orientation.y, imu_raw->orientation.z, imu_raw->orientation.w));
         m.getRPY(roll_bno055, pitch_bno055, yaw_bno055);
-        //ROS_ERROR("bno055: %f,%f,%f", roll_bno055, pitch_bno055, yaw_bno055);
-
+        yaw_bno055 = - yaw_bno055;
+        if(BNO055_Calibration_Finish)
+        {
+        	yaw_bno055= yaw_bno055-ANGLE_DRIFT_BNO055;
+         	ROS_INFO("bno055 yaw drift: %f", ANGLE_DRIFT_BNO055);
+         }
+        else
+        {      ANGLE_DRIFT_BNO055 = ANGLE_DRIFT_BNO055+ yaw_bno055;
+        			BNO055_ANGLE_Calibration_Count = BNO055_ANGLE_Calibration_Count+1;
+        			ROS_INFO("bno055 calibration count: %d", BNO055_ANGLE_Calibration_Count);	
+        	if(BNO055_ANGLE_Calibration_Count == 200)
+        	{
+        		BNO055_Calibration_Finish=1;
+        	        ANGLE_DRIFT_BNO055 = ANGLE_DRIFT_BNO055/200;
+        	}
+        }
+        if (yaw_bno055>PI)
+        yaw_bno055 = yaw_bno055-2*PI;
+        if (yaw_bno055<-PI)
+        yaw_bno055 = yaw_bno055 + 2*PI;
+        ROS_INFO("bno055: %f,%f,%f", roll_bno055, pitch_bno055, yaw_bno055);
+        
         pose_bno055.pose.orientation = imu_raw->orientation;
         twist_bno055.twist.angular = imu_raw->angular_velocity;
 
@@ -126,9 +152,6 @@ void IMUFusionCallback(const marvelmind_nav::hedge_imu_fusion& hedge_imu_fusion_
     pose_beaconIMU.pose.position.z = hedge_imu_fusion_msg.z_m; 
   
 	
-   //pose.header.stamp.sec =  (int) (hedge_imu_fusion_msg.timestamp_ms/1000);
-   //pose.header.stamp.nsec =  (int) ((hedge_imu_fusion_msg.timestamp_ms%1000)*(10^6));					
-   
     pose_beaconIMU.pose.orientation.x= hedge_imu_fusion_msg.qx;
     pose_beaconIMU.pose.orientation.y= hedge_imu_fusion_msg.qy;
     pose_beaconIMU.pose.orientation.z= hedge_imu_fusion_msg.qz;
@@ -140,10 +163,32 @@ void IMUFusionCallback(const marvelmind_nav::hedge_imu_fusion& hedge_imu_fusion_
     orientation_qz= hedge_imu_fusion_msg.qz;
     orientation_qw= hedge_imu_fusion_msg.qw;
     tf::Matrix3x3 m;
-    m = tf::Matrix3x3(tf::Quaternion(pose_beaconIMU.pose.orientation.x, pose_beaconIMU.pose.orientation.y, pose_beaconIMU.pose.orientation.z, pose_beaconIMU.pose.orientation.w));
+    m = tf::Matrix3x3(tf::Quaternion(orientation_qx, orientation_qy, orientation_qz, orientation_qw));
     m.getRPY(roll_beaconIMU, pitch_beaconIMU, yaw_beaconIMU);
     yaw_beaconIMU = -yaw_beaconIMU;
-
+    
+         if(BEACONIMU_Calibration_Finish)
+        {
+        	yaw_beaconIMU= yaw_beaconIMU-ANGLE_DRIFT_BEACONIMU;
+         	ROS_INFO("BEACONIMU yaw drift: %f", ANGLE_DRIFT_BEACONIMU);
+         }
+        else
+        {      ANGLE_DRIFT_BEACONIMU = ANGLE_DRIFT_BEACONIMU+yaw_beaconIMU;
+        			BEACONIMU_ANGLE_Calibration_Count = BEACONIMU_ANGLE_Calibration_Count+1;
+        		   ROS_INFO("BEACONIMU calibration count: %d", BEACONIMU_ANGLE_Calibration_Count);	 
+        	if(BEACONIMU_ANGLE_Calibration_Count == 200)
+        	{
+        		BEACONIMU_Calibration_Finish=1;
+        	    ANGLE_DRIFT_BEACONIMU = ANGLE_DRIFT_BEACONIMU/200;      
+        	}
+        }
+        if (yaw_beaconIMU>PI)
+        yaw_beaconIMU = yaw_beaconIMU-2*PI;
+        if (yaw_beaconIMU<-PI)
+        yaw_beaconIMU = yaw_beaconIMU + 2*PI;
+    
+    
+    
     ROS_INFO("beaconIMU roll, pitch, yaw:  %f.%f,%f\n", roll_beaconIMU, pitch_beaconIMU, yaw_beaconIMU);
 
 
@@ -181,7 +226,7 @@ int main(int argc, char **argv)
   // ROS node reference 
   ros::NodeHandle n;
 
-  if(n.hasParam("IMU/ANGLE_DRIFT")) n.getParam("IMU/ANGLE_DRIFT", ANGLE_DRIFT);
+  if(n.hasParam("IMU/ANGLE_DRIFT")) n.getParam("IMU/ANGLE_DRIFT", ANGLE_DRIFT_BNO055);
   //ROS_ERROR("%d", ANGLE_DRIFT);
   if(n.hasParam("IMU/USE_BNO055")) n.getParam("IMU/USE_BNO055", USE_BNO055);
 
@@ -213,7 +258,7 @@ int main(int argc, char **argv)
     {
       state[0] = pose_bno055.pose.position.x;
       state[1] = pose_bno055.pose.position.y;
-      state[2] = -yaw_bno055;
+      state[2] = yaw_bno055;
       state[3] = twist_bno055.twist.linear.x;
       state[4] = twist_bno055.twist.linear.y;
       state[5] = -twist_bno055.twist.angular.z;

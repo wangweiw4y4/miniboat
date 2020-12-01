@@ -50,13 +50,13 @@ void Command::joyCallback(sensor_msgs::Joy msg)
         force[1] = Command::joy_max_force * msg.axes[1];
         if (msg.axes[0]>0)
           {  
-              force[2] = Command::joy_max_force * msg.axes[0];
+              force[2] = Command::joy_max_force * msg.axes[0]*0.25;
               force[3] = 0;
           }
         else
         {
               force[2] = 0;
-              force[3] = -Command::joy_max_force * msg.axes[0];
+              force[3] = -Command::joy_max_force * msg.axes[0]*0.25;
         }
       }
 
@@ -67,11 +67,11 @@ void Command::joyCallback(sensor_msgs::Joy msg)
         if (msg.axes[0]>0)
           {  
               force[0] = 0;
-              force[1] = Command::joy_max_force * msg.axes[0];
+              force[1] = Command::joy_max_force * msg.axes[0]*0.25;
           }
         else
         {
-              force[0] = - Command::joy_max_force * msg.axes[0];
+              force[0] = - Command::joy_max_force * msg.axes[0]*0.25;
               force[1] = 0;
         }
         
