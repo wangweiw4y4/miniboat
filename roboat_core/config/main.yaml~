@@ -8,7 +8,7 @@ trajectory: {
     init_x: 0,
     init_y: 0,
     angle_rotate: 0,
-    file: /paths/point.csv,
+    file: /paths/miniboat_point_speed_0.csv,
     repeat: false
 }
 

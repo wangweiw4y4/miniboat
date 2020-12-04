@@ -86,13 +86,13 @@ void MPC::pathCallback(const nav_msgs::Path::ConstPtr& msg)
     *pos = it->pose.position.x;
 
     // convert from Autoware map to roboat map reference
-    *(pos + 1) = -(it->pose.position.y);
+    *(pos + 1) = it->pose.position.y;
 
     // quaternion in Autoware map to theta in roboat map reference
     m = tf::Matrix3x3(
         tf::Quaternion(it->pose.orientation.x, it->pose.orientation.y, it->pose.orientation.z, it->pose.orientation.w));
     m.getRPY(roll, pitch, yaw);
-    *(pos + 2) = -yaw;
+    *(pos + 2) = yaw;
 
     if (i == 0)
     {
