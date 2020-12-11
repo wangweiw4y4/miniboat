@@ -170,12 +170,12 @@ void IMUFusionCallback(const marvelmind_nav::hedge_imu_fusion& hedge_imu_fusion_
          if(BEACONIMU_Calibration_Finish)
         {
         	yaw_beaconIMU= yaw_beaconIMU-ANGLE_DRIFT_BEACONIMU;
-         	ROS_INFO("BEACONIMU yaw drift: %f", ANGLE_DRIFT_BEACONIMU);
+         	//ROS_INFO("BEACONIMU yaw drift: %f", ANGLE_DRIFT_BEACONIMU);
          }
         else
         {      ANGLE_DRIFT_BEACONIMU = ANGLE_DRIFT_BEACONIMU+yaw_beaconIMU;
         			BEACONIMU_ANGLE_Calibration_Count = BEACONIMU_ANGLE_Calibration_Count+1;
-        		   ROS_INFO("BEACONIMU calibration count: %d", BEACONIMU_ANGLE_Calibration_Count);	 
+        		   //ROS_INFO("BEACONIMU calibration count: %d", BEACONIMU_ANGLE_Calibration_Count);	 
         	if(BEACONIMU_ANGLE_Calibration_Count == 200)
         	{
         		BEACONIMU_Calibration_Finish=1;
@@ -189,7 +189,7 @@ void IMUFusionCallback(const marvelmind_nav::hedge_imu_fusion& hedge_imu_fusion_
     
     
     
-    ROS_INFO("beaconIMU roll, pitch, yaw:  %f.%f,%f\n", roll_beaconIMU, pitch_beaconIMU, yaw_beaconIMU);
+    //ROS_INFO("beaconIMU roll, pitch, yaw:  %f.%f,%f\n", roll_beaconIMU, pitch_beaconIMU, yaw_beaconIMU);
 
 
    twist_beaconIMU.header.stamp = ros::Time::now();
