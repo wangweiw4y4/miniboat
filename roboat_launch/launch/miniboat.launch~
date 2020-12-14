@@ -1,5 +1,5 @@
 <launch>
-
+ 
     <include file="$(find roboat_core)/launch/master.launch">
         <arg name="sim_node"                         default="false"/>
     	<arg name="serial_node"                      default="true"/>
@@ -8,7 +8,26 @@
     	<arg name="mpc_node"                         default="true"/>
     	<arg name="command_node"                     default="true"/>
     	<arg name="joy_node"                         default="true"/>
-    	<arg name="bag_node"	   		            default="false"/>
+        <arg name="pid_node"                         default="false"/>
+    	<arg name="bag_node"	   		             default="false"/>
     </include>
+    
+    <include file="$(find ros_imu_bno055)/launch/imu.launch">
+        <arg name = "serial_port" value="/dev/ttyUSB0" />
+        <arg name = "frame_id" value="imu_link" />
+        <arg name = "operation_mode" value="NDOF_FMC_OFF"/>
+        <arg name = "oscillator" value="INTERNAL" />
+        <arg name = "reset_orientation" value="true" />
+        <arg name = "frequency" value="50" /> 
+        <arg name = "use_magnetometer" value="false" />
+        <arg name = "use_temperature" value="false" /> 
+     </include>
+     
+      <include file="$(find marvelmind_nav)/launch/beacon.launch">
+      </include>
+
+      <include file="$(find pid)/launch/headingpid.launch">
+      </include>
+
      
 </launch>
