@@ -91,27 +91,6 @@ void bno055callback(const sensor_msgs::Imu::ConstPtr& imu_raw)
         m = tf::Matrix3x3(
         tf::Quaternion(imu_raw->orientation.x, imu_raw->orientation.y, imu_raw->orientation.z, imu_raw->orientation.w));
         m.getRPY(roll_bno055, pitch_bno055, yaw_bno055);
-        yaw_bno055 = - yaw_bno055;
-/*        if(BNO055_Calibration_Finish)
-        {
-        	yaw_bno055= yaw_bno055-ANGLE_DRIFT_BNO055;
-         	ROS_INFO("bno055 yaw drift: %f", ANGLE_DRIFT_BNO055);
-         }
-        else
-        {      ANGLE_DRIFT_BNO055 = ANGLE_DRIFT_BNO055+ yaw_bno055;
-        			BNO055_ANGLE_Calibration_Count = BNO055_ANGLE_Calibration_Count+1;
-        			ROS_INFO("bno055 calibration count: %d", BNO055_ANGLE_Calibration_Count);	
-        	if(BNO055_ANGLE_Calibration_Count == 200)
-        	{
-        		BNO055_Calibration_Finish=1;
-        	        ANGLE_DRIFT_BNO055 = ANGLE_DRIFT_BNO055/200;
-        	}
-        }
-        if (yaw_bno055>PI)
-        yaw_bno055 = yaw_bno055-2*PI;
-        if (yaw_bno055<-PI)
-        yaw_bno055 = yaw_bno055 + 2*PI;
-        ROS_INFO("bno055: %f,%f,%f", roll_bno055, pitch_bno055, yaw_bno055);*/
         
         pose_bno055.pose.orientation = imu_raw->orientation;
         twist_bno055.twist.angular = imu_raw->angular_velocity;
@@ -258,7 +237,7 @@ int main(int argc, char **argv)
     {
       state[0] = pose_bno055.pose.position.x;
       state[1] = pose_bno055.pose.position.y;
-      state[2] = yaw_bno055;
+      state[2] = -yaw_bno055;
       state[3] = twist_bno055.twist.linear.x;
       state[4] = twist_bno055.twist.linear.y;
       state[5] = -twist_bno055.twist.angular.z;

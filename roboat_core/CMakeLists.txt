@@ -16,6 +16,8 @@ find_package(catkin REQUIRED COMPONENTS
   roslint
   serial
   std_msgs
+   sensor_msgs
+  geometry_msgs
   tf
 )
 
@@ -121,8 +123,6 @@ catkin_package(
   roscpp
   sensor_msgs
   std_msgs
-  DEPENDS
-  system_lib
 )
 
 ###########

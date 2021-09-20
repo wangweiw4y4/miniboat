@@ -4,11 +4,11 @@ IMU: {
 }
 
 trajectory: {
-    sim_time: 140,
+    sim_time: 500,
     init_x: 0,
     init_y: 0,
     angle_rotate: 0,
-    file: /paths/miniboat_point_miniboat1.csv,
+    file: /paths/miniboat_shapeshift_miniboat8.csv,
     repeat: false
 }
 
