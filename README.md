@@ -29,4 +29,4 @@ dd if=path/to/your-backup.img of=/dev/sdX
 
 Finally, we can insert the sd card and start the cloned system. As the size of image could be much smaller than the sd card. If one wants to store more data later, we can use the disks tool on ubuntu to resize the partion of the sd card.
 
-Reinaldo: Editing Right tests
+
