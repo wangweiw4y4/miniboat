@@ -41,6 +41,7 @@
 #define ROS_NODE_NAME "sensor_node"
 #define HEDGE_IMU_RAW_TOPIC_NAME "hedge_imu_raw"
 #define HEDGE_IMU_FUSION_TOPIC_NAME "hedge_imu_fusion"
+#define HEDGE_POSITION_WITH_ANGLE_TOPIC_NAME "hedge_pos_ang"
 
 #define SCALE_HEDGE 3.0
 #define ROBOT_LENGTH 0.20;
@@ -80,8 +81,37 @@ double roll_beaconIMU;
 double pitch_beaconIMU;
 double yaw_beaconIMU;
 
+double twobeacon_x;
+double twobeacon_y;
+double twobeacon_heading;
 
 std::vector<double> state(6);
+
+
+void hedgePosAngCallback(const marvelmind_nav::hedge_pos_ang& hedge_pos_msg)
+{
+  ROS_INFO("Hedgehog data: Address= %d, timestamp= %d, X=%.3f  Y= %.3f  Z=%.3f  Angle: %.1f  flags=%d", 	
+				(int) hedge_pos_msg.address, 
+				(int) hedge_pos_msg.timestamp_ms, 
+				(float) hedge_pos_msg.x_m, (float) hedge_pos_msg.y_m, (float) hedge_pos_msg.z_m,
+				(float) hedge_pos_msg.angle,  
+				(int) hedge_pos_msg.flags);
+				
+				twobeacon_x = hedge_pos_msg.x_m;
+				twobeacon_y = hedge_pos_msg.y_m;
+				twobeacon_heading = hedge_pos_msg.angle +135;
+				if (twobeacon_heading>180)
+				twobeacon_heading = twobeacon_heading-360;
+				twobeacon_heading = twobeacon_heading*PI/180.0;
+				
+				
+/*				
+  if ((hedge_pos_msg.flags&(1<<0))==0)
+    {				
+      showRvizObject(hedge_pos_msg.address,hedge_pos_msg.x_m, hedge_pos_msg.y_m, hedge_pos_msg.z_m, objHedge);
+    }  
+    */
+}
 
 
 void bno055callback(const sensor_msgs::Imu::ConstPtr& imu_raw)
@@ -222,6 +252,7 @@ int main(int argc, char **argv)
 
   ros::Subscriber subIMURaw = n.subscribe(HEDGE_IMU_RAW_TOPIC_NAME, 1000, IMURawCallback);
   ros::Subscriber subIMUFusion = n.subscribe(HEDGE_IMU_FUSION_TOPIC_NAME, 1000, IMUFusionCallback);
+  ros::Subscriber subHedgeWithAngle = n.subscribe(HEDGE_POSITION_WITH_ANGLE_TOPIC_NAME, 1000, hedgePosAngCallback);
   ros::Subscriber bno055_sub= n.subscribe("/imu/data", 1, bno055callback);
 
 
@@ -232,7 +263,7 @@ int main(int argc, char **argv)
   while (ros::ok())
   {
        ros::spinOnce();
-       
+/*       
         if (USE_BNO055 ==1)
     {
       state[0] = pose_bno055.pose.position.x;
@@ -252,7 +283,14 @@ int main(int argc, char **argv)
       state[4] = twist_beaconIMU.twist.linear.y;
       state[5] = twist_beaconIMU.twist.angular.z;
      }    
+*/
 
+      state[0] = twobeacon_x;
+      state[1] = twobeacon_y;
+      state[2] = twobeacon_heading;
+      state[3] = 0;
+      state[4] = 0;
+      state[5] = -twist_bno055.twist.angular.z;
     geometry_msgs::PoseStamped pose_bno055_msg;
     pose_bno055_msg = pose_bno055; 
     pose_bno055_pub.publish(pose_bno055_msg);
