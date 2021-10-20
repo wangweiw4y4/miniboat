@@ -1,3 +1,39 @@
+
+
+#Install ACADO
+-------------- 
+1. Install the prerequisites
+    .. code-block:: bash
+
+        sudo apt-get install gcc g++ cmake git gnuplot doxygen graphviz
+
+2. Download ACADOtoolkit by git cloning it from the ACADO Github repository or finding it at another source. For the purposes of this tutorial we placed it in our home directory although you should be able to place it elsewhere.
+    .. code-block:: bash
+
+        cd ~
+        git clone https://github.com/acado/acado.git -b stable ACADOtoolkit
+
+3. create a build directory in the ACADOtoolkit directory
+    .. code-block:: bash
+
+        cd ACADOtoolkit
+        mkdir build         
+        cd build
+
+4. make and install ACADO
+    .. code-block:: bash
+
+        cmake ..
+        make
+        sudo make install
+        sudo ldconfig
+
+5. Source ACADOtoolkit/build/acado_env.sh in your .bashrc. If ACADOtoolkit was placed somewhere other than your home directory accordingly modify the bellow statement.
+    .. code-block:: bash
+
+        echo 'source '$HOME'/ACADOtoolkit/build/acado_env.sh' >> ~/.bashrc
+
+
 # Miniboat Swarm
 
 ## 1. Clone and restore a system image for Raspberry Pi
@@ -28,3 +64,5 @@ dd if=path/to/your-backup.img of=/dev/sdX
 **1.4 Resize your SD card to full size**
 
 Finally, we can insert the sd card and start the cloned system. As the size of image could be much smaller than the sd card. If one wants to store more data later, we can use the disks tool on ubuntu to resize the partion of the sd card.
+
+
