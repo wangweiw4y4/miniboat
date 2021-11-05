@@ -98,7 +98,7 @@ void hedgePosAngCallback(const marvelmind_nav::hedge_pos_ang& hedge_pos_msg)
 				twobeacon_heading = twobeacon_heading-360;
 				twobeacon_heading = twobeacon_heading*PI/180.0;
 				
-				         ROS_INFO("Hedgehog data: Address= %d, timestamp= %d, X=%.3f  Y= %.3f  Z=%.3f  Angle: %.1f  flags=%d", 	
+				        ROS_INFO("Hedgehog data: Address= %d, timestamp= %d, X=%.3f  Y= %.3f  Z=%.3f  Angle: %.1f  flags=%d", 	
 				(int) hedge_pos_msg.address, 
 				(int) hedge_pos_msg.timestamp_ms, 
 				(float) hedge_pos_msg.x_m, (float) hedge_pos_msg.y_m, (float) hedge_pos_msg.z_m,
@@ -306,13 +306,13 @@ int main(int argc, char **argv)
 
       state[0] = twobeacon_x;
       state[1] = twobeacon_y;
-      state[2] = yaw_beaconIMU;
+      state[2] = twobeacon_heading;
       state[3] = 0;
       state[4] = 0;
       state[5] = -twist_bno055.twist.angular.z;
       
       
-      ROS_INFO("x,y,z,u,v,r:  %f,%f,%f,%f,%f,%f\n",  state[0],  state[1],  state[2],  state[3],  state[4], state[5]);
+      ROS_INFO("x,y,heading,u,v,r:  %f,%f,%f,%f,%f,%f\n",  state[0],  state[1],  state[2]*180/PI,  state[3],  state[4], state[5]);
     geometry_msgs::PoseStamped pose_bno055_msg;
     pose_bno055_msg = pose_bno055; 
     pose_bno055_pub.publish(pose_bno055_msg);
