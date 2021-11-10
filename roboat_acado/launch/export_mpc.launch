@@ -1,0 +1,9 @@
+<launch>
+    <arg name="core_dynamics" default="true"/>
+    <arg name="core_export" default="true"/>
+
+    <rosparam command="load" file="$(eval (find('roboat_core') if(arg('core_dynamics')) else find('roboat_acado'))+'/config/system_dynamics.yaml')" ns="system_dynamics"/>
+    <param name="export_path" value="$(eval (find('roboat_core') if(arg('core_export')) else find('roboat_acado'))+'/codegen_solver')"/>
+
+    <node name="codegen" type="codegen" pkg="roboat_acado" output="screen" required="true"/>
+</launch>

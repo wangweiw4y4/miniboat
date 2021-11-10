@@ -1,0 +1,9 @@
+<launch>
+
+    <arg name="serial_port" default="/dev/ttyACM0" />
+    <arg name="baudrate" default="500000" />
+
+    <node pkg="marvelmind_nav" type="hedge_rcv_bin" name="hedge_rcv_bin" args="$(arg serial_port) $(arg baudrate)" output="screen">
+    </node>
+
+</launch>

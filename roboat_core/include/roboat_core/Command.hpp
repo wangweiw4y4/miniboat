@@ -1,0 +1,33 @@
+#ifndef COMMAND_HPP
+#define COMMAND_HPP
+
+#include "ros/ros.h"
+#include <std_msgs/Float64MultiArray.h>
+#include <sensor_msgs/Joy.h>
+
+#include <roboat_core/CommandToMicroController.h>
+#include <roboat_core/Force.h>
+
+class Command
+{
+private:
+  roboat_core::CommandToMicroController commandMsg(double* force);
+  ros::Publisher command_pub;
+  ros::Publisher command_force_pub;
+  ros::Publisher latch_override_pub;
+  ros::Publisher latch_pub;
+  int command_priority = 3, stop_force_priority = 3;
+  double force[4];
+  double joy_max_force;
+  const int pid_priority = 1;
+  const int mpc_priority = 2;
+  double stop_force[4] = {0, 0, 0, 0};
+
+  void forceCallback(const roboat_core::Force::ConstPtr& msg, int priority);
+  void joyCallback(const sensor_msgs::Joy msg);
+
+public:
+  Command(ros::NodeHandle n);
+};
+
+#endif

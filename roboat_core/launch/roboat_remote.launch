@@ -1,0 +1,6 @@
+<launch> 
+    <include file="$(find roboat_core)/launch/master.launch">
+        <arg name="sensors"      value="true"/>
+        <arg name="command_node" value="true"/>
+    </include>
+</launch>
