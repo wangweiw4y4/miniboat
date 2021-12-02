@@ -93,7 +93,7 @@ Sim::Sim(ros::NodeHandle n)
   force_sub = n.subscribe("command_force", 1, &Sim::forceCallback, this);
 
   // initial pose from rviz
-  initialpose_sub = n.subscribe("/initialpose", 1, &Sim::initialPoseCallback, this);
+  initialpose_sub = n.subscribe("initialpose", 1, &Sim::initialPoseCallback, this);
 
   ros::Rate loop_rate(1/step);
 

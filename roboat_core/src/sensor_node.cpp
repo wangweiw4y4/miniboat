@@ -272,7 +272,7 @@ int main(int argc, char **argv)
   ros::Subscriber subIMURaw = n.subscribe(HEDGE_IMU_RAW_TOPIC_NAME, 1000, IMURawCallback);
   ros::Subscriber subIMUFusion = n.subscribe(HEDGE_IMU_FUSION_TOPIC_NAME, 1000, IMUFusionCallback);
   ros::Subscriber subHedgeWithAngle = n.subscribe(HEDGE_POSITION_WITH_ANGLE_TOPIC_NAME, 1000, hedgePosAngCallback);
-  ros::Subscriber bno055_sub= n.subscribe("/imu/data", 1, bno055callback);
+  ros::Subscriber bno055_sub= n.subscribe("imu/data", 1, bno055callback);
 
 
   n.param("system_dynamics/step", step, 0.1);
