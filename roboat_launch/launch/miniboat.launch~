@@ -13,7 +13,7 @@
     </include>
     
     <include file="$(find ros_imu_bno055)/launch/imu.launch">
-        <arg name = "serial_port" value="/dev/ttyUSB0" />
+        <arg name = "serial_port" value="/dev/ttyUSB1" />
         <arg name = "frame_id" value="imu_link" />
         <arg name = "operation_mode" value="NDOF_FMC_OFF"/>
         <arg name = "oscillator" value="INTERNAL" />

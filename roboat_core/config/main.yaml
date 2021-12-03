@@ -8,8 +8,8 @@ trajectory: {
     init_x: 0,
     init_y: 0,
     angle_rotate: 0,
-    file: /paths/miniboat_curve_speed_0.2.csv,
-    repeat: false
+    file: /paths/miniboat_shapeshift_miniboat6.csv,
+   repeat: false
 }
 
 
