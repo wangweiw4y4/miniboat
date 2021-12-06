@@ -3,6 +3,7 @@
 #include <geometry_msgs/PoseWithCovarianceStamped.h>
 #include <geometry_msgs/TwistWithCovarianceStamped.h>
 #include <nav_msgs/Path.h>
+#include <nav_msgs/Odometry.h>
 #include <std_msgs/Float64MultiArray.h>
 #include <tf/transform_datatypes.h>
 #include <sensor_msgs/Imu.h>
@@ -31,9 +32,39 @@
 std::vector<double> state(6);
 
 
-void MPC::stateCallback(const std_msgs::Float64MultiArray array) {
-    for(int i=0; i<6; i++) state[i] = array.data[i];
+void MPC::stateCallback(const nav_msgs::Odometry msg) {
+    
+    /*If state is advertised as an array, data can just be copied */
+    // for(int i=0; i<6; i++) state[i] = array.data[i];
+    // pose_received = true;
+    
+    /*If state is advertised as odometry, easier to visualize in rviz*/
+    double yaw;
     pose_received = true;
+
+    // convert from map to roboat map reference (negative y and yaw)
+    state[0] = msg.pose.pose.position.x;
+    state[1] = -msg.pose.pose.position.y; //
+    yaw = -tf::getYaw(tf::Quaternion(msg.pose.pose.orientation.x, msg.pose.pose.orientation.y,
+                                    msg.pose.pose.orientation.z, msg.pose.pose.orientation.w));
+
+    // Unwrap the angle when roll over happens
+    double yaw_diff = state[2] - yaw - state_roll_over_count * 2 * M_PI;
+    if (yaw_diff > M_PI)
+    {
+      state_roll_over_count += 1;
+    }
+    else if (yaw_diff < -M_PI)
+    {
+      state_roll_over_count -= 1;
+    }
+    state[2] = yaw + state_roll_over_count * 2 * M_PI;
+
+    // convert from map to roboat map reference (negative y and yaw)
+    state[3] = msg.twist.twist.linear.x;
+    state[4] = -msg.twist.twist.linear.y;
+    state[5] = -msg.twist.twist.angular.z;
+    
 }
 
 // void MPC::poseCallback(const geometry_msgs::PoseWithCovarianceStamped msg)
@@ -237,6 +268,7 @@ std::vector<double> MPC::acadoForce(std::vector<double> state, double* trajector
 MPC::MPC(ros::NodeHandle n)
 {
   state = std::vector<double>(6);
+  state_roll_over_count = 0;
 
   for (int i = 0; i < 6; i++)
     lastGoal[i] = 0.;

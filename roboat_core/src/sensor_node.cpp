@@ -22,6 +22,7 @@
 #include <geometry_msgs/PoseStamped.h>
 #include <geometry_msgs/Pose.h>
 #include <geometry_msgs/PoseArray.h>
+#include <nav_msgs/Odometry.h>
 #include <tf/transform_datatypes.h>
 #include <tf/transform_broadcaster.h>
 #include <tf/transform_listener.h>
@@ -266,7 +267,7 @@ int main(int argc, char **argv)
   ros::Publisher pose_beaconIMU_pub = n.advertise<geometry_msgs::PoseStamped>("pose_beaconIMU", 10); 
   ros::Publisher twist_beaconIMU_pub = n.advertise<geometry_msgs::TwistStamped>("twist_beaconIMU", 10); 
 
-  ros::Publisher state_pub = n.advertise<std_msgs::Float64MultiArray>("state", 10);
+  ros::Publisher state_pub = n.advertise<nav_msgs::Odometry>("state", 10);
 
 
   ros::Subscriber subIMURaw = n.subscribe(HEDGE_IMU_RAW_TOPIC_NAME, 1000, IMURawCallback);
@@ -291,7 +292,6 @@ int main(int argc, char **argv)
       state[3] = twist_bno055.twist.linear.x;
       state[4] = twist_bno055.twist.linear.y;
       state[5] = -twist_bno055.twist.angular.z;
-      ROS_INFO("x,y,z,u,v,r:  %f,%f,%f,%f,%f,%f\n",  state[0],  state[1],  state[2],  state[3],  state[4], state[5]);
     }
     else
      {
@@ -332,9 +332,23 @@ int main(int argc, char **argv)
 
 
     //publish state
-    std_msgs::Float64MultiArray stateMsg;
-    stateMsg.data.resize(6);
-    stateMsg.data = state;
+    // std_msgs::Float64MultiArray stateMsg;
+    // stateMsg.data.resize(6);
+    // stateMsg.data = state;
+
+    nav_msgs::Odometry stateMsg;
+    stateMsg.pose.pose.position.x = state[0];
+    stateMsg.pose.pose.position.y = state[1];
+    stateMsg.pose.pose.position.z = 0;
+
+    stateMsg.pose.pose.orientation = tf::createQuaternionMsgFromRollPitchYaw(0, 0, state[2]);
+
+    // No velocities for now
+    stateMsg.twist.twist.linear.x = 0.0;
+    stateMsg.twist.twist.linear.y = 0.0;
+    stateMsg.twist.twist.angular.z = 0.0;
+
+    //publishes the state odometry data    
     state_pub.publish(stateMsg);
 
     loop_rate.sleep();
