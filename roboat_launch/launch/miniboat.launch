@@ -11,15 +11,16 @@
     <group ns="$(arg id)">
 
         <include file="$(find roboat_core)/launch/master.launch">
-            <arg name="sim_node"                         default="false"/>
-            <arg name="serial_node"                      default="true"/>
-            <arg name="sensor_node"                      default="true"/>
-            <arg name="csv_path_node"                    default="false"/>
-            <arg name="mpc_node"                         default="true"/>
-            <arg name="command_node"                     default="true"/>
-            <arg name="joy_node"                         default="true"/>
-            <arg name="pid_node"                         default="false"/>
-            <arg name="bag_node"	   		             default="false"/>
+            <arg name="sim_node"            value="false"/>
+            <arg name="serial_node"         value="true"/>
+            <arg name="sensor_node"         value="true"/>
+            <arg name="csv_path_node"       value="false"/>
+            <arg name="mpc_node"            value="true"/>
+            <arg name="command_node"        value="true"/>
+            <arg name="joy_node"            value="true"/>
+            <arg name="pid_node"            value="false"/>
+            <arg name="swarm_node"          value="true"/>
+            <arg name="bag_node"	   		value="false"/>
         </include>
         
         <include file="$(find ros_imu_bno055)/launch/imu.launch">

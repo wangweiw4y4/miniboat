@@ -1,0 +1,4 @@
+# -----------------------------------------------------------------------------
+# SWARM SETTINGS
+# -----------------------------------------------------------------------------
+n_boats:    10     #number of boats composing the swarm, i.e. maximum expected miniboat index

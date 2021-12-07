@@ -16,7 +16,7 @@ find_package(catkin REQUIRED COMPONENTS
   roslint
   serial
   std_msgs
-   sensor_msgs
+  sensor_msgs
   geometry_msgs
   tf
 )
@@ -179,7 +179,8 @@ add_executable(mpc_node                 src/mpc_node.cpp                   src/M
 add_executable(sensor_node              src/sensor_node.cpp)
 add_executable(pid_node                 src/pid_node.cpp)
 add_executable(serial_node              src/serial_node.cpp)            
-add_executable(sim_node                 src/sim_node.cpp                   src/Sim.cpp)        
+add_executable(sim_node                 src/sim_node.cpp                   src/Sim.cpp)       
+add_executable(swarm_node               src/swarm_node.cxx                  src/swarm.cpp)        
 
 
 ## Rename C++ executable without prefix
@@ -196,6 +197,7 @@ add_dependencies(pid_node                    ${PROJECT_NAME}_generate_messages_c
 add_dependencies(mpc_node                    ${PROJECT_NAME}_generate_messages_cpp acado_mpc)
 add_dependencies(command_node                ${PROJECT_NAME}_generate_messages_cpp)
 add_dependencies(sim_node                    ${PROJECT_NAME}_generate_messages_cpp)
+add_dependencies(swarm_node                  ${PROJECT_NAME}_generate_messages_cpp)
 
 ## Specify libraries to link a library or executable target against
 target_link_libraries(serial_node                ${catkin_LIBRARIES})
@@ -206,6 +208,7 @@ target_link_libraries(sim_node                   ${catkin_LIBRARIES})
 target_link_libraries(command_node               ${catkin_LIBRARIES})
 target_link_libraries(csv_path_node              ${catkin_LIBRARIES})
 target_link_libraries(pose_path_node             ${catkin_LIBRARIES})
+target_link_libraries(swarm_node                 ${catkin_LIBRARIES})
 #############
 ## Install ##
 #############
@@ -232,6 +235,7 @@ install(
   mpc_node
   serial_node
   sim_node
+  swarm_node
   ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
   LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
