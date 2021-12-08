@@ -250,7 +250,7 @@ install(
 ## Mark other files for installation (e.g. launch and bag files, etc.)
 install(
   # FILES
-  DIRECTORY launch/
+  DIRECTORY config/ launch/
   DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/launch
 )
 

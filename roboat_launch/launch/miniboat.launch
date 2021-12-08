@@ -5,10 +5,11 @@
          - namespaces with '-' character are not valid, need to be changed
     -->
     <arg    name="id"               default="$(env HOSTNAME)"/>
-    <param  name="/miniboat_id"     value="$(arg id)" />
 
     <!-- package namespace -->
     <group ns="$(arg id)">
+
+        <param  name="roboat_id"        value="$(arg id)" />
 
         <include file="$(find roboat_core)/launch/master.launch">
             <arg name="sim_node"            value="false"/>

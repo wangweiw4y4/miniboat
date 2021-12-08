@@ -13,18 +13,36 @@ Swarm::Swarm(ros::NodeHandle &nh) : nh_(nh)
   /*After being initialized, runs within the class the control node, since no
   other control scheme is considered for now*/
 
-  //For now, we will identify all miniboats with a unique positive integer
-  nh_.getParam("swarm/n_boats",n_boats_);
-  // ROS_INFO("n boats %d",n_boats_);
-
+  //Assumes all miniboats are properly identified int he YAML config file, with no repeated ids
+  std::vector<std::string> boat_ids;
+  nh_.getParam("swarm/boat_ids",boat_ids);
+  
+  //identifies the index of the miniboat itself within the swarm (-1 if not found)
+  idx_= -1;
+  std::string id = ros::this_node::getNamespace();
+  id.erase(id.begin()); //first character is '/' for the global namespace, so takes it away
+  // ROS_INFO("miniboat id: %s",id.c_str());
+  for (int i = 0; i<boat_ids.size(); i++) {
+    if (boat_ids[i]==id) {
+      idx_=i;
+      break;
+    } 
+    // ROS_INFO("boat %d: %s",i,boat_ids[i].c_str());
+  }
+  
   //resize the arrays within showing the number 
+  n_boats_ = boat_ids.size();
   state_.resize(n_boats_);
   swarm_state_.resize(n_boats_);
 
   for (int i = 0; i<n_boats_; i++) {
     state_[i].resize(6);
-    swarm_state_[i].initialize(nh_, i, &state_[i]);
+    swarm_state_[i].initialize(nh_, boat_ids[i], &state_[i]);
   }
+}
+
+int Swarm::getIdx() {
+  return idx_;
 }
 
 SwarmState::SwarmState()
@@ -32,15 +50,12 @@ SwarmState::SwarmState()
   state_roll_over_count_ = 0;
 }
 
-void SwarmState::initialize(ros::NodeHandle &nh, int idx, std::vector<double>* state) 
+void SwarmState::initialize(ros::NodeHandle &nh, std::string id, std::vector<double>* state) 
 {
   nh_ = nh;
   state_ = state;
   //subscribe to the topic
-  // std::stringstream ss;
-  // ss << std::setw(2) << std::setfill('0') << idx;
-  // std::string topic = "/miniboat" +  ss.str() + "/state";
-  std::string topic = "/miniboat" +  std::to_string(idx) + "/state";
+  std::string topic = "/" +  id + "/state"; 
   // ROS_INFO("rostopic subscribed: %s", topic.c_str());
   state_sub_ = nh_.subscribe(topic, 1, &SwarmState::stateCallback, this);
   return;

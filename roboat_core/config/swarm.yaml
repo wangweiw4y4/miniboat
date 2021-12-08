@@ -1,4 +1,14 @@
 # -----------------------------------------------------------------------------
 # SWARM SETTINGS
 # -----------------------------------------------------------------------------
-n_boats:    10     #number of boats composing the swarm, i.e. maximum expected miniboat index
+# ids of the boats composing the swarm
+boat_ids: [
+  "miniboat1",
+  "miniboat2",
+  "miniboat3",
+  "miniboat4",
+  "miniboat5",
+  "miniboat6",
+  "miniboat7",
+  "miniboat8",
+]
