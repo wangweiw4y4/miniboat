@@ -312,7 +312,7 @@ int main(int argc, char **argv)
       state[5] = -twist_bno055.twist.angular.z;
       
       
-      ROS_INFO("x,y,heading,u,v,r:  %f,%f,%f,%f,%f,%f\n",  state[0],  state[1],  state[2]*180/PI,  state[3],  state[4], state[5]);
+    // ROS_INFO("x,y,heading,u,v,r:  %f,%f,%f,%f,%f,%f\n",  state[0],  state[1],  state[2]*180/PI,  state[3],  state[4], state[5]);
     geometry_msgs::PoseStamped pose_bno055_msg;
     pose_bno055_msg = pose_bno055; 
     pose_bno055_pub.publish(pose_bno055_msg);

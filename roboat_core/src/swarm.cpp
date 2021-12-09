@@ -14,36 +14,46 @@ Swarm::Swarm(ros::NodeHandle &nh) : nh_(nh)
   other control scheme is considered for now*/
 
   //Assumes all miniboats are properly identified int he YAML config file, with no repeated ids
-  std::vector<std::string> boat_ids;
-  nh_.getParam("swarm/boat_ids",boat_ids);
+  nh_.getParam("swarm/boat_ids",boat_ids_);
+  n_boats_ = boat_ids_.size();
   
   //identifies the index of the miniboat itself within the swarm (-1 if not found)
   idx_= -1;
   std::string id = ros::this_node::getNamespace();
   id.erase(id.begin()); //first character is '/' for the global namespace, so takes it away
   // ROS_INFO("miniboat id: %s",id.c_str());
-  for (int i = 0; i<boat_ids.size(); i++) {
-    if (boat_ids[i]==id) {
+  for (int i = 0; i<n_boats_; i++) {
+    if (boat_ids_[i]==id) {
       idx_=i;
       break;
     } 
-    // ROS_INFO("boat %d: %s",i,boat_ids[i].c_str());
+    // ROS_INFO("boat %d: %s",i,boat_ids_[i].c_str());
   }
   
   //resize the arrays within showing the number 
-  n_boats_ = boat_ids.size();
   state_.resize(n_boats_);
   swarm_state_.resize(n_boats_);
 
   for (int i = 0; i<n_boats_; i++) {
     state_[i].resize(6);
-    swarm_state_[i].initialize(nh_, boat_ids[i], &state_[i]);
+    swarm_state_[i].initialize(nh_, boat_ids_[i], &state_[i]);
   }
 }
 
 int Swarm::getIdx() {
   return idx_;
 }
+
+int Swarm::getBoatN() {
+  return n_boats_;
+}
+
+std::vector<std::string> Swarm::getBoatNames() 
+{
+  return boat_ids_;
+}
+
+
 
 SwarmState::SwarmState()
 {

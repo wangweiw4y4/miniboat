@@ -17,7 +17,27 @@ int main(int argc, char** argv)
   ROS_INFO("SETUP DONE");
 
   //spins the node
-  ros::spin();
+  // ros::spin();
+
+  //publishes the positions stored synchronously instead for testing
+  ros::Rate loop_rate(1);
+  int n_boats = swarm.getBoatN();
+  std::vector<std::string> ids = swarm.getBoatNames();
+  while (ros::ok())
+  {
+    ros::spinOnce();
+
+    std::stringstream ss;
+    for (int i=0; i<n_boats; i++) {
+      ss << ids[i] << ": [" << swarm.state_[i][0] << "," 
+                            << swarm.state_[i][1] << "," 
+                            << swarm.state_[i][2] << "]; ";
+    }
+    ROS_INFO(ss.str().c_str());
+
+    //waits until next iteration ----------------
+    loop_rate.sleep();
+  }
   
   return 0;
 }
