@@ -1,0 +1,71 @@
+<?xml version="1.0"?>
+<robot name="roboat" xmlns:xacro="http://roboat.org">
+    <xacro:property name="PI" value="3.1415926535897931"/>
+
+    <material name="dark_grey">
+        <color rgba="0.2 0.2 0.2 1.0"/>
+    </material>
+    <material name="light_grey">
+        <color rgba="0.4 0.4 0.4 1.0"/>
+    </material>
+    <material name="yellow">
+        <color rgba="0.8 0.8 0.0 1.0"/>
+    </material>
+    <material name="black">
+        <color rgba="0.15 0.15 0.15 1.0"/>
+    </material>
+
+    <link name="base_link"/>
+    <joint name="base_link_joint" type="fixed">
+        <parent link="base_link"/>
+        <child link="chassis_link"/>
+        <origin xyz="0 0 0.5" rpy="0 0 0"/>
+    </joint>
+
+    <link name="chassis_link">
+        <collision>
+            <origin xyz="0 0 0.0"/>
+            <geometry>
+                <mesh filename="package://roboat_localization/meshes/roboat.dae" />
+            </geometry>
+        </collision>
+        <visual>
+            <origin xyz="0 0 0.0"/>
+            <geometry>
+                <mesh filename="package://roboat_localization/meshes/roboat.dae" />
+            </geometry>
+        </visual>
+        <inertial>
+            <!-- Center of mass -->
+            <origin xyz="0 0 0.7" rpy="0 0 0"/>
+            <mass value="1300.523"/>
+            <!-- Moments of inertia: ( chassis without wheels ) -->
+            <inertia
+                    ixx="10.3136" ixy="-10.0008" ixz="10.0164"
+                    iyy="10.3922" iyz="-10.0009"
+                    izz="10.4485"/>
+        </inertial>
+    </link>
+
+    <link name="imu_link"/>
+    <joint name="imu_joint" type="fixed">
+        <parent link="chassis_link"/>
+        <child link="imu_link"/>
+        <origin xyz="1.8 0 1.2" rpy="0 0 0"/>
+    </joint>
+
+    <link name="navsat_link"/>
+    <joint name="navsat_joint" type="fixed">
+        <parent link="chassis_link"/>
+        <child link="navsat_link"/>
+        <origin xyz="1.8 -0.45 1.2" rpy="0 0 0"/>
+    </joint>
+
+    <link name="navsat2_link"/>
+    <joint name="navsat2_joint" type="fixed">
+        <parent link="chassis_link"/>
+        <child link="navsat2_link"/>
+        <origin xyz="-1.8 0.45 1.2" rpy="0 0 0"/>
+    </joint>
+
+</robot>

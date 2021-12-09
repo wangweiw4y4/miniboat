@@ -1,0 +1,35 @@
+# Params
+roboat_filter:
+
+  # Extrinsics for IMU
+  # extrinsicRot: [-1,  0,  0,
+  #                 0,  1,  0,
+  #                 0,  0, -1]
+  # extrinsicRPY: [ 0,  1,  0,
+  #                -1,  0,  0,
+  #                 0,  0,  1]
+  extrinsicRot: [ 1,  0,  0,
+                  0,  1,  0,
+                  0,  0,  1]
+  extrinsicRPY: [ 1,  0,  0,
+                  0,  1,  0,
+                  0,  0,  1]
+
+  # GPS covariance params
+  minGPSCovTh: 0.000001
+  maxGPSCovTh: 0.9
+
+  # Dual GPS params
+  # The GPS's are 5.1 degrees off from the x axis:
+  #
+  #   gps
+  #    |  17.0cm
+  #    |
+  #   centre --------------------- centre
+  #                   360cm          |
+  #                                  | 17.0cm
+  #                                 gps
+
+  headingOffset: 15  # Hand tuned to align point cloud with earth. This is a combination of the gps offset and cloud offset.
+  gpsBaseline: 3.66
+

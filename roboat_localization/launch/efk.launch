@@ -1,0 +1,17 @@
+<launch>
+    <arg name="PROJECT_NAME" default="roboat_localization"/>
+
+    <!-- EKF Fusion-->
+    <node pkg="robot_localization" type="ekf_localization_node" name="$(arg PROJECT_NAME)_EKF" respawn="true">
+        <rosparam command="load" file="$(find roboat_localization)/config/kalman_filter.yaml" />
+        <!-- In -->
+        <remap from="data/imu"          to="roboat_filter/filtered/imu" />
+        <!-- <remap from="data/dvl"          to="roboat_filter/filtered/dvl" /> -->
+        <remap from="data/gps"          to="roboat_filter/filtered/gps" />
+        <remap from="data/gps2"          to="roboat_filter/filtered/gps2" />
+        <remap from="data/heading"      to="roboat_filter/filtered/heading" />
+        <!-- Out -->
+        <remap from="accel/filtered"    to="roboat_localization/odometry_ekf/accel_filtered" />
+        <remap from="odometry/filtered" to="roboat_localization/odometry_ekf/odometry_filtered" />
+    </node>
+</launch>

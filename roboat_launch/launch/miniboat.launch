@@ -40,7 +40,12 @@
 
         <include file="$(find pid)/launch/headingpid.launch">
         </include>
-    
+
+        <!-- <include file="$(find roboat_localization)/launch/localization.launch" >
+            <arg name="run_rviz"      value="true"/>
+            <arg name="run_efk"     value="false"/>
+        </include> -->
+
     </group>
      
 </launch>

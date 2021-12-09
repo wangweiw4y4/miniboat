@@ -96,6 +96,7 @@ Command::Command(ros::NodeHandle n)
   // publisher for command topic
   command_pub = n.advertise<roboat_core::CommandToMicroController>("command", 1);
   command_force_pub = n.advertise<roboat_core::Force>("command_force", 1);
+  thrust_state_pub = n.advertise<roboat_msgs::ThrustState>("thrust_state", 1);
   latch_pub = n.advertise<std_msgs::UInt16>("latching_open_close_int", 1);
   latch_override_pub = n.advertise<std_msgs::UInt16>("latching_override_int", 1);
 
@@ -127,6 +128,10 @@ Command::Command(ros::NodeHandle n)
       command_priority = stop_force_priority;
       std::copy(std::begin(stop_force), std::end(stop_force), std::begin(force));
     }
+
+    roboat_msgs::ThrustState thrust_state_msg;
+    thrust_state_msg.priority = command_priority;
+    thrust_state_pub.publish(thrust_state_msg);
 
     loopRate.sleep();
   }

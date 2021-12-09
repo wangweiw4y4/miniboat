@@ -7,6 +7,7 @@
 
 #include <roboat_core/CommandToMicroController.h>
 #include <roboat_core/Force.h>
+#include <roboat_msgs/ThrustState.h>
 
 class Command
 {
@@ -14,6 +15,7 @@ private:
   roboat_core::CommandToMicroController commandMsg(double* force);
   ros::Publisher command_pub;
   ros::Publisher command_force_pub;
+  ros::Publisher thrust_state_pub;
   ros::Publisher latch_override_pub;
   ros::Publisher latch_pub;
   int command_priority = 3, stop_force_priority = 3;
