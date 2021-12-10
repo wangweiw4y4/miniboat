@@ -1,13 +1,13 @@
 # Miniboat Swarm
 
-If one download the miniboat code from github, you need to install the ACADO toolkit. With ACADO toolkit installed, you can tune the MPC parameters as needed. Each time, after you change the MPC parameters, you need to run the following four commands to make the MPC parameters to take effects:
+## If one download the miniboat code from github, you need to install the ACADO toolkit. With ACADO toolkit installed, you can tune the MPC parameters as needed. Each time, after you change the MPC parameters, you need to run the following four commands to make the MPC parameters to take effects:
 ```
 catkin_make
 roslaunch roboat_acado export_mpc.launch
 catkin_make
 catkin_make
 ```
-Here are the steps to install ACADO.
+Steps to install ACADO:
 -------------- 
 1. Install the prerequisites
     .. code-block:: bash
@@ -40,9 +40,7 @@ Here are the steps to install ACADO.
 
         echo 'source '$HOME'/ACADOtoolkit/build/acado_env.sh' >> ~/.bashrc
 
-If we need to produce multiple new miniboats, it is easier to use the image method to make the code ready. Here are the steps to clone and restore a codebase image for PI 4.
-
-## 1. Clone and restore a system image for Raspberry Pi
+## If we need to produce multiple new miniboats, it is easier to use the image method to make the code ready. Here are the steps to clone and restore a codebase image for PI 4.
 
 
 **1.1 Clone an Ubuntu Syste to an Image**   
