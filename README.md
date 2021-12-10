@@ -10,8 +10,8 @@ roslaunch roboat_acado export_mpc.launch
 catkin_make
 catkin_make
 ```
-**Steps to install ACADO:**
--------------- 
+Here are the steps to install ACADO:
+
 1. Install the prerequisites
     .. code-block:: bash
 
