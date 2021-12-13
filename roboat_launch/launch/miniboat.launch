@@ -9,7 +9,7 @@
     <!-- package namespace -->
     <group ns="$(arg id)">
 
-        <param  name="roboat_id"        value="$(arg id)" />
+        <param  name="roboat_id"    type="string"   value="$(arg id)" />
 
         <include file="$(find roboat_core)/launch/master.launch">
             <arg name="sim_node"            value="false"/>
@@ -42,8 +42,8 @@
         </include>
 
         <!-- <include file="$(find roboat_localization)/launch/localization.launch" >
-            <arg name="run_rviz"      value="true"/>
-            <arg name="run_efk"     value="false"/>
+            <arg name="run_rviz"    value="false"/>
+            <arg name="run_efk"     value="true"/>
         </include> -->
 
     </group>

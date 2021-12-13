@@ -1,0 +1,14 @@
+<launch>
+ 
+    <!-- If we only want to run the roscore so all the miniboats detect the host master, 
+    from the home catkin workspace folder:
+        ..src/miniboat/scripts/run_server.sh
+    -->
+
+    <!-- RVIZ visualization -->
+    <include file="$(find roboat_localization)/launch/localization.launch" >
+        <arg name="run_rviz"    value="true"/>
+        <arg name="run_efk"     value="false"/>
+    </include>
+    
+</launch>
