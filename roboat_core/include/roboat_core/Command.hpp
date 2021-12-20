@@ -11,13 +11,14 @@
 class Command
 {
 private:
-  roboat_core::CommandToMicroController commandMsg(double* force);
+  roboat_core::CommandToMicroController commandMsg(double* force,unsigned char latch);
   ros::Publisher command_pub;
   ros::Publisher command_force_pub;
   ros::Publisher latch_override_pub;
   ros::Publisher latch_pub;
   int command_priority = 3, stop_force_priority = 3;
-  double force[4];
+  unsigned char latchingaction = 0; 
+  double force[4]; 
   double joy_max_force;
   const int pid_priority = 1;
   const int mpc_priority = 2;
