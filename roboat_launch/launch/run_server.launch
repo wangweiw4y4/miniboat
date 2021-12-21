@@ -6,9 +6,6 @@
     -->
 
     <!-- RVIZ visualization -->
-    <include file="$(find roboat_localization)/launch/localization.launch" >
-        <arg name="run_rviz"    value="true"/>
-        <arg name="run_efk"     value="false"/>
-    </include>
+    <include file="$(find roboat_visualization)/launch/display.launch"/>
     
 </launch>

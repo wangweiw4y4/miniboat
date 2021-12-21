@@ -78,11 +78,7 @@ Visualization Manager:
           Value: true
         chassis_link:
           Value: true
-        dvl_link:
-          Value: true
         imu_link:
-          Value: true
-        lidar_link:
           Value: true
         map:
           Value: true
@@ -111,11 +107,7 @@ Visualization Manager:
               chassis_link:
                 camera_link:
                   {}
-                dvl_link:
-                  {}
                 imu_link:
-                  {}
-                lidar_link:
                   {}
                 navsat2_link:
                   {}

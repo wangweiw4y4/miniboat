@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 2.8.3)
-project(roboat_localization)
+project(roboat_visualization)
 
 ###########
 ## Build ##
@@ -75,8 +75,9 @@ link_directories(
 ###########
 
 # Data Modify
-add_executable(${PROJECT_NAME}_dataFilter src/dataFilter.cpp)
-target_link_libraries(${PROJECT_NAME}_dataFilter ${catkin_LIBRARIES} ${PCL_LIBRARIES} ${OpenCV_LIBRARIES})
+add_executable(visualization_node src/roboat_visualization.cpp)
+add_dependencies(visualization_node ${catkin_EXPORTED_TARGETS})
+target_link_libraries(visualization_node ${catkin_LIBRARIES})
 
 # Mark cpp header files for installation
 install(DIRECTORY include/${PROJECT_NAME}/
@@ -84,11 +85,6 @@ install(DIRECTORY include/${PROJECT_NAME}/
         FILES_MATCHING PATTERN "*.h"
         )
 
-install(DIRECTORY include/${PROJECT_NAME}/
-        DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION}
-        FILES_MATCHING PATTERN "*.hpp"
-        )
-
-install(DIRECTORY launch urdf
+install(DIRECTORY launch meshes
         DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
         )

@@ -332,24 +332,34 @@ int main(int argc, char **argv)
 
 
     //publish state
-    // std_msgs::Float64MultiArray stateMsg;
-    // stateMsg.data.resize(6);
-    // stateMsg.data = state;
+    // std_msgs::Float64MultiArray state_msg;
+    // state_msg.data.resize(6);
+    // state_msg.data = state;
 
-    nav_msgs::Odometry stateMsg;
-    stateMsg.pose.pose.position.x = state[0];
-    stateMsg.pose.pose.position.y = state[1];
-    stateMsg.pose.pose.position.z = 0;
+    nav_msgs::Odometry state_msg;
+    state_msg.pose.pose.position.x = state[0];
+    state_msg.pose.pose.position.y = state[1];
+    state_msg.pose.pose.position.z = 0;
 
-    stateMsg.pose.pose.orientation = tf::createQuaternionMsgFromRollPitchYaw(0, 0, state[2]);
+    state_msg.pose.pose.orientation = tf::createQuaternionMsgFromRollPitchYaw(0, 0, state[2]);
 
     // No velocities for now
-    stateMsg.twist.twist.linear.x = 0.0;
-    stateMsg.twist.twist.linear.y = 0.0;
-    stateMsg.twist.twist.angular.z = 0.0;
+    state_msg.twist.twist.linear.x = 0.0;
+    state_msg.twist.twist.linear.y = 0.0;
+    state_msg.twist.twist.angular.z = 0.0;
 
     //publishes the state odometry data    
-    state_pub.publish(stateMsg);
+    state_pub.publish(state_msg);
+
+    // map -> odom static transformation (both are the same)
+    static tf::TransformBroadcaster tf_map_odom;
+    static tf::Transform map_to_odom = tf::Transform(tf::createQuaternionFromRPY(0, 0, 0), tf::Vector3(0, 0, 0));
+    tf_map_odom.sendTransform(tf::StampedTransform(map_to_odom, state_msg.header.stamp, "map", "odom"));
+
+    // odom -> base_link transformation (for visualization, matching what the EKF filter will do)
+    static tf::TransformBroadcaster tf_odom_base;
+    static tf::Transform odom_to_base = tf::Transform(tf::createQuaternionFromRPY(0, 0, state[2]), tf::Vector3(state[0], state[1], 0.0));
+    tf_map_odom.sendTransform(tf::StampedTransform(odom_to_base, state_msg.header.stamp, "odom", "base_link"));
 
     loop_rate.sleep();
   }

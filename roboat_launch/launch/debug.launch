@@ -1,0 +1,36 @@
+<launch>
+ 
+    <!-- Make sure you provide the correct target boat and serial_port input -->
+    <arg name="id"          default="$(env HOSTNAME)"/>
+    <!-- joy node only run to control a particular boat, specified by its node space -->
+    <group ns="$(arg id)">
+
+        <param  name="roboat_id"    type="string"   value="$(arg id)" />
+
+        <!--- Robat core -->
+        <include file="$(find roboat_core)/launch/master.launch">
+            <arg name="sim_node"            value="false"/>
+            <arg name="serial_node"         value="false"/>
+            <arg name="sensor_node"         value="true"/>
+            <arg name="csv_path_node"       value="false"/>
+            <arg name="mpc_node"            value="false"/>
+            <arg name="command_node"        value="false"/>
+            <arg name="joy_node"            value="false"/>
+            <arg name="pid_node"            value="false"/>
+            <arg name="swarm_node"          value="false"/>
+            <arg name="bag_node"	   		value="false"/>
+        </include>
+        
+
+        <!--- Robat localization -->
+        <include file="$(find roboat_localization)/launch/localization.launch">
+            <arg name="run_efk"     value="false"/>
+        </include>
+
+        <!--- Robat visualization -->
+        <include file="$(find roboat_visualization)/launch/display.launch"/>
+
+        
+    </group>
+    
+</launch>

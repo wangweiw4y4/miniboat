@@ -144,7 +144,7 @@ public:
     {
       marker_node.action = visualization_msgs::Marker::ADD;
       marker_node.type = visualization_msgs::Marker::MESH_RESOURCE;
-      marker_node.mesh_resource = "package://roboat_localization/meshes/roboat.obj";
+      marker_node.mesh_resource = "package://roboat_visualization/meshes/miniboat.obj";
       marker_node.ns = "roboat";
       marker_node.id = 0;
       marker_node.scale.x = 1;

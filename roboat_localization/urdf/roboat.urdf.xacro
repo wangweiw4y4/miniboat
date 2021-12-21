@@ -26,13 +26,13 @@
         <collision>
             <origin xyz="0 0 0.0"/>
             <geometry>
-                <mesh filename="package://roboat_localization/meshes/roboat.dae" />
+                <mesh filename="package://roboat_visualization/meshes/miniboat.dae" />
             </geometry>
         </collision>
         <visual>
             <origin xyz="0 0 0.0"/>
             <geometry>
-                <mesh filename="package://roboat_localization/meshes/roboat.dae" />
+                <mesh filename="package://roboat_visualization/meshes/miniboat.dae" />
             </geometry>
         </visual>
         <inertial>
