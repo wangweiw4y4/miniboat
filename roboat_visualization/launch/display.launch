@@ -2,7 +2,4 @@
     <!-- Node generating the markers properly formatted -->
     <node name="visualization_node" pkg="roboat_visualization" type="visualization_node" output="screen" respawn="true"/>
 
-    <!--- Run Rviz-->
-    <node pkg="rviz" type="rviz" name="roboat_visualization_rviz" args="-d $(find roboat_visualization)/rviz/miniboats_visualization.rviz" />
-
 </launch>

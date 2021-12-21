@@ -6,6 +6,6 @@
     -->
 
     <!-- RVIZ visualization -->
-    <include file="$(find roboat_visualization)/launch/display.launch"/>
+    <include file="$(find roboat_visualization)/launch/rviz.launch"/>
     
 </launch>

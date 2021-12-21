@@ -1,8 +1,9 @@
 <launch>
     <arg name="PROJECT_NAME" default="roboat_localization"/>
 
-    <arg name="run_efk" default="false"/>
-
+    <arg name="run_efk"             default="false"/>
+    <arg name="publish_display"     default="true"/>
+    
     <!--- Robot State TF -->
     <include file="$(find roboat_localization)/launch/robot_state_publisher.launch"/>
 
@@ -11,5 +12,8 @@
     <include if="$(arg run_efk)" file="$(find roboat_localization)/launch/efk.launch"/>
 
     <!-- if not running ekf, sensor_node needs to be run to process the raw sensor data and publish state -->
+
+    <!--- Run node publishing topics used for rviz visualization -->
+    <include if="$(arg publish_display)" file="$(find roboat_visualization)/launch/display.launch"/>
 
 </launch>

@@ -4,8 +4,9 @@
          - remember to add 'export HOSTNAME' to the .bashrc file or script launching the program 
          - namespaces with '-' character are not valid, need to be changed
     -->
-    <arg    name="id"           default="$(env HOSTNAME)"/>
-    <arg    name="use_ekf"      default="false"/>
+    <arg    name="id"                   default="$(env HOSTNAME)"/>
+    <arg    name="use_ekf"              default="false"/>
+    <arg    name="publish_display"      default="true"/>
 
     <!-- package namespace -->
     <group ns="$(arg id)">
@@ -43,7 +44,8 @@
         </include>
 
         <include file="$(find roboat_localization)/launch/localization.launch" >
-            <arg name="run_efk"     value="$(arg use_ekf)"/>
+            <arg name="run_efk"             value="$(arg use_ekf)"/>
+            <arg name="publish_display"     value="$(arg publish_display)"/>
         </include>
 
     </group>
