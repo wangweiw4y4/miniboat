@@ -5,6 +5,9 @@
         ..src/miniboat/scripts/run_server.sh
     -->
 
+    <!-- loads swarm ids, to properly identify all -->
+    <rosparam command="load" file="$(find roboat_core)/config/swarm.yaml" ns="swarm"/>
+
     <!-- RVIZ visualization -->
     <include file="$(find roboat_visualization)/launch/rviz.launch"/>
     

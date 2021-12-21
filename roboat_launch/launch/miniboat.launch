@@ -6,7 +6,6 @@
     -->
     <arg    name="id"                   default="$(env HOSTNAME)"/>
     <arg    name="use_ekf"              default="false"/>
-    <arg    name="publish_display"      default="true"/>
 
     <!-- package namespace -->
     <group ns="$(arg id)">
@@ -44,8 +43,8 @@
         </include>
 
         <include file="$(find roboat_localization)/launch/localization.launch" >
+            <arg name="id"                  value="$(arg id)"/>
             <arg name="run_efk"             value="$(arg use_ekf)"/>
-            <arg name="publish_display"     value="$(arg publish_display)"/>
         </include>
 
     </group>

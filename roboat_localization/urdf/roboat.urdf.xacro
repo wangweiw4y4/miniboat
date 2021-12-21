@@ -1,7 +1,12 @@
 <?xml version="1.0"?>
-<robot name="roboat" xmlns:xacro="http://roboat.org">
+<robot name="miniboat" xmlns:xacro="http://roboat.org">
+    <!-- arguments -->
+    <xacro:arg name="id" default="miniboat" />
+    
+    <!-- constants -->
+    <xacro:property name="id" value="$(arg id)" />
     <xacro:property name="PI" value="3.1415926535897931"/>
-
+    
     <material name="dark_grey">
         <color rgba="0.2 0.2 0.2 1.0"/>
     </material>
@@ -15,14 +20,14 @@
         <color rgba="0.15 0.15 0.15 1.0"/>
     </material>
 
-    <link name="base_link"/>
-    <joint name="base_link_joint" type="fixed">
-        <parent link="base_link"/>
-        <child link="chassis_link"/>
+    <link name="base_link_${id}"/>
+    <joint name="base_link_joint_${id}" type="fixed">
+        <parent link="base_link_${id}"/>
+        <child link="chassis_link_${id}"/>
         <origin xyz="0 0 0.5" rpy="0 0 0"/>
     </joint>
 
-    <link name="chassis_link">
+    <link name="chassis_link_${id}">
         <collision>
             <origin xyz="0 0 0.0"/>
             <geometry>
@@ -47,24 +52,24 @@
         </inertial>
     </link>
 
-    <link name="imu_link"/>
-    <joint name="imu_joint" type="fixed">
-        <parent link="chassis_link"/>
-        <child link="imu_link"/>
+    <link name="imu_link_${id}"/>
+    <joint name="imu_joint_${id}" type="fixed">
+        <parent link="chassis_link_${id}"/>
+        <child link="imu_link_${id}"/>
         <origin xyz="1.8 0 1.2" rpy="0 0 0"/>
     </joint>
 
-    <link name="navsat_link"/>
-    <joint name="navsat_joint" type="fixed">
-        <parent link="chassis_link"/>
-        <child link="navsat_link"/>
+    <link name="navsat_link_${id}"/>
+    <joint name="navsat_joint_${id}" type="fixed">
+        <parent link="chassis_link_${id}"/>
+        <child link="navsat_link_${id}"/>
         <origin xyz="1.8 -0.45 1.2" rpy="0 0 0"/>
     </joint>
 
-    <link name="navsat2_link"/>
-    <joint name="navsat2_joint" type="fixed">
-        <parent link="chassis_link"/>
-        <child link="navsat2_link"/>
+    <link name="navsat2_link_${id}"/>
+    <joint name="navsat2_joint_${id}" type="fixed">
+        <parent link="chassis_link_${id}"/>
+        <child link="navsat2_link_${id}"/>
         <origin xyz="-1.8 0.45 1.2" rpy="0 0 0"/>
     </joint>
 

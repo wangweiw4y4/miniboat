@@ -1,6 +1,7 @@
 <launch>
-    <arg name="project" default="roboat_localization"/>
-    <param name="robot_description" command="$(find xacro)/xacro --inorder '$(find roboat_localization)/urdf/roboat.urdf.xacro'" />
+    <arg name="id" default="roboat"/>
+    
+    <param name="robot_description" command="$(find xacro)/xacro --inorder '$(find roboat_localization)/urdf/roboat.urdf.xacro' id:=$(arg id)" />
 
-    <node pkg="robot_state_publisher" type="robot_state_publisher" name="$(arg project)_statePublisher" respawn="true" />
+    <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher" respawn="true" />
 </launch>

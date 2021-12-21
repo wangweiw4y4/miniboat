@@ -75,7 +75,7 @@ link_directories(
 ###########
 
 # Data Modify
-add_executable(visualization_node src/roboat_visualization.cpp)
+add_executable(visualization_node       src/swarm_visualization_node.cxx        src/roboat_visualization.cpp)
 add_dependencies(visualization_node ${catkin_EXPORTED_TARGETS})
 target_link_libraries(visualization_node ${catkin_LIBRARIES})
 

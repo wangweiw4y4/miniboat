@@ -1,9 +1,8 @@
 <launch>
-    <!-- Node generating the markers properly formatted 
-        (right now, runs in each miniboat so each topic is published within the namespace of the miniboat) -->
-    <!-- <node name="visualization_node" pkg="roboat_visualization" type="visualization_node" output="screen" respawn="true"/> -->
+    <!-- Node generating the markers properly formatted -->
+    <node name="visualization_node"  pkg="roboat_visualization"  type="visualization_node" output="screen" respawn="true"/>
 
     <!--- Runs Rviz with the saved configuration -->
-    <node pkg="rviz" type="rviz" name="roboat_visualization_rviz" args="-d $(find roboat_visualization)/rviz/miniboats_visualization.rviz" />
+    <node name="visualization_rviz"  pkg="rviz" type="rviz" args="-d $(find roboat_visualization)/rviz/miniboats_visualization.rviz" />
 
 </launch>

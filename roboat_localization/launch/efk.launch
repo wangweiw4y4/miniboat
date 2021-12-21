@@ -1,9 +1,11 @@
 <launch>
-    <arg name="PROJECT_NAME" default="roboat_localization"/>
+    <arg name="id" default="roboat"/>
 
     <!-- EKF Fusion-->
-    <node pkg="robot_localization" type="ekf_localization_node" name="$(arg PROJECT_NAME)_EKF" respawn="true">
+    <node pkg="robot_localization" type="ekf_localization_node" name="ekf_localization_node" respawn="true">
         <rosparam command="load" file="$(find roboat_localization)/config/kalman_filter.yaml" />
+        <!-- updates base_link_frame to include roboat_id, to avoid conflicts with other roboats in the network -->
+        <param name="base_link_frame" value="base_lin_$(arg id)"/>
         <!-- In -->
         <remap from="data/imu"          to="roboat_filter/filtered/imu" />
         <!-- <remap from="data/dvl"          to="roboat_filter/filtered/dvl" /> -->

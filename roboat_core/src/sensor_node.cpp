@@ -275,6 +275,15 @@ int main(int argc, char **argv)
   ros::Subscriber subHedgeWithAngle = n.subscribe(HEDGE_POSITION_WITH_ANGLE_TOPIC_NAME, 1000, hedgePosAngCallback);
   ros::Subscriber bno055_sub= n.subscribe("imu/data", 1, bno055callback);
 
+  std::string id;
+  n.param<std::string>("roboat_id",id,"");
+  std::string base_link_frame;
+  if (id.empty()) {
+    base_link_frame = "base_link";
+  }
+  else {
+    base_link_frame = "base_link_"+id;
+  }
 
   n.param("system_dynamics/step", step, 0.1);
   ros::Rate loop_rate(1/step);
@@ -359,7 +368,7 @@ int main(int argc, char **argv)
     // odom -> base_link transformation (for visualization, matching what the EKF filter will do)
     static tf::TransformBroadcaster tf_odom_base;
     static tf::Transform odom_to_base = tf::Transform(tf::createQuaternionFromRPY(0, 0, state[2]), tf::Vector3(state[0], state[1], 0.0));
-    tf_map_odom.sendTransform(tf::StampedTransform(odom_to_base, state_msg.header.stamp, "odom", "base_link"));
+    tf_map_odom.sendTransform(tf::StampedTransform(odom_to_base, state_msg.header.stamp, "odom", base_link_frame));
 
     loop_rate.sleep();
   }

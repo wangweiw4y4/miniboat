@@ -75,8 +75,8 @@ link_directories(
 ###########
 
 # Data Modify
-add_executable(${PROJECT_NAME}_dataFilter src/dataFilter.cpp)
-target_link_libraries(${PROJECT_NAME}_dataFilter ${catkin_LIBRARIES} ${PCL_LIBRARIES} ${OpenCV_LIBRARIES})
+add_executable(data_filter_node src/dataFilter.cpp)
+target_link_libraries(data_filter_node ${catkin_LIBRARIES} ${PCL_LIBRARIES} ${OpenCV_LIBRARIES})
 
 # Mark cpp header files for installation
 install(DIRECTORY include/${PROJECT_NAME}/

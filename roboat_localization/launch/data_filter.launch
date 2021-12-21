@@ -1,5 +1,5 @@
 <launch>
-    <arg name="PROJECT_NAME" default="roboat_localization"/>
+    <arg name="id"  default="roboat"/>
 
     <!-- Sensor Topics -->
     <arg name="IMU_TOPIC" default="/imu_correct"/>
@@ -9,9 +9,9 @@
 
     <!-- Parameters -->
     <rosparam file="$(find roboat_localization)/config/filter_params.yaml" command="load"/>
-
+    
     <!-- Data Filter -->
-    <node pkg="$(arg PROJECT_NAME)" type="$(arg PROJECT_NAME)_dataFilter" name="$(arg PROJECT_NAME)_dataFilter"
+    <node pkg="roboat_localization" type="data_filter_node" name="data_filter_node"
           output="screen" respawn="true">
         <!-- In -->
         <remap from="sensor/imu" to="$(arg IMU_TOPIC)"/>
