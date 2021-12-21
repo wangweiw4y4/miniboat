@@ -361,14 +361,13 @@ int main(int argc, char **argv)
     state_pub.publish(state_msg);
 
     // map -> odom static transformation (both are the same)
-    static tf::TransformBroadcaster tf_map_odom;
+    static tf::TransformBroadcaster tf_broadcast;
     static tf::Transform map_to_odom = tf::Transform(tf::createQuaternionFromRPY(0, 0, 0), tf::Vector3(0, 0, 0));
-    tf_map_odom.sendTransform(tf::StampedTransform(map_to_odom, state_msg.header.stamp, "map", "odom"));
-
+    tf_broadcast.sendTransform(tf::StampedTransform(map_to_odom, state_msg.header.stamp, "map", "odom"));
+    
     // odom -> base_link transformation (for visualization, matching what the EKF filter will do)
-    static tf::TransformBroadcaster tf_odom_base;
     static tf::Transform odom_to_base = tf::Transform(tf::createQuaternionFromRPY(0, 0, state[2]), tf::Vector3(state[0], state[1], 0.0));
-    tf_map_odom.sendTransform(tf::StampedTransform(odom_to_base, state_msg.header.stamp, "odom", base_link_frame));
+    tf_broadcast.sendTransform(tf::StampedTransform(odom_to_base, state_msg.header.stamp, "odom", base_link_frame));
 
     loop_rate.sleep();
   }

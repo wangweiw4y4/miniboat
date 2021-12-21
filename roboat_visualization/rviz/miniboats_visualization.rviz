@@ -4,7 +4,7 @@ Panels:
     Name: Displays
     Property Tree Widget:
       Expanded: ~
-      Splitter Ratio: 0.5708501935005188
+      Splitter Ratio: 0.8510301113128662
     Tree Height: 1783
   - Class: rviz/Selection
     Name: Selection
@@ -43,48 +43,49 @@ Visualization Manager:
       Reference Frame: <Fixed Frame>
       Value: true
     - Class: rviz/TF
-      Enabled: true
+      Enabled: false
       Frame Timeout: 15
       Frames:
         All Enabled: false
-        base_link:
-          Value: false
-        chassis_link:
-          Value: false
-        imu_link:
-          Value: false
-        map:
-          Value: false
-        navsat2_link:
-          Value: false
-        navsat_link:
-          Value: false
-        odom:
-          Value: false
       Marker Scale: 1
       Name: TF
       Show Arrows: true
       Show Axes: true
       Show Names: true
       Tree:
-        map:
-          odom:
-            base_link:
-              chassis_link:
-                imu_link:
-                  {}
-                navsat2_link:
-                  {}
-                navsat_link:
-                  {}
+        {}
       Update Interval: 0
+      Value: false
+    - Class: rviz/Marker
+      Enabled: true
+      Marker Topic: /miniboat4/visual/robot
+      Name: Miniboat4
+      Namespaces:
+        miniboat6: true
+      Queue Size: 100
       Value: true
     - Class: rviz/Marker
       Enabled: true
       Marker Topic: /miniboat6/visual/robot
-      Name: Boat
+      Name: Miniboat6
       Namespaces:
-        roboat: true
+        miniboat6: true
+      Queue Size: 100
+      Value: true
+    - Class: rviz/Marker
+      Enabled: true
+      Marker Topic: /miniboat7/visual/robot
+      Name: Miniboat7
+      Namespaces:
+        {}
+      Queue Size: 100
+      Value: true
+    - Class: rviz/Marker
+      Enabled: true
+      Marker Topic: /miniboat8/visual/robot
+      Name: Miniboat8
+      Namespaces:
+        {}
       Queue Size: 100
       Value: true
     - Alpha: 1
@@ -97,7 +98,30 @@ Visualization Manager:
       Length: 0.30000001192092896
       Line Style: Billboards
       Line Width: 0.5
-      Name: Trajectory
+      Name: Trajectory4
+      Offset:
+        X: 0
+        Y: 0
+        Z: 0.10000000149011612
+      Pose Color: 255; 85; 255
+      Pose Style: None
+      Radius: 0.029999999329447746
+      Shaft Diameter: 0.10000000149011612
+      Shaft Length: 0.10000000149011612
+      Topic: /miniboat4/visual/path
+      Unreliable: false
+      Value: true
+    - Alpha: 1
+      Buffer Length: 1
+      Class: rviz/Path
+      Color: 25; 255; 0
+      Enabled: true
+      Head Diameter: 0.30000001192092896
+      Head Length: 0.20000000298023224
+      Length: 0.30000001192092896
+      Line Style: Billboards
+      Line Width: 0.5
+      Name: Trajectory6
       Offset:
         X: 0
         Y: 0
@@ -108,6 +132,52 @@ Visualization Manager:
       Shaft Diameter: 0.10000000149011612
       Shaft Length: 0.10000000149011612
       Topic: /miniboat6/visual/path
+      Unreliable: false
+      Value: true
+    - Alpha: 1
+      Buffer Length: 1
+      Class: rviz/Path
+      Color: 25; 255; 0
+      Enabled: true
+      Head Diameter: 0.30000001192092896
+      Head Length: 0.20000000298023224
+      Length: 0.30000001192092896
+      Line Style: Billboards
+      Line Width: 0.5
+      Name: Trajectory7
+      Offset:
+        X: 0
+        Y: 0
+        Z: 0.10000000149011612
+      Pose Color: 255; 85; 255
+      Pose Style: None
+      Radius: 0.029999999329447746
+      Shaft Diameter: 0.10000000149011612
+      Shaft Length: 0.10000000149011612
+      Topic: /miniboat7/visual/path
+      Unreliable: false
+      Value: true
+    - Alpha: 1
+      Buffer Length: 1
+      Class: rviz/Path
+      Color: 25; 255; 0
+      Enabled: true
+      Head Diameter: 0.30000001192092896
+      Head Length: 0.20000000298023224
+      Length: 0.30000001192092896
+      Line Style: Billboards
+      Line Width: 0.5
+      Name: Trajectory8
+      Offset:
+        X: 0
+        Y: 0
+        Z: 0.10000000149011612
+      Pose Color: 255; 85; 255
+      Pose Style: None
+      Radius: 0.029999999329447746
+      Shaft Diameter: 0.10000000149011612
+      Shaft Length: 0.10000000149011612
+      Topic: /miniboat8/visual/path
       Unreliable: false
       Value: true
   Enabled: true
@@ -126,25 +196,25 @@ Visualization Manager:
   Views:
     Current:
       Class: rviz/XYOrbit
-      Distance: 15.046378135681152
+      Distance: 1.0668736696243286
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.05999999865889549
         Stereo Focal Distance: 1
         Swap Stereo Eyes: false
         Value: false
       Focal Point:
-        X: 0.5150723457336426
-        Y: 0.08851385116577148
-        Z: 0
+        X: 0.0
+        Y: 0.0
+        Z: 0.0
       Focal Shape Fixed Size: true
       Focal Shape Size: 0.05000000074505806
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.009999999776482582
-      Pitch: 0.37039804458618164
+      Pitch: 0.6203979849815369
       Target Frame: base_link
       Value: XYOrbit (rviz)
-      Yaw: 5.293562412261963
+      Yaw: 5.438571453094482
     Saved: ~
 Window Geometry:
   Displays:
