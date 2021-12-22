@@ -285,10 +285,11 @@ int main(int argc, char **argv)
     base_link_frame = "base_link_"+id;
   }
 
+  double draught = 0.025; //fixed draught, used only for visualization so defined here explicitly
+
   n.param("system_dynamics/step", step, 0.1);
   ros::Rate loop_rate(1/step);
-  ros::Time begin = ros::Time::now();
-
+  
   while (ros::ok())
   {
        ros::spinOnce();
@@ -366,7 +367,7 @@ int main(int argc, char **argv)
     tf_broadcast.sendTransform(tf::StampedTransform(map_to_odom, state_msg.header.stamp, "map", "odom"));
     
     // odom -> base_link transformation (for visualization, matching what the EKF filter will do)
-    static tf::Transform odom_to_base = tf::Transform(tf::createQuaternionFromRPY(0, 0, state[2]), tf::Vector3(state[0], state[1], 0.0));
+    static tf::Transform odom_to_base = tf::Transform(tf::createQuaternionFromRPY(0, 0, state[2]), tf::Vector3(state[0], state[1], -draught));
     tf_broadcast.sendTransform(tf::StampedTransform(odom_to_base, state_msg.header.stamp, "odom", base_link_frame));
 
     loop_rate.sleep();

@@ -177,7 +177,6 @@ add_executable(command_node             src/command_node.cpp               src/C
 add_executable(csv_path_node            src/csv_path_node.cpp              src/CsvPath.cpp      src/Path.cpp)
 add_executable(pose_path_node           src/pose_path_node.cpp             src/PosePath.cpp     src/Path.cpp)
 add_executable(mpc_node                 src/mpc_node.cpp                   src/MPC.cpp)
-add_executable(sensor_node              src/sensor_node.cpp)
 add_executable(pid_node                 src/pid_node.cpp)
 add_executable(serial_node              src/serial_node.cpp)            
 add_executable(sim_node                 src/sim_node.cpp                   src/Sim.cpp)       
@@ -193,7 +192,6 @@ add_executable(swarm_node               src/swarm_node.cxx                  src/
 ## Add cmake target dependencies of the executable
 ## same as for the library above
 add_dependencies(serial_node                 ${PROJECT_NAME}_generate_messages_cpp)
-add_dependencies(sensor_node                 ${PROJECT_NAME}_generate_messages_cpp)
 add_dependencies(pid_node                    ${PROJECT_NAME}_generate_messages_cpp)
 add_dependencies(mpc_node                    ${PROJECT_NAME}_generate_messages_cpp acado_mpc)
 add_dependencies(command_node                ${PROJECT_NAME}_generate_messages_cpp)
@@ -203,7 +201,6 @@ add_dependencies(swarm_node                  ${PROJECT_NAME}_generate_messages_c
 ## Specify libraries to link a library or executable target against
 target_link_libraries(serial_node                ${catkin_LIBRARIES})
 target_link_libraries(mpc_node                   ${catkin_LIBRARIES} acado_mpc)
-target_link_libraries(sensor_node                ${catkin_LIBRARIES})
 target_link_libraries(pid_node                   ${catkin_LIBRARIES})
 target_link_libraries(sim_node                   ${catkin_LIBRARIES})
 target_link_libraries(command_node               ${catkin_LIBRARIES})
@@ -230,7 +227,6 @@ install(
   TARGETS
   acado_mpc
   command_node
-  sensor_node
   pid_node
   csv_path_node
   mpc_node

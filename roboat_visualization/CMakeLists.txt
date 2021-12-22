@@ -21,8 +21,6 @@ find_package(catkin REQUIRED COMPONENTS
         xacro
         cv_bridge
         message_filters
-        # pcl library
-        pcl_conversions
         # msgs
         std_msgs
         sensor_msgs
@@ -34,7 +32,6 @@ find_package(catkin REQUIRED COMPONENTS
         roboat_msgs
         )
 
-find_package(PCL REQUIRED)
 find_package(OpenMP REQUIRED)
 find_package(OpenCV REQUIRED)
 
@@ -45,7 +42,7 @@ find_package(OpenCV REQUIRED)
 catkin_package(
         INCLUDE_DIRS
         include
-        DEPENDS PCL GTSAM
+        # DEPENDS
         CATKIN_DEPENDS
         std_msgs
         nav_msgs
@@ -58,7 +55,6 @@ catkin_package(
 include_directories(
         include
         ${catkin_INCLUDE_DIRS}
-        ${PCL_INCLUDE_DIRS}
         ${OpenCV_INCLUDE_DIRS}
         ${catkin_INCLUDE_DIRS}
 )
@@ -66,7 +62,6 @@ include_directories(
 # link directories
 link_directories(
         include
-        ${PCL_LIBRARY_DIRS}
         ${OpenCV_LIBRARY_DIRS}
 )
 

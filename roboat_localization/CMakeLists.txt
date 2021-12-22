@@ -21,8 +21,6 @@ find_package(catkin REQUIRED COMPONENTS
         xacro
         cv_bridge
         message_filters
-        # pcl library
-        pcl_conversions
         # msgs
         std_msgs
         sensor_msgs
@@ -32,9 +30,12 @@ find_package(catkin REQUIRED COMPONENTS
         # roboat
         roboat_core
         roboat_msgs
+        # sensors
+        marvelmind_nav
         )
 
-find_package(PCL REQUIRED)
+## System dependencies are found with CMake's conventions
+find_package (Eigen3 REQUIRED)
 find_package(OpenMP REQUIRED)
 find_package(OpenCV REQUIRED)
 
@@ -45,29 +46,30 @@ find_package(OpenCV REQUIRED)
 catkin_package(
         INCLUDE_DIRS
         include
-        DEPENDS PCL GTSAM
+        # DEPENDS 
         CATKIN_DEPENDS
         std_msgs
         nav_msgs
         geometry_msgs
         sensor_msgs
         visualization_msgs
+        roboat_core
+        marvelmind_nav
 )
 
 # include directories
 include_directories(
         include
         ${catkin_INCLUDE_DIRS}
-        ${PCL_INCLUDE_DIRS}
         ${OpenCV_INCLUDE_DIRS}
-        ${catkin_INCLUDE_DIRS}
+        ${EIGEN3_INCLUDE_DIRS}
 )
 
 # link directories
 link_directories(
         include
-        ${PCL_LIBRARY_DIRS}
         ${OpenCV_LIBRARY_DIRS}
+        ${EIGEN3_INCLUDE_DIRS}
 )
 
 ###########
@@ -75,8 +77,22 @@ link_directories(
 ###########
 
 # Data Modify
-add_executable(data_filter_node src/dataFilter.cpp)
-target_link_libraries(data_filter_node ${catkin_LIBRARIES} ${PCL_LIBRARIES} ${OpenCV_LIBRARIES})
+add_executable(data_filter_node  src/data_filter_node.cxx)
+target_link_libraries(data_filter_node  ${catkin_LIBRARIES})
+
+add_executable(sensor_node  src/sensor_node.cxx)
+add_dependencies(sensor_node  ${catkin_EXPORTED_TARGETS})
+target_link_libraries(sensor_node  ${catkin_LIBRARIES})
+
+
+## Mark executables and/or libraries for installation
+install(
+  TARGETS
+  sensor_node
+  ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+  LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+  RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
+)
 
 # Mark cpp header files for installation
 install(DIRECTORY include/${PROJECT_NAME}/

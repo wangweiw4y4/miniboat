@@ -11,7 +11,7 @@
 #include <message_filters/synchronizer.h>
 #include <message_filters/sync_policies/approximate_time.h>
 
-#include <pcl/point_cloud.h>
+// #include <pcl/point_cloud.h>
 
 #include <utility>
 #include <vector>

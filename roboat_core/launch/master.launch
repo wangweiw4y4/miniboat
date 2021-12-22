@@ -4,7 +4,6 @@
 
     <arg name="sim_node"                         default="false"/>
     <arg name="serial_node"                      default="true"/>
-    <arg name="sensor_node"                      default="true"/>
     <arg name="csv_path_node"                    default="false"/>
     <arg name="mpc_node"                         default="true"/>
     <arg name="command_node"                     default="true"/>
@@ -28,7 +27,6 @@
     <!-- INCLUDE FILES AND NODES -->
 
     <node if="$(arg sim_node)"                 name="sim_node"                pkg="roboat_core"       type="sim_node"           output="screen"/>
-    <node if="$(arg sensor_node)"              name="sensor_node"             pkg="roboat_core"       type="sensor_node"        output="screen"/>  
     <node if="$(arg serial_node)"              name="serial_node"             pkg="roboat_core"       type="serial_node"/>
     <node if="$(arg mpc_node)"                 name="mpc_node"                pkg="roboat_core"       type="mpc_node"           output="screen"/>
     <node if="$(arg command_node)"             name="command_node"            pkg="roboat_core"       type="command_node"       output="screen"/>

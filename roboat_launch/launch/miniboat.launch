@@ -15,7 +15,6 @@
         <include file="$(find roboat_core)/launch/master.launch">
             <arg name="sim_node"            value="false"/>
             <arg name="serial_node"         value="true"/>
-            <arg name="sensor_node"         value="true"/>
             <arg name="csv_path_node"       value="false"/>
             <arg name="mpc_node"            value="true"/>
             <arg name="command_node"        value="true"/>
@@ -44,7 +43,7 @@
 
         <include file="$(find roboat_localization)/launch/localization.launch" >
             <arg name="id"                  value="$(arg id)"/>
-            <arg name="run_efk"             value="$(arg use_ekf)"/>
+            <arg name="run_ekf"             value="$(arg use_ekf)"/>
         </include>
 
     </group>

@@ -1,6 +1,6 @@
 <launch>
     <arg name="id"                  default="roboat"/>
-    <arg name="run_efk"             default="false"/>
+    <arg name="run_ekf"             default="false"/>
     
     <!--- Robot State TF -->
     <include file="$(find roboat_localization)/launch/robot_state_publisher.launch">
@@ -8,14 +8,14 @@
     </include>
 
     <!--  Data filter  & EKF -->
-    <include if="$(arg run_efk)" file="$(find roboat_localization)/launch/data_filter.launch">
+    <include if="$(arg run_ekf)" file="$(find roboat_localization)/launch/data_filter.launch">
         <arg name="id"      value="$(arg id)"/>
     </include>
-    <include if="$(arg run_efk)" file="$(find roboat_localization)/launch/efk.launch">
+    <include if="$(arg run_ekf)" file="$(find roboat_localization)/launch/ekf.launch">
         <arg name="id"      value="$(arg id)"/>
     </include>
 
-    <!-- if not running ekf, sensor_node needs to be run to process the raw sensor data and publish state -->
-
+    <!-- If not running EKF, executes directly the sensor node to determine miniboat position from beacons -->
+    <node if="$(eval not arg('run_ekf'))"  name="sensor_node"  pkg="roboat_localization"  type="sensor_node"  output="screen"/>  
 
 </launch>

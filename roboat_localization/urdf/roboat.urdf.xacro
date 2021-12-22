@@ -20,14 +20,7 @@
         <color rgba="0.15 0.15 0.15 1.0"/>
     </material>
 
-    <link name="base_link_${id}"/>
-    <joint name="base_link_joint_${id}" type="fixed">
-        <parent link="base_link_${id}"/>
-        <child link="chassis_link_${id}"/>
-        <origin xyz="0 0 0.5" rpy="0 0 0"/>
-    </joint>
-
-    <link name="chassis_link_${id}">
+    <link name="base_link_${id}">
         <collision>
             <origin xyz="0 0 0.0"/>
             <geometry>
@@ -42,35 +35,35 @@
         </visual>
         <inertial>
             <!-- Center of mass -->
-            <origin xyz="0 0 0.7" rpy="0 0 0"/>
-            <mass value="1300.523"/>
-            <!-- Moments of inertia: ( chassis without wheels ) -->
+            <origin xyz="0 0 0.05" rpy="0 0 0"/>
+            <mass value="0.6"/>
+            <!-- Moments of inertia -->
             <inertia
-                    ixx="10.3136" ixy="-10.0008" ixz="10.0164"
-                    iyy="10.3922" iyz="-10.0009"
-                    izz="10.4485"/>
+                    ixx="0.009" ixy="0.0" ixz="0.0"
+                    iyy="0.009" iyz="0.0"
+                    izz="0.006"/>
         </inertial>
     </link>
 
     <link name="imu_link_${id}"/>
     <joint name="imu_joint_${id}" type="fixed">
-        <parent link="chassis_link_${id}"/>
+        <parent link="base_link_${id}"/>
         <child link="imu_link_${id}"/>
-        <origin xyz="1.8 0 1.2" rpy="0 0 0"/>
+        <origin xyz="0.0 0.0 0.04" rpy="0 0 0"/>
     </joint>
 
-    <link name="navsat_link_${id}"/>
-    <joint name="navsat_joint_${id}" type="fixed">
-        <parent link="chassis_link_${id}"/>
-        <child link="navsat_link_${id}"/>
-        <origin xyz="1.8 -0.45 1.2" rpy="0 0 0"/>
+    <link name="beacon1_link_${id}"/>
+    <joint name="beacon1_joint_${id}" type="fixed">
+        <parent link="base_link_${id}"/>
+        <child link="beacon1_link_${id}"/>
+        <origin xyz="0.09 0.09 0.09" rpy="0 0 0"/>
     </joint>
 
-    <link name="navsat2_link_${id}"/>
-    <joint name="navsat2_joint_${id}" type="fixed">
-        <parent link="chassis_link_${id}"/>
-        <child link="navsat2_link_${id}"/>
-        <origin xyz="-1.8 0.45 1.2" rpy="0 0 0"/>
+    <link name="beacon2_link_${id}"/>
+    <joint name="beacon2_joint_${id}" type="fixed">
+        <parent link="base_link_${id}"/>
+        <child link="beacon2_link_${id}"/>
+        <origin xyz="-0.09 -0.09 0.09" rpy="0 0 0"/>
     </joint>
 
 </robot>
