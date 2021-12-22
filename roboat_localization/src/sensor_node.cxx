@@ -267,7 +267,7 @@ int main(int argc, char **argv)
   ros::Publisher pose_beaconIMU_pub = n.advertise<geometry_msgs::PoseStamped>("pose_beaconIMU", 10); 
   ros::Publisher twist_beaconIMU_pub = n.advertise<geometry_msgs::TwistStamped>("twist_beaconIMU", 10); 
 
-  ros::Publisher state_pub = n.advertise<nav_msgs::Odometry>("state", 10);
+  ros::Publisher state_pub = n.advertise<nav_msgs::Odometry>("odom/filtered", 10);
 
 
   ros::Subscriber subIMURaw = n.subscribe(HEDGE_IMU_RAW_TOPIC_NAME, 1000, IMURawCallback);

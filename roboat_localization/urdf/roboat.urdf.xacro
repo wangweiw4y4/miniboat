@@ -20,7 +20,10 @@
         <color rgba="0.15 0.15 0.15 1.0"/>
     </material>
 
-    <link name="base_link_${id}">
+    <link name="base_link_${id}"/>
+
+    <!-- KDL does not support a base_link with an inertia. As workaround, we add an extra dummy link -->
+    <link name="chassis_link_${id}">
         <collision>
             <origin xyz="0 0 0.0"/>
             <geometry>
@@ -44,7 +47,13 @@
                     izz="0.006"/>
         </inertial>
     </link>
+    <joint name="chassis_joint_${id}" type="fixed">
+        <parent link="base_link_${id}"/>
+        <child link="chassis_link_${id}"/>
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+    </joint>
 
+    <!-- sensor joints -->
     <link name="imu_link_${id}"/>
     <joint name="imu_joint_${id}" type="fixed">
         <parent link="base_link_${id}"/>

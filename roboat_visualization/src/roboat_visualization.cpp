@@ -29,7 +29,7 @@ void RoboatVisualization::initialize(ros::NodeHandle &nh, std::string id)
 
   sub_priority = nh.subscribe(ns+"thrust_state", 1, &RoboatVisualization::thrustStateCallback, this);
   sub_force = nh.subscribe(ns+"force", 1, &RoboatVisualization::forceCallback, this);
-  current_odometry = nh.subscribe(ns+"state", 1, &RoboatVisualization::odometryCallback, this);
+  current_odometry = nh.subscribe(ns+"odom/filtered", 1, &RoboatVisualization::odometryCallback, this);
 
   path_update_timer = nh.createTimer(ros::Duration(update_rate), &RoboatVisualization::pathHandler, this);
 }

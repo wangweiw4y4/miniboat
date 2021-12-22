@@ -288,7 +288,7 @@ MPC::MPC(ros::NodeHandle n)
 //  twist_sub = n.subscribe("filtered_twist", 1, &MPC::twistCallback, this);
 
     //subscriber for sensor state from microcontroller
-    ros::Subscriber state_sub = n.subscribe("state", 1, &MPC::stateCallback, this); 
+    ros::Subscriber state_sub = n.subscribe("odom/filtered", 1, &MPC::stateCallback, this); 
 
 
   n.param("system_dynamics/step", step, 0.1);
