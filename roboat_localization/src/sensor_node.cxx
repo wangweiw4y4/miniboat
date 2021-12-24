@@ -267,7 +267,7 @@ int main(int argc, char **argv)
   ros::Publisher pose_beaconIMU_pub = n.advertise<geometry_msgs::PoseStamped>("pose_beaconIMU", 10); 
   ros::Publisher twist_beaconIMU_pub = n.advertise<geometry_msgs::TwistStamped>("twist_beaconIMU", 10); 
 
-  ros::Publisher state_pub = n.advertise<nav_msgs::Odometry>("odom/filtered", 10);
+  ros::Publisher state_pub = n.advertise<nav_msgs::Odometry>("odometry/filtered", 10);
 
 
   ros::Subscriber subIMURaw = n.subscribe(HEDGE_IMU_RAW_TOPIC_NAME, 1000, IMURawCallback);
@@ -363,12 +363,12 @@ int main(int argc, char **argv)
 
     // map -> odom static transformation (both are the same)
     static tf::TransformBroadcaster tf_broadcast;
-    static tf::Transform map_to_odom = tf::Transform(tf::createQuaternionFromRPY(0, 0, 0), tf::Vector3(0, 0, 0));
-    tf_broadcast.sendTransform(tf::StampedTransform(map_to_odom, state_msg.header.stamp, "map", "odom"));
+    // static tf::Transform map_to_odom = tf::Transform(tf::createQuaternionFromRPY(0, 0, 0), tf::Vector3(0, 0, 0));
+    // tf_broadcast.sendTransform(tf::StampedTransform(map_to_odom, ros::Time::now(), "map", "odom"));
     
     // odom -> base_link transformation (for visualization, matching what the EKF filter will do)
     static tf::Transform odom_to_base = tf::Transform(tf::createQuaternionFromRPY(0, 0, state[2]), tf::Vector3(state[0], state[1], -draught));
-    tf_broadcast.sendTransform(tf::StampedTransform(odom_to_base, state_msg.header.stamp, "odom", base_link_frame));
+    tf_broadcast.sendTransform(tf::StampedTransform(odom_to_base, ros::Time::now(), "odom", base_link_frame));
 
     loop_rate.sleep();
   }

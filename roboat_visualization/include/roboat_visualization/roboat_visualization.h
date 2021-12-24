@@ -6,6 +6,7 @@
 
 #include <tf/tf.h>
 #include <tf/transform_listener.h>
+#include <tf/transform_broadcaster.h>
 
 #include <nav_msgs/Path.h>
 #include <nav_msgs/Odometry.h>

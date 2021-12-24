@@ -1,8 +1,9 @@
 <launch>
     <arg name="id"                  default="roboat"/>
-    <arg name="run_ekf"             default="false"/>
+    <arg name="run_ekf"             default="true"/>
     
     <!--- Robot State TF -->
+    <!-- <node pkg="tf" type="static_transform_publisher" name="tf_map_odom" args="0 0 0 0 0 0 1 map odom 100" /> -->
     <include file="$(find roboat_localization)/launch/robot_state_publisher.launch">
         <arg name="id" value="$(arg id)" />
     </include>

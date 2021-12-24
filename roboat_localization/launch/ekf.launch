@@ -5,15 +5,14 @@
     <node pkg="robot_localization" type="ekf_localization_node" name="ekf_localization_node" respawn="true">
         <rosparam command="load" file="$(find roboat_localization)/config/kalman_filter.yaml" />
         <!-- updates base_link_frame to include roboat_id, to avoid conflicts with other roboats in the network -->
-        <param name="base_link_frame" value="base_lin_$(arg id)"/>
+        <param name="base_link_frame" value="base_link_$(arg id)"/>
+        
         <!-- In -->
-        <remap from="data/imu"          to="roboat_filter/filtered/imu" />
-        <!-- <remap from="data/dvl"          to="roboat_filter/filtered/dvl" /> -->
-        <remap from="data/gps"          to="roboat_filter/filtered/gps" />
-        <remap from="data/gps2"          to="roboat_filter/filtered/gps2" />
-        <remap from="data/heading"      to="roboat_filter/filtered/heading" />
-        <!-- Out -->
-        <remap from="accel/filtered"    to="roboat_localization/odometry_ekf/accel_filtered" />
-        <remap from="odometry/filtered" to="roboat_localization/odometry_ekf/odometry_filtered" />
+        <remap from="data/imu0"             to="data_filter/imu0" />
+        <remap from="data/imu1"             to="data_filter/imu1" />
+        <remap from="data/paired_beacons"   to="data_filter/paired_beacons" />
+        <!-- Out (skipped, we use default topic names)-->
+        <!-- <remap from="accel/filtered"    to="roboat_localization/odometry_ekf/accel_filtered" /> -->
+        <!-- <remap from="odometry/filtered" to="roboat_localization/odometry_ekf/odometry_filtered" /> -->
     </node>
 </launch>

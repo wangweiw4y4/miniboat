@@ -1,14 +1,14 @@
 // Copyright (c) 2021. MIT & AMS institute - Roboat.
-#include <ros/ros.h>
-
-
+#include "roboat_localization/data_filter.h"
 
 int main(int argc, char **argv) {
-  ros::init(argc, argv, "roboat_filter");
+  ros::init(argc, argv, "data_filter");
 
-  ROS_INFO("\033[1;32m----> roboat_filter: Data Filter.\033[0m");
+  DataFilter DF;
 
-  ros::MultiThreadedSpinner spinner(5);
+  ROS_INFO("\033[1;32m----> roboat_localization: data filter.\033[0m");
+
+  ros::MultiThreadedSpinner spinner(4);
   spinner.spin();
 
   return 0;

@@ -20,6 +20,7 @@
         <color rgba="0.15 0.15 0.15 1.0"/>
     </material>
 
+    <!-- miniboat root link -->
     <link name="base_link_${id}"/>
 
     <!-- KDL does not support a base_link with an inertia. As workaround, we add an extra dummy link -->
@@ -61,18 +62,11 @@
         <origin xyz="0.0 0.0 0.04" rpy="0 0 0"/>
     </joint>
 
-    <link name="beacon1_link_${id}"/>
+    <link name="dual_beacon_link_${id}"/>
     <joint name="beacon1_joint_${id}" type="fixed">
         <parent link="base_link_${id}"/>
-        <child link="beacon1_link_${id}"/>
-        <origin xyz="0.09 0.09 0.09" rpy="0 0 0"/>
-    </joint>
-
-    <link name="beacon2_link_${id}"/>
-    <joint name="beacon2_joint_${id}" type="fixed">
-        <parent link="base_link_${id}"/>
-        <child link="beacon2_link_${id}"/>
-        <origin xyz="-0.09 -0.09 0.09" rpy="0 0 0"/>
+        <child link="dual_beacon_link_${id}"/>
+        <origin xyz="0.0 0.0 0.09" rpy="0 0 ${135*PI/180.0}"/>
     </joint>
 
 </robot>

@@ -13,7 +13,7 @@ int main(int argc, char** argv)
   nh.getParam("swarm/boat_ids",boat_ids);
   
   std::vector<RoboatVisualization> RV(boat_ids.size());
-  for (int i = 0; i<RV.size(); i++) {
+  for (uint i = 0; i<RV.size(); i++) {
     RV[i].initialize(nh,boat_ids[i]);
   }
 

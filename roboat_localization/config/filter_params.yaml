@@ -1,26 +1,21 @@
 # Params
 roboat_filter:
 
-  # Extrinsics for IMU
-  # extrinsicRot: [-1,  0,  0,
-  #                 0,  1,  0,
-  #                 0,  0, -1]
-  # extrinsicRPY: [ 0,  1,  0,
-  #                -1,  0,  0,
-  #                 0,  0,  1]
-  extrinsicRot: [ 1,  0,  0,
-                  0,  1,  0,
-                  0,  0,  1]
-  extrinsicRPY: [ 1,  0,  0,
-                  0,  1,  0,
-                  0,  0,  1]
+  # # GPS covariance params
+  # minGPSCovTh: 0.000001
+  # maxGPSCovTh: 0.9
 
-  # GPS covariance params
-  minGPSCovTh: 0.000001
-  maxGPSCovTh: 0.9
-
-  # Dual GPS params
-  # The GPS's are 5.1 degrees off from the x axis:
+  # Dual-beacon params
+  hedge_ref_pos_cov: 0.000001    #reference position covariance value (when not computed)
+  hedge_ref_acc_cov: 0.000001    #reference linear acceleration covariance value (when not computed)
+  hedge_ref_gyr_cov: 0.000001    #reference angular velocity covariance value (when not computed)
+  hedge_ref_compass_cov: 0.000001    #reference compasss orientation covariance value (when not computed)
+  
+  # orientation of each IMU might be different
+  # dualhedge_heading_offset: 135             #(deg)
+  
+  # Dual Beacon params
+  # The beacon antennas are 5.1 degrees off from the x axis:
   #
   #   gps
   #    |  17.0cm
@@ -29,7 +24,7 @@ roboat_filter:
   #                   360cm          |
   #                                  | 17.0cm
   #                                 gps
-
-  headingOffset: 15  # Hand tuned to align point cloud with earth. This is a combination of the gps offset and cloud offset.
-  gpsBaseline: 3.66
+  # 
+  # headingOffset: 15  # Hand tuned to align point cloud with earth. This is a combination of the gps offset and cloud offset.
+  # gpsBaseline: 3.66
 

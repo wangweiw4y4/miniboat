@@ -21,71 +21,50 @@ history_length: 4.0
 # -------------------------------------
 # IMU:
 # -------------------------------------
-imu0: data/imu
+# bno055:
+imu0: data/imu0
 imu0_config: [false, false, false,
-              true,  true,  false,
+              false, false, false,
               false, false, false,
               true,  true,  true,
-              false, false, false]
+              true,  true,  true]
 imu0_differential: false
 imu0_queue_size: 100
 imu0_remove_gravitational_acceleration: true
 
-# -------------------------------------
-# Odometry (From DVL):
-# -------------------------------------
-odom0: data/dvl
-odom0_config: [false, false, true,
+# paired Hedge beacons:
+imu1: data/imu1
+imu1_config: [false, false, false,
+              false, false, false,
               false, false, false,
               true,  true,  true,
-              false, false, false,
-              false, false, false]
-odom0_differential: false
-odom0_queue_size: 10
+              true,  true,  true]
+imu1_differential: false
+imu1_queue_size: 100
+imu1_remove_gravitational_acceleration: true
 
 # -------------------------------------
-# Odometry (From GPS): 7.5hz
+# Odometry 
 # -------------------------------------
-odom1: data/gps
-odom1_config: [true,  true,  true,
-               false, false, false,
-               false, false, false,
-               false, false, false,
-               false, false, false]
-odom1_differential: false
-odom1_queue_size: 10
-
-# -------------------------------------
-# Odometry (From GPS):  7.5hz
-# -------------------------------------
-odom2: data/gps2
-odom2_config: [false, false, false,
-               true,  true,  true,
-               false, false, false,
-               false, false, false,
-               false, false, false]
-odom2_differential: true
-odom2_queue_size: 10
-
-# -------------------------------------
-# Heading:
-# -------------------------------------
-odom3: data/heading
-odom3_config: [false, false, false,
+# paired Hedge beacons:
+odom0: data/paired_beacons
+odom0_config: [true,  true,  true,
                false, false, true,
                false, false, false,
                false, false, false,
                false, false, false]
-odom3_differential: false
-odom3_queue_size: 10
+odom0_differential: false
+odom0_queue_size: 10
 
-initial_estimate_covariance: [10,   0,    0,    0,    0,    0,    0,    0,    0,    0,     0,     0,     0,    0,    0,
-                              0,    10,   0,    0,    0,    0,    0,    0,    0,    0,     0,     0,     0,    0,    0,
-                              0,    0,    3,    0,    0,    0,    0,    0,    0,    0,     0,     0,     0,    0,    0,
+
+# -------------------------------------
+initial_estimate_covariance: [1,    0,    0,    0,    0,    0,    0,    0,    0,    0,     0,     0,     0,    0,    0,
+                              0,    1,    0,    0,    0,    0,    0,    0,    0,    0,     0,     0,     0,    0,    0,
+                              0,    0,    1,    0,    0,    0,    0,    0,    0,    0,     0,     0,     0,    0,    0,
                               0,    0,    0,    1,    0,    0,    0,    0,    0,    0,     0,     0,     0,    0,    0,
                               0,    0,    0,    0,    1,    0,    0,    0,    0,    0,     0,     0,     0,    0,    0,
                               0,    0,    0,    0,    0,    1,    0,    0,    0,    0,     0,     0,     0,    0,    0,
-                              0,    0,    0,    0,    0,    0,    0.3,  0,    0,    0,     0,     0,     0,    0,    0,
+                              0,    0,    0,    0,    0,    0,    1,    0,    0,    0,     0,     0,     0,    0,    0,
                               0,    0,    0,    0,    0,    0,    0,    1,    0,    0,     0,     0,     0,    0,    0,
                               0,    0,    0,    0,    0,    0,    0,    0,    1,    0,     0,     0,     0,    0,    0,
                               0,    0,    0,    0,    0,    0,    0,    0,    0,    1,     0,     0,     0,    0,    0,

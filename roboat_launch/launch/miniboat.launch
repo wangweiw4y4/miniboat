@@ -35,8 +35,8 @@
             <arg name = "use_temperature" value="true" /> 
         </include>
         
-        <include file="$(find marvelmind_nav)/launch/beacon.launch">
-        </include>
+        <!-- paired beacons; arguments are "serial port & baudrate" -->
+        <node pkg="marvelmind_nav" type="hedge_rcv_bin" name="hedge_rcv_bin" args="/dev/ttyACM0 500000" output="screen"/>
 
         <include file="$(find pid)/launch/headingpid.launch">
         </include>

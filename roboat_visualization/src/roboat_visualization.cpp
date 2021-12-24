@@ -29,7 +29,7 @@ void RoboatVisualization::initialize(ros::NodeHandle &nh, std::string id)
 
   sub_priority = nh.subscribe(ns+"thrust_state", 1, &RoboatVisualization::thrustStateCallback, this);
   sub_force = nh.subscribe(ns+"force", 1, &RoboatVisualization::forceCallback, this);
-  current_odometry = nh.subscribe(ns+"odom/filtered", 1, &RoboatVisualization::odometryCallback, this);
+  current_odometry = nh.subscribe(ns+"odometry/filtered", 1, &RoboatVisualization::odometryCallback, this);
 
   path_update_timer = nh.createTimer(ros::Duration(update_rate), &RoboatVisualization::pathHandler, this);
 }
@@ -58,6 +58,13 @@ void RoboatVisualization::forceCallback(const roboat_core::Force& msg)
 
 void RoboatVisualization::pathHandler(const ros::TimerEvent& event)
 {
+  // map -> odom static transformation (both are the same)
+  static tf::TransformBroadcaster tf_broadcast;
+  static tf::Transform map_to_odom = tf::Transform(tf::createQuaternionFromRPY(0, 0, 0), tf::Vector3(0, 0, 0));
+  tf_broadcast.sendTransform(tf::StampedTransform(map_to_odom, ros::Time::now(), "map", "odom"));
+
+  /*WARNING: for the transforms to work, time need to be synchronized between the server and the miniboats, 
+      otherwise lister will fail and no miniboat is plotted */
   static tf::TransformListener listener;
   static tf::StampedTransform transform;
   try
@@ -65,7 +72,8 @@ void RoboatVisualization::pathHandler(const ros::TimerEvent& event)
     listener.lookupTransform("map", base_link_frame_, ros::Time(0), transform);
   }
   catch (tf::TransformException ex)
-  { /*ROS_ERROR("Transfrom Failure.");*/
+  { 
+    // ROS_INFO("Transfrom missing: %s",base_link_frame_.c_str());
     return;
   }
 

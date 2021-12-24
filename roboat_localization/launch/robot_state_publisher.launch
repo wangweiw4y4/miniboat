@@ -3,5 +3,9 @@
     
     <param name="robot_description" command="$(find xacro)/xacro --inorder '$(find roboat_localization)/urdf/roboat.urdf.xacro' id:=$(arg id)" />
 
-    <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher" respawn="true" />
+    <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher" respawn="true">
+        <param name="publish_frequency"      value="10"/>
+        <param name="use_tf_static"          value="false"/>
+    </node>
+    
 </launch>

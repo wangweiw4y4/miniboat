@@ -77,18 +77,23 @@ link_directories(
 ###########
 
 # Data Modify
-add_executable(data_filter_node  src/data_filter_node.cxx)
+add_executable(data_filter_node  src/data_filter_node.cxx  src/data_filter.cpp)
 target_link_libraries(data_filter_node  ${catkin_LIBRARIES})
 
 add_executable(sensor_node  src/sensor_node.cxx)
 add_dependencies(sensor_node  ${catkin_EXPORTED_TARGETS})
 target_link_libraries(sensor_node  ${catkin_LIBRARIES})
 
+add_executable(test_node  src/test_node.cxx)
+add_dependencies(test_node  ${catkin_EXPORTED_TARGETS})
+target_link_libraries(test_node  ${catkin_LIBRARIES})
 
 ## Mark executables and/or libraries for installation
 install(
   TARGETS
+  data_filter_node
   sensor_node
+  test_node
   ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
   LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}

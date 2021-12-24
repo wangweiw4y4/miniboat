@@ -64,8 +64,8 @@ void SwarmState::initialize(ros::NodeHandle &nh, std::string id, std::vector<dou
 {
   nh_ = nh;
   state_ = state;
-  //subscribe to the topic
-  std::string topic = "/" +  id + "/state"; 
+  //subscribe to the topic (keep "/" apart so topic name is relative as in the rest of code)
+  std::string topic = "/" +  id + "/" + "odometry/filtered"; 
   // ROS_INFO("rostopic subscribed: %s", topic.c_str());
   state_sub_ = nh_.subscribe(topic, 1, &SwarmState::stateCallback, this);
   return;
