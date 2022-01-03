@@ -1,4 +1,3 @@
-
 #include "ros/ros.h"
 #include "std_msgs/String.h"
 #include "marvelmind_nav/hedge_pos.h"
@@ -92,52 +91,51 @@ std::vector<double> state(6);
 
 void hedgePosAngCallback(const marvelmind_nav::hedge_pos_ang& hedge_pos_msg)
 {				
-				twobeacon_x = hedge_pos_msg.x_m;
-				twobeacon_y = hedge_pos_msg.y_m;
-				twobeacon_heading = hedge_pos_msg.angle +135;
-				if (twobeacon_heading>180)
-				twobeacon_heading = twobeacon_heading-360;
-				twobeacon_heading = twobeacon_heading*PI/180.0;
+  twobeacon_x = hedge_pos_msg.x_m;
+  twobeacon_y = hedge_pos_msg.y_m;
+  twobeacon_heading = hedge_pos_msg.angle +135;
+  if (twobeacon_heading>180)
+    twobeacon_heading = twobeacon_heading-360;
+  twobeacon_heading = twobeacon_heading*PI/180.0;
+  
+  // ROS_INFO("Hedgehog data: Address= %d, timestamp= %d, X=%.3f  Y= %.3f  Z=%.3f  Angle: %.1f  flags=%d", 	
+  //   (int) hedge_pos_msg.address, 
+  //   (int) hedge_pos_msg.timestamp_ms, 
+  //   (float) hedge_pos_msg.x_m, (float) hedge_pos_msg.y_m, (float) hedge_pos_msg.z_m,
+  //   twobeacon_heading*180/PI,  
+  //   (int) hedge_pos_msg.flags);		
 				
-				        ROS_INFO("Hedgehog data: Address= %d, timestamp= %d, X=%.3f  Y= %.3f  Z=%.3f  Angle: %.1f  flags=%d", 	
-				(int) hedge_pos_msg.address, 
-				(int) hedge_pos_msg.timestamp_ms, 
-				(float) hedge_pos_msg.x_m, (float) hedge_pos_msg.y_m, (float) hedge_pos_msg.z_m,
-				twobeacon_heading*180/PI,  
-				(int) hedge_pos_msg.flags);
-				
-				
-/*				
+  /*				
   if ((hedge_pos_msg.flags&(1<<0))==0)
-    {				
-      showRvizObject(hedge_pos_msg.address,hedge_pos_msg.x_m, hedge_pos_msg.y_m, hedge_pos_msg.z_m, objHedge);
-    }  
-    */
+  {				
+    showRvizObject(hedge_pos_msg.address,hedge_pos_msg.x_m, hedge_pos_msg.y_m, hedge_pos_msg.z_m, objHedge);
+  }  
+  */
 }
+
 void hedgePosCallback(const marvelmind_nav::hedge_pos_a& hedge_pos_msg)
 {
   ROS_INFO("Hedgehog data: Address= %d, timestamp= %d, X=%.3f  Y= %.3f  Z=%.3f  flags=%d", 	
-				(int) hedge_pos_msg.address, 
-				(int) hedge_pos_msg.timestamp_ms, 
-				(float) hedge_pos_msg.x_m, (float) hedge_pos_msg.y_m, (float) hedge_pos_msg.z_m,  
-				(int) hedge_pos_msg.flags);
-				
-				twobeacon_x = hedge_pos_msg.x_m;
-				twobeacon_y = hedge_pos_msg.y_m;
+    (int) hedge_pos_msg.address, 
+    (int) hedge_pos_msg.timestamp_ms, 
+    (float) hedge_pos_msg.x_m, (float) hedge_pos_msg.y_m, (float) hedge_pos_msg.z_m,  
+    (int) hedge_pos_msg.flags);
+    
+  twobeacon_x = hedge_pos_msg.x_m;
+  twobeacon_y = hedge_pos_msg.y_m;
 }
-
 
 
 void bno055callback(const sensor_msgs::Imu::ConstPtr& imu_raw)
 {
-        tf::Matrix3x3 m;
+  tf::Matrix3x3 m;
 
-        m = tf::Matrix3x3(
-        tf::Quaternion(imu_raw->orientation.x, imu_raw->orientation.y, imu_raw->orientation.z, imu_raw->orientation.w));
-        m.getRPY(roll_bno055, pitch_bno055, yaw_bno055);
-        
-        pose_bno055.pose.orientation = imu_raw->orientation;
-        twist_bno055.twist.angular = imu_raw->angular_velocity;
+  m = tf::Matrix3x3(
+  tf::Quaternion(imu_raw->orientation.x, imu_raw->orientation.y, imu_raw->orientation.z, imu_raw->orientation.w));
+  m.getRPY(roll_bno055, pitch_bno055, yaw_bno055);
+  
+  pose_bno055.pose.orientation = imu_raw->orientation;
+  twist_bno055.twist.angular = imu_raw->angular_velocity;
 
 }
 
@@ -151,11 +149,9 @@ void IMURawCallback(const marvelmind_nav::hedge_imu_raw& hedge_imu_raw_msg)
 
 
 // 0.0175 dps/LSB
-   twist_beaconIMU.twist.angular.x = hedge_imu_raw_msg.gyro_x * 0.0175 * PI / 180;
-   twist_beaconIMU.twist.angular.y = -hedge_imu_raw_msg.gyro_y * 0.0175 * PI / 180;
-   twist_beaconIMU.twist.angular.z = -hedge_imu_raw_msg.gyro_z * 0.0175 * PI / 180;
-
-
+  twist_beaconIMU.twist.angular.x = hedge_imu_raw_msg.gyro_x * 0.0175 * PI / 180;
+  twist_beaconIMU.twist.angular.y = -hedge_imu_raw_msg.gyro_y * 0.0175 * PI / 180;
+  twist_beaconIMU.twist.angular.z = -hedge_imu_raw_msg.gyro_z * 0.0175 * PI / 180;
 }
 
 void IMUFusionCallback(const marvelmind_nav::hedge_imu_fusion& hedge_imu_fusion_msg)
@@ -168,82 +164,78 @@ void IMUFusionCallback(const marvelmind_nav::hedge_imu_fusion& hedge_imu_fusion_
 	// 			(float) hedge_imu_fusion_msg.ax, (float) hedge_imu_fusion_msg.ay, (float) hedge_imu_fusion_msg.az);
 
   
-    pose_beaconIMU.header.stamp  =ros::Time::now();
+  pose_beaconIMU.header.stamp  =ros::Time::now();
 
-    pose_beaconIMU.pose.position.x = hedge_imu_fusion_msg.x_m;
-    pose_beaconIMU.pose.position.y = hedge_imu_fusion_msg.y_m; 
-    pose_beaconIMU.pose.position.z = hedge_imu_fusion_msg.z_m; 
+  pose_beaconIMU.pose.position.x = hedge_imu_fusion_msg.x_m;
+  pose_beaconIMU.pose.position.y = hedge_imu_fusion_msg.y_m; 
+  pose_beaconIMU.pose.position.z = hedge_imu_fusion_msg.z_m; 
+
+
+  pose_beaconIMU.pose.orientation.x= hedge_imu_fusion_msg.qx;
+  pose_beaconIMU.pose.orientation.y= hedge_imu_fusion_msg.qy;
+  pose_beaconIMU.pose.orientation.z= hedge_imu_fusion_msg.qz;
+  pose_beaconIMU.pose.orientation.w= hedge_imu_fusion_msg.qw;
   
-	
-    pose_beaconIMU.pose.orientation.x= hedge_imu_fusion_msg.qx;
-    pose_beaconIMU.pose.orientation.y= hedge_imu_fusion_msg.qy;
-    pose_beaconIMU.pose.orientation.z= hedge_imu_fusion_msg.qz;
-    pose_beaconIMU.pose.orientation.w= hedge_imu_fusion_msg.qw;
     
-     
-    orientation_qx= hedge_imu_fusion_msg.qx;
-    orientation_qy= hedge_imu_fusion_msg.qy;
-    orientation_qz= hedge_imu_fusion_msg.qz;
-    orientation_qw= hedge_imu_fusion_msg.qw;
-    tf::Matrix3x3 m;
-    m = tf::Matrix3x3(tf::Quaternion(orientation_qx, orientation_qy, orientation_qz, orientation_qw));
-    m.getRPY(roll_beaconIMU, pitch_beaconIMU, yaw_beaconIMU);
-    yaw_beaconIMU = yaw_beaconIMU*180.0/PI +135;
-    if (yaw_beaconIMU>180)
-    yaw_beaconIMU = yaw_beaconIMU-360;
-    yaw_beaconIMU = yaw_beaconIMU*PI/180.0;
-    
-    /*
-    yaw_beaconIMU = -yaw_beaconIMU;
-    
-         if(BEACONIMU_Calibration_Finish)
-        {
-        	yaw_beaconIMU= yaw_beaconIMU-ANGLE_DRIFT_BEACONIMU;
-         	//ROS_INFO("BEACONIMU yaw drift: %f", ANGLE_DRIFT_BEACONIMU);
-         }
-        else
-        {      ANGLE_DRIFT_BEACONIMU = ANGLE_DRIFT_BEACONIMU+yaw_beaconIMU;
-        			BEACONIMU_ANGLE_Calibration_Count = BEACONIMU_ANGLE_Calibration_Count+1;
-        		   //ROS_INFO("BEACONIMU calibration count: %d", BEACONIMU_ANGLE_Calibration_Count);	 
-        	if(BEACONIMU_ANGLE_Calibration_Count == 200)
-        	{
-        		BEACONIMU_Calibration_Finish=1;
-        	    ANGLE_DRIFT_BEACONIMU = ANGLE_DRIFT_BEACONIMU/200;      
-        	}
-        }
-        if (yaw_beaconIMU>PI)
-        yaw_beaconIMU = yaw_beaconIMU-2*PI;
-        if (yaw_beaconIMU<-PI)
-        yaw_beaconIMU = yaw_beaconIMU + 2*PI;
-    
-    */
-    
-    //ROS_INFO("beaconIMU roll, pitch, yaw:  %f.%f,%f\n", roll_beaconIMU, pitch_beaconIMU, yaw_beaconIMU);
+  orientation_qx= hedge_imu_fusion_msg.qx;
+  orientation_qy= hedge_imu_fusion_msg.qy;
+  orientation_qz= hedge_imu_fusion_msg.qz;
+  orientation_qw= hedge_imu_fusion_msg.qw;
+  tf::Matrix3x3 m;
+  m = tf::Matrix3x3(tf::Quaternion(orientation_qx, orientation_qy, orientation_qz, orientation_qw));
+  m.getRPY(roll_beaconIMU, pitch_beaconIMU, yaw_beaconIMU);
+  yaw_beaconIMU = yaw_beaconIMU*180.0/PI +135;
+  if (yaw_beaconIMU>180)
+  yaw_beaconIMU = yaw_beaconIMU-360;
+  yaw_beaconIMU = yaw_beaconIMU*PI/180.0;
+  
+  /*
+  yaw_beaconIMU = -yaw_beaconIMU;
+  
+  if(BEACONIMU_Calibration_Finish)
+  {
+    yaw_beaconIMU= yaw_beaconIMU-ANGLE_DRIFT_BEACONIMU;
+    //ROS_INFO("BEACONIMU yaw drift: %f", ANGLE_DRIFT_BEACONIMU);
+    }
+  else
+  {      ANGLE_DRIFT_BEACONIMU = ANGLE_DRIFT_BEACONIMU+yaw_beaconIMU;
+        BEACONIMU_ANGLE_Calibration_Count = BEACONIMU_ANGLE_Calibration_Count+1;
+          //ROS_INFO("BEACONIMU calibration count: %d", BEACONIMU_ANGLE_Calibration_Count);	 
+    if(BEACONIMU_ANGLE_Calibration_Count == 200)
+    {
+      BEACONIMU_Calibration_Finish=1;
+        ANGLE_DRIFT_BEACONIMU = ANGLE_DRIFT_BEACONIMU/200;      
+    }
+  }
+  if (yaw_beaconIMU>PI)
+  yaw_beaconIMU = yaw_beaconIMU-2*PI;
+  if (yaw_beaconIMU<-PI)
+  yaw_beaconIMU = yaw_beaconIMU + 2*PI;
+  */
+  
+  //ROS_INFO("beaconIMU roll, pitch, yaw:  %f.%f,%f\n", roll_beaconIMU, pitch_beaconIMU, yaw_beaconIMU);
 
 
-   twist_beaconIMU.header.stamp = ros::Time::now();
-   //twist.header.stamp.sec =  (int) (hedge_imu_fusion_msg.timestamp_ms/1000);
-   //twist.header.stamp.nsec =  (int) ((hedge_imu_fusion_msg.timestamp_ms%1000)*(10^6));	
+  twist_beaconIMU.header.stamp = ros::Time::now();
+  //twist.header.stamp.sec =  (int) (hedge_imu_fusion_msg.timestamp_ms/1000);
+  //twist.header.stamp.nsec =  (int) ((hedge_imu_fusion_msg.timestamp_ms%1000)*(10^6));	
 
-   twist_beaconIMU.twist.linear.x = hedge_imu_fusion_msg.vx;
-   twist_beaconIMU.twist.linear.y = hedge_imu_fusion_msg.vy;
-   twist_beaconIMU.twist.linear.z = hedge_imu_fusion_msg.vz;
+  twist_beaconIMU.twist.linear.x = hedge_imu_fusion_msg.vx;
+  twist_beaconIMU.twist.linear.y = hedge_imu_fusion_msg.vy;
+  twist_beaconIMU.twist.linear.z = hedge_imu_fusion_msg.vz;
    
+  pose_bno055.header.stamp  =ros::Time::now();
 
+  pose_bno055.pose.position.x = hedge_imu_fusion_msg.x_m;
+  pose_bno055.pose.position.y = hedge_imu_fusion_msg.y_m; 
+  pose_bno055.pose.position.z = hedge_imu_fusion_msg.z_m; 
+  pose_bno055.pose.orientation = pose_bno055.pose.orientation;
 
-    pose_bno055.header.stamp  =ros::Time::now();
-
-    pose_bno055.pose.position.x = hedge_imu_fusion_msg.x_m;
-    pose_bno055.pose.position.y = hedge_imu_fusion_msg.y_m; 
-    pose_bno055.pose.position.z = hedge_imu_fusion_msg.z_m; 
-    pose_bno055.pose.orientation = pose_bno055.pose.orientation;
-
-    twist_bno055.header.stamp = ros::Time::now();
-    twist_bno055.twist.linear.x = hedge_imu_fusion_msg.vx;
-    twist_bno055.twist.linear.y = hedge_imu_fusion_msg.vy;
-    twist_bno055.twist.linear.z = hedge_imu_fusion_msg.vz;
-    twist_bno055.twist.angular =  twist_bno055.twist.angular;
-
+  twist_bno055.header.stamp = ros::Time::now();
+  twist_bno055.twist.linear.x = hedge_imu_fusion_msg.vx;
+  twist_bno055.twist.linear.y = hedge_imu_fusion_msg.vy;
+  twist_bno055.twist.linear.z = hedge_imu_fusion_msg.vz;
+  twist_bno055.twist.angular =  twist_bno055.twist.angular;
 }
 
 
@@ -292,9 +284,9 @@ int main(int argc, char **argv)
   
   while (ros::ok())
   {
-       ros::spinOnce();
-/*       
-        if (USE_BNO055 ==1)
+    ros::spinOnce();
+    /*       
+    if (USE_BNO055 ==1)
     {
       state[0] = pose_bno055.pose.position.x;
       state[1] = pose_bno055.pose.position.y;
@@ -312,34 +304,22 @@ int main(int argc, char **argv)
       state[4] = twist_beaconIMU.twist.linear.y;
       state[5] = twist_beaconIMU.twist.angular.z;
      }    
-*/
+    */
 
-      state[0] = twobeacon_x;
-      state[1] = twobeacon_y;
-      state[2] = twobeacon_heading;
-      state[3] = 0;
-      state[4] = 0;
-      state[5] = -twist_bno055.twist.angular.z;
+    state[0] = twobeacon_x;
+    state[1] = twobeacon_y;
+    state[2] = twobeacon_heading;
+    state[3] = 0;
+    state[4] = 0;
+    state[5] = -twist_bno055.twist.angular.z;
       
       
     // ROS_INFO("x,y,heading,u,v,r:  %f,%f,%f,%f,%f,%f\n",  state[0],  state[1],  state[2]*180/PI,  state[3],  state[4], state[5]);
-    geometry_msgs::PoseStamped pose_bno055_msg;
-    pose_bno055_msg = pose_bno055; 
-    pose_bno055_pub.publish(pose_bno055_msg);
+    pose_bno055_pub.publish(pose_bno055);
+    twist_bno055_pub.publish(twist_bno055);
 
-    geometry_msgs::TwistStamped twist_bno055_msg;
-    twist_bno055_msg = twist_bno055; 
-    twist_bno055_pub.publish(twist_bno055_msg);
-
-
-    geometry_msgs::PoseStamped pose_beaconIMU_msg;
-    pose_beaconIMU_msg = pose_beaconIMU; 
-    pose_beaconIMU_pub.publish(pose_beaconIMU_msg);
-
-    geometry_msgs::TwistStamped twist_beaconIMU_msg;
-    twist_beaconIMU_msg = twist_beaconIMU; 
-    twist_beaconIMU_pub.publish(twist_beaconIMU_msg);
-
+    pose_beaconIMU_pub.publish(pose_beaconIMU);
+    twist_beaconIMU_pub.publish(twist_beaconIMU);
 
     //publish state
     // std_msgs::Float64MultiArray state_msg;
@@ -367,12 +347,10 @@ int main(int argc, char **argv)
     // tf_broadcast.sendTransform(tf::StampedTransform(map_to_odom, ros::Time::now(), "map", "odom"));
     
     // odom -> base_link transformation (for visualization, matching what the EKF filter will do)
-    static tf::Transform odom_to_base = tf::Transform(tf::createQuaternionFromRPY(0, 0, state[2]), tf::Vector3(state[0], state[1], -draught));
+    tf::Transform odom_to_base = tf::Transform(tf::createQuaternionFromRPY(0, 0, state[2]), tf::Vector3(state[0], state[1], -draught));
     tf_broadcast.sendTransform(tf::StampedTransform(odom_to_base, ros::Time::now(), "odom", base_link_frame));
 
     loop_rate.sleep();
   }
   return 0;
-
 }
-

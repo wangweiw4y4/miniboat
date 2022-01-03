@@ -43,7 +43,7 @@ class DataFilter {
 
   // configuration parameters
   double hedge_pos_cov_, hedge_acc_cov_, hedge_gyr_cov_, hedge_compass_cov_;
-  // double dualhedge_heading_offset_;
+  double dualhedge_heading_offset_;
 
   void imuHandler(const sensor_msgs::Imu::ConstPtr &imu_raw);
   void pairedHedgeIMUHandler(const marvelmind_nav::hedge_imu_raw &hedge_imu_raw_msg);

@@ -5,26 +5,26 @@ roboat_filter:
   # minGPSCovTh: 0.000001
   # maxGPSCovTh: 0.9
 
-  # Dual-beacon params
+  # Dual Beacon params
   hedge_ref_pos_cov: 0.000001    #reference position covariance value (when not computed)
   hedge_ref_acc_cov: 0.000001    #reference linear acceleration covariance value (when not computed)
   hedge_ref_gyr_cov: 0.000001    #reference angular velocity covariance value (when not computed)
   hedge_ref_compass_cov: 0.000001    #reference compasss orientation covariance value (when not computed)
   
-  # orientation of each IMU might be different
-  # dualhedge_heading_offset: 135             #(deg)
-  
-  # Dual Beacon params
-  # The beacon antennas are 5.1 degrees off from the x axis:
+  # The beacon antennas are -45 degrees off from the x axis:
   #
-  #   gps
-  #    |  17.0cm
+  #  beacon
+  #    |  9.0cm
   #    |
   #   centre --------------------- centre
-  #                   360cm          |
-  #                                  | 17.0cm
-  #                                 gps
+  #                   18 cm          |
+  #                                  | 9.0cm
+  #                                 beacon
   # 
+  dualhedge_heading_offset: 135             #(deg)
+  
+  
+  # Dual GPS params
   # headingOffset: 15  # Hand tuned to align point cloud with earth. This is a combination of the gps offset and cloud offset.
   # gpsBaseline: 3.66
 

@@ -23,7 +23,7 @@
 
         <!--- Robat localization -->
         <include file="$(find roboat_localization)/launch/localization.launch">
-            <arg name="run_ekf"     value="false"/>
+            <arg name="use_ekf"     value="false"/>
         </include>
 
         <!--- Robat visualization -->

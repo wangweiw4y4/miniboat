@@ -34,7 +34,7 @@ DataFilter::DataFilter()
   nh_.getParam("roboat_filter/hedge_ref_acc_cov", hedge_acc_cov_);
   nh_.getParam("roboat_filter/hedge_ref_gyr_cov", hedge_gyr_cov_);
   nh_.getParam("roboat_filter/hedge_ref_compass_cov", hedge_compass_cov_);
-  // nh_.getParam("roboat_filter/dualhedge_heading_offset", dualhedge_heading_offset_);
+  nh_.getParam("roboat_filter/dualhedge_heading_offset", dualhedge_heading_offset_);
   // nh_.getParam("roboat_filter/minGPSCovTh", min_GPS_cov_threshold_);
   // nh_.getParam("roboat_filter/maxGPSCovTh", max_GPS_cov_threshold_);
   // // nh_.getParam("roboat_filter/headingOffset", headingOffset);
@@ -140,13 +140,16 @@ void DataFilter::pairedHedgeOdomHandler(const marvelmind_nav::hedge_pos_ang &msg
   beaconOdometry.pose.pose.position.y = msg.y_m;
   beaconOdometry.pose.pose.position.z = -0.025; //used only for visualization, so defined here explicitly
 
-  // double heading = + dualhedge_heading_offset_;
-  // if (heading>180) {
-  //   heading -= 360;
-  // }
-  // heading *= PI/180.0;  
+  double heading = msg.angle + dualhedge_heading_offset_;
+  if (heading>180) {
+    heading -= 360;
+  }
+  else if (heading<-180) {
+    heading += 360;
+  }
+  heading *= M_PI/180.0;  
   
-  beaconOdometry.pose.pose.orientation = tf::createQuaternionMsgFromRollPitchYaw(0, 0, msg.angle*M_PI/180.0);
+  beaconOdometry.pose.pose.orientation = tf::createQuaternionMsgFromRollPitchYaw(0, 0, heading);
   std::fill(beaconOdometry.pose.covariance.begin(), beaconOdometry.pose.covariance.end(), 0.0);
   beaconOdometry.pose.covariance[0] = hedge_pos_cov_;
   beaconOdometry.pose.covariance[7] = hedge_pos_cov_;
