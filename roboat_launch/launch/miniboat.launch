@@ -6,7 +6,11 @@
     -->
     <arg    name="id"                   default="$(env HOSTNAME)"/>
     <arg    name="use_ekf"              default="false"/>
+    <arg    name="use_multimaster"      default="false"/>
 
+    <!-- Multimaster synchronization -->
+    <node if="$(arg use_multimaster)" name="master_discovery"  pkg="fkie_master_discovery"   type="master_discovery"    output="screen"/>
+    
     <!-- package namespace -->
     <group ns="$(arg id)">
 
