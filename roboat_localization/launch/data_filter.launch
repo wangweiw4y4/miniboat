@@ -1,30 +1,13 @@
 <launch>
     <arg name="id"  default="roboat"/>
 
-    <!-- Sensor Topics -->
-    <arg name="IMU_TOPIC" default="/imu_correct"/>
-    <arg name="GPS_TOPIC" default="/gps/fix"/>
-    <arg name="GPS2_TOPIC" default="/gps2/fix"/>
-    <arg name="DVL_TOPIC" default="/dvl"/>
-
     <!-- Parameters -->
     <rosparam file="$(find roboat_localization)/config/filter_params.yaml" command="load"/>
     
     <!-- Data Filter -->
-    <node pkg="roboat_localization" type="data_filter_node" name="data_filter_node"
-          output="screen" respawn="true">
-        <!-- In -->
-        <remap from="sensor/imu" to="$(arg IMU_TOPIC)"/>
-        <remap from="sensor/gps" to="$(arg GPS_TOPIC)"/>
-        <remap from="sensor/gps2" to="$(arg GPS2_TOPIC)"/>
-        <remap from="sensor/dvl" to="$(arg DVL_TOPIC)"/>
-        <remap from="sensor/heading_gps1" to="$(arg GPS_TOPIC)"/>
-        <remap from="sensor/heading_gps2" to="$(arg GPS2_TOPIC)"/>
-        <!-- Out -->
-        <remap from="filtered/imu" to="roboat_filter/filtered/imu"/>
-        <remap from="filtered/gps" to="roboat_filter/filtered/gps"/>
-        <remap from="filtered/gps2" to="roboat_filter/filtered/gps2"/>
-        <remap from="filtered/dvl" to="roboat_filter/filtered/dvl"/>
-        <remap from="filtered/heading" to="roboat_filter/filtered/heading"/>
+    <node pkg="roboat_localization" type="data_filter_node" name="data_filter_node" output="screen" respawn="true">
+        <!-- Remaps topics (if sensors change between miniboats and use differen topcis) -->
+        <!-- <remap from="imu/data" to="imu/data"/> -->
     </node>
+    
 </launch>

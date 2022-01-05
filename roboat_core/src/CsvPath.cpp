@@ -21,7 +21,7 @@ CsvPath::CsvPath(ros::NodeHandle n)
   n.param("trajectory/init_x", init_x, 0.);
   n.param("trajectory/init_y", init_y, 0.);
   n.param("trajectory/angle_rotate", angle, 0.);
-  n.param("trajectory/file", relativeFileName, std::string("/paths/Curve_Speed_0.3.csv"));
+  n.param("trajectory/file", relativeFileName, std::string("/paths/miniboat_shapeshift_miniboat4.csv"));
   n.param("trajectory/repeat", repeat, false);
   n.param("system_dynamics/step", step, 0.1);
   n.param("system_dynamics/num_steps", num_steps, 20);

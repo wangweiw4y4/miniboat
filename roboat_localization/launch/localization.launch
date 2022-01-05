@@ -19,4 +19,8 @@
     <!-- If not running EKF, executes directly the sensor node to determine miniboat position from beacons -->
     <node if="$(eval not arg('use_ekf'))"  name="sensor_node"  pkg="roboat_localization"  type="sensor_node"  output="screen"/>  
 
+    <!-- test node, if wanted, can be run directly with
+        `rosrun roboat_localization test_node __ns:=$HOSTNAME` 
+    -->
+
 </launch>
