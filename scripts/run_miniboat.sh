@@ -10,4 +10,4 @@ export ROS_MASTER_URI=http://192.168.31.102:11311   # user ip address or name (i
 export ROS_IP=192.168.31.11                         # miniboat ip address (the raspberry ip address)
 
 # launch ROS packages
-roslaunch roboat_launch miniboat.launch
+roslaunch roboat_launch miniboat.launch use_ekf:=true
