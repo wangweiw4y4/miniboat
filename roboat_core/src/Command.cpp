@@ -12,7 +12,7 @@
 #include <roboat_core/serial_node.h>
 #include <roboat_core/Command.hpp>
 
-roboat_core::CommandToMicroController Command::commandMsg(double* force)
+roboat_core::CommandToMicroController Command::commandMsg(double* force, unsigned char* latch)
 {
   roboat_core::CommandToMicroController command;
 
@@ -22,6 +22,7 @@ roboat_core::CommandToMicroController Command::commandMsg(double* force)
       sizeof(SendingPacket.ForceData) + sizeof(SendingPacket.LatchingCommand) + sizeof(SendingPacket.SensorCommand);
   for (int i = 0; i < 4; i++)
     SendingPacket.ForceData[i] = (float)force[i];
+  SendingPacket.LatchingCommand[0] =  latch[0];
 
   // Copy the SendingPacket Data to the command data
   memcpy(&command.CommandtoLower[0], &SendingPacket, SendingPacket.DataLength + UARTHEARDER_NUMBER);
@@ -39,7 +40,7 @@ void Command::forceCallback(const roboat_core::Force::ConstPtr& msg, int priorit
 
   ROS_DEBUG("control force received with priority %d", priority);
 }
-
+// latch = 1, delatch = 2, otherwise 0.
 void Command::joyCallback(sensor_msgs::Joy msg)
 {
   if (msg.buttons[4] == 1)
@@ -73,14 +74,18 @@ void Command::joyCallback(sensor_msgs::Joy msg)
         {
               force[0] = - Command::joy_max_force * msg.axes[0]*0.25;
               force[1] = 0;
-        }
-        
-        // start using the joypad command force
-    command_priority = 0;
-    ROS_DEBUG("[COMMAND_NODE] joypad force received start");    
+        }  
      }
-        
-   }     
+     if (msg.buttons[3] == 1)
+     latchingaction[0] = 1;
+     else if  (msg.buttons[0] == 1)
+     latchingaction[0] = 2;
+     else
+     latchingaction[0] = 0;
+             // start using the joypad command force
+    command_priority = 0;
+    ROS_DEBUG("[COMMAND_NODE] joypad force received start");   
+   }
   else
   {
     // stop using the joypad command force
@@ -119,8 +124,8 @@ Command::Command(ros::NodeHandle n)
 
     roboat_core::Force command_force_msg;
     std::copy(std::begin(force), std::end(force), std::begin(command_force_msg.data));
-    command_pub.publish(commandMsg(force));
     command_force_pub.publish(command_force_msg);
+    command_pub.publish(commandMsg(force,latchingaction));
 
     // reset command to stop as default if joypad is not in use
     if (command_priority!=0)
