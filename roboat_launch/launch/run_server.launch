@@ -8,7 +8,9 @@
     <arg    name="use_multimaster"      default="false"/>
 
     <!-- Multimaster synchronization -->
-    <node if="$(arg use_multimaster)" name="master_discovery"  pkg="fkie_master_discovery"   type="master_discovery"    output="screen"/>
+    <node if="$(arg use_multimaster)" name="master_discovery"  pkg="fkie_master_discovery"   type="master_discovery"    output="screen">
+        <param name="mcast_group" type="str" value="224.0.0.1" />
+    </node>
     <node if="$(arg use_multimaster)" name="master_sync"  pkg="fkie_master_sync"   type="master_sync"    output="screen"/>
 
     <!-- loads swarm ids, to properly identify all -->

@@ -23,7 +23,7 @@ DataFilter::DataFilter()
   nh_.param<std::string>("roboat_id",id,"");
   base_link_ = "base_link";
   imu_link_ = "imu1_link"; 
-  dual_beacon_link_ = "dual_beacon";
+  dual_beacon_link_ = "dual_beacon_link";
   if (!id.empty()) {
     base_link_ += "_"+id;
     imu_link_ += "_"+id; 
