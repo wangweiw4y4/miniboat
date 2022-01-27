@@ -137,7 +137,7 @@ void DataFilter::pairedHedgeOdomHandler(const marvelmind_nav::hedge_pos_ang &msg
   beaconOdometry.child_frame_id = dual_beacon_link_;
 
   beaconOdometry.pose.pose.position.x = msg.x_m;
-  beaconOdometry.pose.pose.position.y = msg.y_m;
+  beaconOdometry.pose.pose.position.y = -msg.y_m;
   beaconOdometry.pose.pose.position.z = -0.025; //used only for visualization, so defined here explicitly
 
   double heading = msg.angle + dualhedge_heading_offset_;
@@ -149,11 +149,12 @@ void DataFilter::pairedHedgeOdomHandler(const marvelmind_nav::hedge_pos_ang &msg
   }
   heading *= M_PI/180.0;  
   
-  beaconOdometry.pose.pose.orientation = tf::createQuaternionMsgFromRollPitchYaw(0, 0, heading);
+  beaconOdometry.pose.pose.orientation = tf::createQuaternionMsgFromRollPitchYaw(0, 0, -heading);
   std::fill(beaconOdometry.pose.covariance.begin(), beaconOdometry.pose.covariance.end(), 0.0);
   beaconOdometry.pose.covariance[0] = hedge_pos_cov_;
   beaconOdometry.pose.covariance[7] = hedge_pos_cov_;
   beaconOdometry.pose.covariance[14] = hedge_pos_cov_;
+  beaconOdometry.pose.covariance[35] = hedge_compass_cov_;
 
   pub_paired_hedge_odom_.publish(beaconOdometry);
   return;

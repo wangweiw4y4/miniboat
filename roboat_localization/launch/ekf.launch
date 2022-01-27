@@ -9,7 +9,7 @@
         
         <!-- In -->
         <remap from="data/imu0"             to="data_filter/imu0" />
-        <remap from="data/imu1"             to="data_filter/imu1" />
+        <!-- <remap from="data/imu1"             to="data_filter/imu1" /> -->
         <remap from="data/paired_beacons"   to="data_filter/paired_beacons" />
         <!-- Out (skipped, we use default topic names)-->
         <!-- <remap from="accel/filtered"    to="roboat_localization/odometry_ekf/accel_filtered" /> -->

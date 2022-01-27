@@ -328,15 +328,15 @@ int main(int argc, char **argv)
 
     nav_msgs::Odometry state_msg;
     state_msg.pose.pose.position.x = state[0];
-    state_msg.pose.pose.position.y = state[1];
-    state_msg.pose.pose.position.z = 0;
+    state_msg.pose.pose.position.y = -state[1];
+    state_msg.pose.pose.position.z = -0;
 
-    state_msg.pose.pose.orientation = tf::createQuaternionMsgFromRollPitchYaw(0, 0, state[2]);
+    state_msg.pose.pose.orientation = tf::createQuaternionMsgFromRollPitchYaw(0, 0, -state[2]);
 
     // No velocities for now
     state_msg.twist.twist.linear.x = 0.0;
-    state_msg.twist.twist.linear.y = 0.0;
-    state_msg.twist.twist.angular.z = 0.0;
+    state_msg.twist.twist.linear.y = -0.0;
+    state_msg.twist.twist.angular.z = -0.0;
 
     //publishes the state odometry data    
     state_pub.publish(state_msg);
@@ -347,7 +347,7 @@ int main(int argc, char **argv)
     // tf_broadcast.sendTransform(tf::StampedTransform(map_to_odom, ros::Time::now(), "map", "odom"));
     
     // odom -> base_link transformation (for visualization, matching what the EKF filter will do)
-    tf::Transform odom_to_base = tf::Transform(tf::createQuaternionFromRPY(0, 0, state[2]), tf::Vector3(state[0], state[1], -draught));
+    tf::Transform odom_to_base = tf::Transform(tf::createQuaternionFromRPY(0, 0, -state[2]), tf::Vector3(state[0], -state[1], -draught));
     tf_broadcast.sendTransform(tf::StampedTransform(odom_to_base, ros::Time::now(), "odom", base_link_frame));
 
     loop_rate.sleep();
