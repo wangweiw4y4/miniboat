@@ -22,6 +22,9 @@ void RoboatVisualization::initialize(ros::NodeHandle &nh, std::string id)
     id_=id;
   }
 
+  nh.getParam("/visualization/update_rate",update_rate);
+  nh.getParam("/visualization/distance_till_update",distance_till_update);
+  
   pub_path = nh.advertise<nav_msgs::Path>(ns+"visual/path", 1);
   pub_marker = nh.advertise<visualization_msgs::Marker>(ns+"visual/robot", 1);
   pub_force_marker = nh.advertise<visualization_msgs::Marker>(ns+"visual/hud/force", 1);
@@ -31,7 +34,7 @@ void RoboatVisualization::initialize(ros::NodeHandle &nh, std::string id)
   sub_force = nh.subscribe(ns+"force", 1, &RoboatVisualization::forceCallback, this);
   current_odometry = nh.subscribe(ns+"odometry/filtered", 1, &RoboatVisualization::odometryCallback, this);
 
-  path_update_timer = nh.createTimer(ros::Duration(update_rate), &RoboatVisualization::pathHandler, this);
+  path_update_timer = nh.createTimer(ros::Duration(1.0/update_rate), &RoboatVisualization::pathHandler, this);
 }
 
 void RoboatVisualization::thrustStateCallback(const roboat_msgs::ThrustState& msg)
@@ -98,8 +101,7 @@ void RoboatVisualization::pathHandler(const ros::TimerEvent& event)
   double new_y = transform.getOrigin().y();
   double new_z = transform.getOrigin().z();
 
-  // We only update the path when we change position
-  double distance_till_update = 0.2;
+  // We only update the path when we change position beyond certain value
   if (sqrt((last_x - new_x) * (last_x - new_x) + (last_y - new_y) * (last_y - new_y) +
             (last_z - new_z) * (last_z - new_z)) >= distance_till_update)
   {

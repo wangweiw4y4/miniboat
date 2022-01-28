@@ -80,6 +80,6 @@ install(DIRECTORY include/${PROJECT_NAME}/
         FILES_MATCHING PATTERN "*.h"
         )
 
-install(DIRECTORY launch meshes
+install(DIRECTORY config launch meshes
         DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
         )

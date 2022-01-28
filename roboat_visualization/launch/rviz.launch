@@ -1,4 +1,7 @@
 <launch>
+    <!-- loads ros visualization settings-->
+    <rosparam command="load" file="$(find roboat_visualization)/config/settings.yaml" ns="visualization"/>
+    
     <!-- Node generating the markers properly formatted -->
     <node name="visualization_node"  pkg="roboat_visualization"  type="visualization_node" output="screen" respawn="true"/>
 

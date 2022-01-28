@@ -110,6 +110,6 @@ install(DIRECTORY include/${PROJECT_NAME}/
         FILES_MATCHING PATTERN "*.hpp"
         )
 
-install(DIRECTORY launch urdf
+install(DIRECTORY config launch urdf
         DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
         )
