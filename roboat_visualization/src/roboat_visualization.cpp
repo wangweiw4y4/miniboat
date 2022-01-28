@@ -24,6 +24,7 @@ void RoboatVisualization::initialize(ros::NodeHandle &nh, std::string id)
 
   nh.getParam("/visualization/update_rate",update_rate);
   nh.getParam("/visualization/distance_till_update",distance_till_update);
+  nh.getParam("/visualization/path_length",path_length);
   
   pub_path = nh.advertise<nav_msgs::Path>(ns+"visual/path", 1);
   pub_marker = nh.advertise<visualization_msgs::Marker>(ns+"visual/robot", 1);
@@ -120,7 +121,6 @@ void RoboatVisualization::pathHandler(const ros::TimerEvent& event)
   if (pub_path.getNumSubscribers() != 0)
     pub_path.publish(pathMsg);
 
-  static double path_length = 100.0;  // in seconds
   while (!pathMsg.poses.empty() &&
           pathMsg.poses.front().header.stamp.toSec() < pathMsg.poses.back().header.stamp.toSec() - path_length)
     pathMsg.poses.erase(pathMsg.poses.begin());

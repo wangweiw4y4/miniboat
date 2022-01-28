@@ -39,6 +39,7 @@ private:
   ros::Timer path_update_timer;
   double distance_till_update;
   double update_rate;
+  double path_length;
   double dx, dy, dTheta;
   double f1, f2, f3, f4;
   roboat_msgs::ThrustState current_thrust_state;
