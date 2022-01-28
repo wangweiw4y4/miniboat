@@ -63,7 +63,7 @@
     </joint>
 
     <link name="dual_beacon_link_${id}"/>
-    <joint name="beacon1_joint_${id}" type="fixed">
+    <joint name="dual_beacon_joint_${id}" type="fixed">
         <parent link="base_link_${id}"/>
         <child link="dual_beacon_link_${id}"/>
         <origin xyz="0.0 0.0 0.09" rpy="0 0 ${135*PI/180.0}"/>

@@ -43,5 +43,5 @@ catkin_make
 
 # recompile message headers for MCU uploads
 source devel/setup.bash
-rm -r src/roboat_msgs/built_headers/ros_lib
-rosrun rosserial_client make_libraries src/roboat_msgs/built_headers/
+rm -r $MINIBOAT_SRC_PATH/roboat_msgs/built_headers/ros_lib
+rosrun rosserial_client make_libraries $MINIBOAT_SRC_PATH/roboat_msgs/built_headers/
