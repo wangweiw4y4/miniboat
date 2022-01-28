@@ -26,6 +26,8 @@ add_message_files(
         FILES
         Force.msg
         Heartbeat.msg
+        MicrocontrollerCommand.msg
+        MicrocontrollerFeedback.msg
         ThrusterCommand.msg
 	ThrusterFeedback.msg
         ThrusterForceFeedback.msg
