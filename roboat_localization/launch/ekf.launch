@@ -4,7 +4,9 @@
     <!-- EKF Fusion-->
     <node pkg="robot_localization" type="ekf_localization_node" name="ekf_localization_node" respawn="true">
         <rosparam command="load" file="$(find roboat_localization)/config/kalman_filter.yaml" />
-        <!-- updates base_link_frame to include roboat_id, to avoid conflicts with other roboats in the network -->
+        <!-- updates odom & base_link_frame to include roboat_id and avoid conflicts with other roboats in the network -->
+        <param name="odom_frame" value="odom_$(arg id)"/>
+        <param name="world_frame" value="odom_$(arg id)"/>
         <param name="base_link_frame" value="base_link_$(arg id)"/>
         
         <!-- In -->

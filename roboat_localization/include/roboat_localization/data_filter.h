@@ -39,7 +39,7 @@ class DataFilter {
   ros::Publisher pub_paired_hedge_odom_;
   
   // tf frames
-  std::string base_link_, imu_link_, dual_beacon_link_;
+  std::string odom_, base_link_, imu_link_, dual_beacon_link_;
 
   // configuration parameters
   double hedge_pos_cov_, hedge_acc_cov_, hedge_gyr_cov_, hedge_compass_cov_;
@@ -49,10 +49,11 @@ class DataFilter {
   void pairedHedgeIMUHandler(const marvelmind_nav::hedge_imu_raw &hedge_imu_raw_msg);
   void pairedHedgeOdomHandler(const marvelmind_nav::hedge_pos_ang &hedge_pos_msg); 
 
-  
+  ros::Timer map_update_timer_;
+  void map_odom(const ros::TimerEvent& event);
+
  public:
   DataFilter();  
-  // void spin_node();
 
 };
 

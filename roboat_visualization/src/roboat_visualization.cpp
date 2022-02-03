@@ -62,13 +62,6 @@ void RoboatVisualization::forceCallback(const roboat_core::Force& msg)
 
 void RoboatVisualization::pathHandler(const ros::TimerEvent& event)
 {
-  // map -> odom static transformation (both are the same)
-  static tf::TransformBroadcaster tf_broadcast;
-  static tf::Transform map_to_odom = tf::Transform(tf::createQuaternionFromRPY(0, 0, 0), tf::Vector3(0, 0, 0));
-  tf_broadcast.sendTransform(tf::StampedTransform(map_to_odom, ros::Time::now(), "map", "odom"));
-
-  /*WARNING: for the transforms to work, time need to be synchronized between the server and the miniboats, 
-      otherwise lister will fail and no miniboat is plotted */
   static tf::TransformListener listener;
   static tf::StampedTransform transform;
   try

@@ -17,14 +17,16 @@ DataFilter::DataFilter()
   pub_IMU_ = nh_.advertise<sensor_msgs::Imu>("data_filter/imu0", 1);
   pub_paired_hedge_IMU_ = nh_.advertise<sensor_msgs::Imu>("data_filter/imu1", 1);
   pub_paired_hedge_odom_ = nh_.advertise<nav_msgs::Odometry>("data_filter/paired_beacons", 1);
-  
+
   // TF FRAMES
   std::string id;
   nh_.param<std::string>("roboat_id",id,"");
+  odom_ = "odom";
   base_link_ = "base_link";
   imu_link_ = "imu1_link"; 
   dual_beacon_link_ = "dual_beacon_link";
   if (!id.empty()) {
+    odom_ += "_"+id;
     base_link_ += "_"+id;
     imu_link_ += "_"+id; 
     dual_beacon_link_ += "_"+id;
@@ -39,26 +41,20 @@ DataFilter::DataFilter()
   // nh_.getParam("roboat_filter/maxGPSCovTh", max_GPS_cov_threshold_);
   // // nh_.getParam("roboat_filter/headingOffset", headingOffset);
   // nh_.getParam("roboat_filter/gpsBaseline", gpsBaseline);
+
+  //timer to publish synchrounously the map to odom transformation
+  double step;
+  nh_.param("system_dynamics/step", step, 0.1);
+  map_update_timer_ = nh_.createTimer(ros::Duration(step), &DataFilter::map_odom, this);
+  
 }
 
-// void DataFilter::spin_node() {
-//   double step;
-//   nh_.param("system_dynamics/step", step, 0.1);
-//   ros::Rate loop_rate(1/step);
-  
-//   // synchronously 
-//   while (ros::ok())
-//   {
-//     ros::spinOnce();
-    
-//     // map -> odom static transformation (both are the same)
-//     static tf::TransformBroadcaster tf_broadcast;
-//     static tf::Transform map_to_odom = tf::Transform(tf::createQuaternionFromRPY(0, 0, 0), tf::Vector3(0, 0, 0));
-//     tf_broadcast.sendTransform(tf::StampedTransform(map_to_odom, ros::Time::now(), "map", "odom"));
-    
-//   }
-//   return;
-// }
+void DataFilter::map_odom(const ros::TimerEvent& event) {
+  // map -> odom static transformation (both are the same)
+    static tf::TransformBroadcaster tf_broadcast;
+    static tf::Transform map_to_odom = tf::Transform(tf::createQuaternionFromRPY(0, 0, 0), tf::Vector3(0, 0, 0));
+    tf_broadcast.sendTransform(tf::StampedTransform(map_to_odom, ros::Time::now(), "map", odom_));
+}
 
 void DataFilter::imuHandler(const sensor_msgs::Imu::ConstPtr &msg) {
   // convert IMU
@@ -133,7 +129,7 @@ void DataFilter::pairedHedgeOdomHandler(const marvelmind_nav::hedge_pos_ang &msg
   // Publish odometry for EKF (global)
   nav_msgs::Odometry beaconOdometry;
   beaconOdometry.header.stamp = ros::Time::now(); //ros::Time(msg.timestamp_ms);
-  beaconOdometry.header.frame_id = "odom";
+  beaconOdometry.header.frame_id = odom_;
   beaconOdometry.child_frame_id = dual_beacon_link_;
 
   beaconOdometry.pose.pose.position.x = msg.x_m;
