@@ -21,7 +21,6 @@ private:
   ros::NodeHandle nh_;
   ros::Subscriber state_sub_;
   std::vector<double>* state_;
-  int state_roll_over_count_;
 
   void stateCallback(const nav_msgs::Odometry msg);
 

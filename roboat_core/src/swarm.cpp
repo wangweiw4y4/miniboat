@@ -57,7 +57,6 @@ std::vector<std::string> Swarm::getBoatNames()
 
 SwarmState::SwarmState()
 {
-  state_roll_over_count_ = 0;
 }
 
 void SwarmState::initialize(ros::NodeHandle &nh, std::string id, std::vector<double>* state) 
@@ -83,20 +82,10 @@ void SwarmState::stateCallback(const nav_msgs::Odometry msg) {
     // convert from map to roboat map reference (negative y and yaw)
     (*state_)[0] = msg.pose.pose.position.x;
     (*state_)[1] = -msg.pose.pose.position.y; //
+    
     yaw = -tf::getYaw(tf::Quaternion(msg.pose.pose.orientation.x, msg.pose.pose.orientation.y,
                                     msg.pose.pose.orientation.z, msg.pose.pose.orientation.w));
-
-    // Unwrap the angle when roll over happens
-    double yaw_diff = (*state_)[2] - yaw - state_roll_over_count_ * 2 * M_PI;
-    if (yaw_diff > M_PI)
-    {
-      state_roll_over_count_++;
-    }
-    else if (yaw_diff < -M_PI)
-    {
-      state_roll_over_count_--;
-    }
-    (*state_)[2] = yaw + state_roll_over_count_ * 2 * M_PI;
+    (*state_)[2] = yaw;
 
     // convert from map to roboat map reference (negative y and yaw)
     (*state_)[3] = msg.twist.twist.linear.x;

@@ -31,9 +31,9 @@ int main(int argc, char** argv)
     for (int i=0; i<n_boats; i++) {
       ss << ids[i] << ": [" << swarm.state_[i][0] << "," 
                             << swarm.state_[i][1] << "," 
-                            << swarm.state_[i][2] << "]; ";
+                            << swarm.state_[i][2] * 180.0/M_PI << "]; ";
     }
-    ROS_INFO(ss.str().c_str());
+    ROS_INFO("%s", ss.str().c_str());
 
     //waits until next iteration ----------------
     loop_rate.sleep();
