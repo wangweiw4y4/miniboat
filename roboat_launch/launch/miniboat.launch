@@ -5,8 +5,8 @@
          - namespaces with '-' character are not valid, need to be changed
     -->
     <arg    name="id"                   default="$(env HOSTNAME)"/>
-    <arg    name="use_ekf"              default="false"/>
-    <arg    name="use_multimaster"      default="false"/>
+    <arg    name="use_multimaster"      default="true"/>
+    <arg    name="use_ekf"              default="true"/>
 
     <!-- Multimaster synchronization -->
     <node if="$(arg use_multimaster)" name="master_discovery"  pkg="fkie_master_discovery"   type="master_discovery"    output="screen">
@@ -27,7 +27,7 @@
             <arg name="joy_node"            value="false"/>
             <arg name="pid_node"            value="false"/>
             <arg name="swarm_node"          value="true"/>
-            <arg name="bag_node"	    value="false"/>
+            <arg name="bag_node"            value="false"/>
         </include>
         
         <include file="$(find ros_imu_bno055)/launch/imu.launch">

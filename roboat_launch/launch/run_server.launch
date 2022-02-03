@@ -5,7 +5,7 @@
         ..src/miniboat/scripts/run_server.sh
     -->
 
-    <arg    name="use_multimaster"      default="false"/>
+    <arg    name="use_multimaster"      default="true"/>
 
     <!-- Multimaster synchronization -->
     <node if="$(arg use_multimaster)" name="master_discovery"  pkg="fkie_master_discovery"   type="master_discovery"    output="screen">

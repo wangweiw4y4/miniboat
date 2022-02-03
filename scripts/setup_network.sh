@@ -15,7 +15,7 @@ ${NET}.16  miniboat6\n\
 ${NET}.17  miniboat7\n\
 ${NET}.18  miniboat8\n\
 \n\
-${NET}.2  david-XPS"
+${NET}.3  david-XPS"
 
 # edits the /etc/hosts file with the ip adresses
 if grep -qxF "$HEADER" /etc/hosts; then
