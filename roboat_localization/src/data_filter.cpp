@@ -22,11 +22,13 @@ DataFilter::DataFilter()
   std::string id;
   nh_.param<std::string>("roboat_id",id,"");
   odom_ = "odom";
+  nmpc_ = "nmpc";
   base_link_ = "base_link";
   imu_link_ = "imu1_link"; 
   dual_beacon_link_ = "dual_beacon_link";
   if (!id.empty()) {
     odom_ += "_"+id;
+    nmpc_ += "_"+id;
     base_link_ += "_"+id;
     imu_link_ += "_"+id; 
     dual_beacon_link_ += "_"+id;
@@ -54,6 +56,10 @@ void DataFilter::map_odom(const ros::TimerEvent& event) {
     static tf::TransformBroadcaster tf_broadcast;
     static tf::Transform map_to_odom = tf::Transform(tf::createQuaternionFromRPY(0, 0, 0), tf::Vector3(0, 0, 0));
     tf_broadcast.sendTransform(tf::StampedTransform(map_to_odom, ros::Time::now(), "map", odom_));
+
+    // odom -> nmpc static transformation (rotated 180deg around x axis, so y axis points right and z points down)
+    tf::Transform odom_to_nmpc = tf::Transform(tf::createQuaternionFromRPY(M_PI, 0, 0), tf::Vector3(0, 0, 0));
+    tf_broadcast.sendTransform(tf::StampedTransform(odom_to_nmpc, ros::Time::now(), odom_, nmpc_));
 }
 
 void DataFilter::imuHandler(const sensor_msgs::Imu::ConstPtr &msg) {

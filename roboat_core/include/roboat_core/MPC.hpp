@@ -25,9 +25,12 @@ private:
   std::vector<double> state;
   int state_roll_over_count;
   ros::Publisher force_pub;
+  ros::Publisher prediction_pub;
   ros::Subscriber path_sub;
   ros::Subscriber pose_sub;
   ros::Subscriber twist_sub;
+  
+  std::string odom_frame_;
 
   // functions related to processing subscriber msgs
   void pathCallback(const nav_msgs::Path::ConstPtr& msg);
@@ -37,6 +40,8 @@ private:
   void trajectoryFill(double* trajectory, int pathSize);
 
   std::vector<double> acadoForce(std::vector<double> state, double* trajectory);
+
+  nav_msgs::Path acadoPrediction();
 
 public:
   MPC(ros::NodeHandle n);

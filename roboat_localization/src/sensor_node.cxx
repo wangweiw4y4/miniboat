@@ -269,14 +269,16 @@ int main(int argc, char **argv)
 
   std::string id;
   n.param<std::string>("roboat_id",id,"");
-  std::string odom_frame;
+  std::string odom_frame, nmpc_frame;
   std::string base_link_frame;
   if (id.empty()) {
     odom_frame = "odom";
+    nmpc_frame = "nmpc";
     base_link_frame = "base_link";
   }
   else {
     odom_frame = "odom_"+id;
+    nmpc_frame = "nmpc_"+id;
     base_link_frame = "base_link_"+id;
   }
 
@@ -348,6 +350,10 @@ int main(int argc, char **argv)
     static tf::TransformBroadcaster tf_broadcast;
     static tf::Transform map_to_odom = tf::Transform(tf::createQuaternionFromRPY(0, 0, 0), tf::Vector3(0, 0, 0));
     tf_broadcast.sendTransform(tf::StampedTransform(map_to_odom, ros::Time::now(), "map", odom_frame));
+
+    // odom -> nmpc static transformation (rotated 180deg around x axis, so y axis points right and z points down)
+    tf::Transform odom_to_nmpc = tf::Transform(tf::createQuaternionFromRPY(M_PI, 0, 0), tf::Vector3(0, 0, 0));
+    tf_broadcast.sendTransform(tf::StampedTransform(odom_to_nmpc, ros::Time::now(), odom_frame, nmpc_frame));
     
     // odom -> base_link transformation (for visualization, matching what the EKF filter will do)
     tf::Transform odom_to_base = tf::Transform(tf::createQuaternionFromRPY(0, 0, -state[2]), tf::Vector3(state[0], -state[1], -draught));

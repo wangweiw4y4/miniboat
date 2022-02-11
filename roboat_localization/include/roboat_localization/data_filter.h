@@ -39,7 +39,7 @@ class DataFilter {
   ros::Publisher pub_paired_hedge_odom_;
   
   // tf frames
-  std::string odom_, base_link_, imu_link_, dual_beacon_link_;
+  std::string odom_, nmpc_, base_link_, imu_link_, dual_beacon_link_;
 
   // configuration parameters
   double hedge_pos_cov_, hedge_acc_cov_, hedge_gyr_cov_, hedge_compass_cov_;

@@ -30,15 +30,15 @@ double* Path::trajectoryPointSet(double* trajectory, int refNum, double x, doubl
   return trajectory;
 }
 
-nav_msgs::Path Path::pathMsg(double* trajectory)
+nav_msgs::Path Path::pathMsg(double* trajectory, std::string nmpc_frame)
 {
   nav_msgs::Path msg;
-  msg.header.frame_id = "odom";
+  msg.header.frame_id = nmpc_frame;
 
   for (int i = 0; i < num_steps; i++)
   {
     geometry_msgs::PoseStamped pose;
-    pose.header.frame_id = "odom";
+    pose.header.frame_id = nmpc_frame;
     pose.pose.position.x = trajectory[3 * i];
     pose.pose.position.y = trajectory[3 * i + 1];
     pose.pose.orientation = tf::createQuaternionMsgFromYaw(trajectory[3 * i + 2]);

@@ -265,6 +265,29 @@ std::vector<double> MPC::acadoForce(std::vector<double> state, double* trajector
   return control;
 }
 
+nav_msgs::Path MPC::acadoPrediction()
+{
+  std::vector<double> prediction(acadoVariables.x,
+                                 acadoVariables.x + NX * N); // 1d vector containing the predictions of the NX systems
+                                                             // states for N steps in the future
+  nav_msgs::Path path_msg;
+  path_msg.header.frame_id = odom_frame_;
+  path_msg.header.stamp = ros::Time::now();
+  for (int i = 0; i < N; i += 1)
+  {
+    geometry_msgs::PoseStamped pose;
+    pose.header.frame_id = odom_frame_;
+    pose.header.stamp = ros::Time::now();
+    pose.pose.position.x = prediction[i * NX + 0]; // i*NX skips ahead NX positions in the prediction vector
+    pose.pose.position.y =
+        -prediction[i * NX + 1]; // minus sine because of NED -> ENU coordinate frame transformation (ACAD0 -> odom)
+    pose.pose.orientation = tf::createQuaternionMsgFromYaw(-prediction[i * NX + 2]);
+    path_msg.poses.push_back(pose);
+  }
+  return path_msg;
+}
+
+
 MPC::MPC(ros::NodeHandle n)
 {
   state = std::vector<double>(6);
@@ -277,6 +300,9 @@ MPC::MPC(ros::NodeHandle n)
 
   // publisher for force topic
   force_pub = n.advertise<roboat_core::Force>("mpc_force", 10);
+
+  // publisher of the path predicted by ACADO
+  prediction_pub = n.advertise<nav_msgs::Path>("nmpc/path_prediction", 1);
 
   // subscriber for geometry_msgs Pose 
   path_sub = n.subscribe("roboat_path", 1, &MPC::pathCallback, this);
@@ -291,6 +317,15 @@ MPC::MPC(ros::NodeHandle n)
     ros::Subscriber state_sub = n.subscribe("odometry/filtered", 1, &MPC::stateCallback, this); 
 
 
+  std::string id;
+  n.param<std::string>("roboat_id",id,"");
+  if (id.empty()) {
+    odom_frame_ = "odom";
+  }
+  else {
+    odom_frame_ = "odom_"+id;
+  }
+  
   n.param("system_dynamics/step", step, 0.1);
 
   ros::Rate loop_rate(1/step);
@@ -338,6 +373,7 @@ MPC::MPC(ros::NodeHandle n)
       state[2] += 2 * M_PI;
     }
     
+    nav_msgs::Path prediction;
     if (path_received && pose_received)
     { 
       ROS_DEBUG("[MPC_NODE] acting on received trajectory update");
@@ -346,6 +382,16 @@ MPC::MPC(ros::NodeHandle n)
       roboat_core::Force msg;
       std::copy(force.begin(), force.end(), &msg.data[0]);
       force_pub.publish(msg);
+
+      // Publish the NMPC predicted trajectory
+      prediction = acadoPrediction();
+      prediction_pub.publish(prediction);
+    }
+    else {
+      // Publishes empty trajectory to clear previous predicted trajectory
+      prediction.header.frame_id = odom_frame_;
+      prediction.header.stamp = ros::Time::now();
+      prediction_pub.publish(prediction);
     }
     
     path_received = false;

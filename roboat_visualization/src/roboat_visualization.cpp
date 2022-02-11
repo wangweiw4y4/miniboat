@@ -96,21 +96,21 @@ void RoboatVisualization::pathHandler(const ros::TimerEvent& event)
   double new_z = transform.getOrigin().z();
 
   // We only update the path when we change position beyond certain value
+  static nav_msgs::Path pathMsg;
+  pathMsg.header = pose_stamped.header;
   if (sqrt((last_x - new_x) * (last_x - new_x) + (last_y - new_y) * (last_y - new_y) +
             (last_z - new_z) * (last_z - new_z)) >= distance_till_update)
   {
     last_x = new_x;
     last_y = new_y;
     last_z = new_z;
+    // Update the visual path for the roboat
+    pathMsg.poses.push_back(pose_stamped);
   }
-  else
-    return;
+  // else
+  //   return;
 
-  // Update the visual path for the roboat
-  static nav_msgs::Path pathMsg;
-  pathMsg.header = pose_stamped.header;
-  pathMsg.poses.push_back(pose_stamped);
-
+  
   if (pub_path.getNumSubscribers() != 0)
     pub_path.publish(pathMsg);
 

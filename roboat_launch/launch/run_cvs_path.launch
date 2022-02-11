@@ -6,13 +6,12 @@
 
     <!-- Make sure you provide the correct serial_port input -->
     <arg name="id"      default="$(env HOSTNAME)"/>
-    <arg name="file"    default="/paths/miniboat_shapeshift_miniboat4.csv"/>
+    <arg name="file"    default="/paths/miniboat_curve_speed_0.1.csv"/>
 
     <!-- Launches the node within the namespace -->
     <group ns="$(arg id)">
-        <node name="csv_path_node"  pkg="roboat_core"  type="csv_path_node">
-            <param name="trajectory/file" type="string" value="$(arg file)" />
-        </node>
+        <param name="trajectory/file" type="string" value="$(arg file)" />
+        <node name="csv_path_node"  pkg="roboat_core"  type="csv_path_node" output="screen" />
     </group>
 
 </launch>

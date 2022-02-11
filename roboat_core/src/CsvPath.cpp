@@ -21,11 +21,20 @@ CsvPath::CsvPath(ros::NodeHandle n)
   n.param("trajectory/init_x", init_x, 0.);
   n.param("trajectory/init_y", init_y, 0.);
   n.param("trajectory/angle_rotate", angle, 0.);
-  n.param("trajectory/file", relativeFileName, std::string("/paths/miniboat_shapeshift_miniboat4.csv"));
+  n.param("trajectory/file", relativeFileName, std::string("/paths/miniboat_curve_speed_0.1.csv"));
   n.param("trajectory/repeat", repeat, false);
   n.param("system_dynamics/step", step, 0.1);
   n.param("system_dynamics/num_steps", num_steps, 20);
 
+  std::string id, nmpc_frame;
+  n.param<std::string>("roboat_id",id,"");
+  if (id.empty()) {
+    nmpc_frame = "nmpc";
+  }
+  else {
+    nmpc_frame = "nmpc_"+id;
+  }
+  
   setRotation(angle);
   
   ROS_DEBUG("[CSV_PATH_NODE] relative filename: %s", relativeFileName.c_str()); 
@@ -73,7 +82,7 @@ CsvPath::CsvPath(ros::NodeHandle n)
   
       trajectoryPointSet(trajectory, num_steps-1, x, y, theta);
   
-      nav_msgs::Path path_msg = pathMsg(trajectory);
+      nav_msgs::Path path_msg = pathMsg(trajectory,nmpc_frame); //nmpc frame tailored for each boat
       path_pub.publish(path_msg);
   
       // publish pose representation of state
