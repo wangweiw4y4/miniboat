@@ -96,7 +96,7 @@ void Command::joyCallback(sensor_msgs::Joy msg)
 
 Command::Command(ros::NodeHandle n)
 {
-  Command::joy_max_force = 0.33;
+  Command::joy_max_force = 0.66;
 
   // publisher for command topic
   command_pub = n.advertise<roboat_core::CommandToMicroController>("command", 1);
