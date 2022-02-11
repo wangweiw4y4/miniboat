@@ -10,7 +10,7 @@ int main(int argc, char** argv)
   ros::NodeHandle nh;
   
   std::vector<std::string> boat_ids;
-  nh.getParam("/swarm/boat_ids",boat_ids);
+  nh.getParam("swarm/boat_ids",boat_ids);
   
   std::vector<RoboatVisualization> RV(boat_ids.size());
   for (uint i = 0; i<RV.size(); i++) {

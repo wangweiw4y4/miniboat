@@ -4,7 +4,7 @@
     from the home catkin workspace folder:
         ..src/miniboat/scripts/run_server.sh
     -->
-
+    <arg    name="id"                   default="$(env HOSTNAME)"/>
     <arg    name="use_multimaster"      default="true"/>
 
     <!-- Multimaster synchronization -->
@@ -13,10 +13,15 @@
     </node>
     <node if="$(arg use_multimaster)" name="master_sync"  pkg="fkie_master_sync"   type="master_sync"    output="screen"/>
 
-    <!-- loads swarm ids, to properly identify all -->
-    <rosparam command="load" file="$(find roboat_core)/config/swarm.yaml" ns="swarm"/>
+    <!-- visualization node -->
+    <!-- only one node instance in the whole network should run for all RVIZ windows, reason why it is loaded by the server -->
+    <include file="$(find roboat_visualization)/launch/visualization_node.launch"/>
 
-    <!-- RVIZ visualization -->
-    <include file="$(find roboat_visualization)/launch/rviz.launch"/>
+    <!-- RVIZ (since each RVIZ node should have a unique name, it is loaded within the namespace -->
+    <group ns="$(arg id)">
+        <include file="$(find roboat_visualization)/launch/rviz.launch"/>
+    </group>
+
+
     
 </launch>

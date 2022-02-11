@@ -22,9 +22,9 @@ void RoboatVisualization::initialize(ros::NodeHandle &nh, std::string id)
     id_=id;
   }
 
-  nh.getParam("/visualization/update_rate",update_rate);
-  nh.getParam("/visualization/distance_till_update",distance_till_update);
-  nh.getParam("/visualization/path_length",path_length);
+  nh.getParam("visualization/update_rate",update_rate);
+  nh.getParam("visualization/distance_till_update",distance_till_update);
+  nh.getParam("visualization/path_length",path_length);
   
   pub_path = nh.advertise<nav_msgs::Path>(ns+"visual/path", 1);
   pub_marker = nh.advertise<visualization_msgs::Marker>(ns+"visual/robot", 1);
