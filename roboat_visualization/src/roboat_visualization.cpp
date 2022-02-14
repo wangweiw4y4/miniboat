@@ -45,6 +45,8 @@ void RoboatVisualization::thrustStateCallback(const roboat_msgs::ThrustState& ms
 
 void RoboatVisualization::odometryCallback(const nav_msgs::Odometry& msg)
 {
+  pose_stamped_.header = msg.header;
+  pose_stamped_.pose = msg.pose.pose;
   dx = msg.twist.twist.linear.x;
   dy = msg.twist.twist.linear.y;
   dTheta = msg.twist.twist.angular.z;
@@ -62,6 +64,7 @@ void RoboatVisualization::forceCallback(const roboat_core::Force& msg)
 
 void RoboatVisualization::pathHandler(const ros::TimerEvent& event)
 {
+  /* checks that the transform is being published, so only active boats are shown */
   static tf::TransformListener listener;
   static tf::StampedTransform transform;
   try
@@ -74,42 +77,46 @@ void RoboatVisualization::pathHandler(const ros::TimerEvent& event)
     return;
   }
 
-  geometry_msgs::TransformStamped trans_stamped;
-  transformStampedTFToMsg(transform, trans_stamped);
-  geometry_msgs::PoseStamped pose_stamped;
-  pose_stamped.header = trans_stamped.header;
-  pose_stamped.pose.position.x = trans_stamped.transform.translation.x;
-  pose_stamped.pose.position.y = trans_stamped.transform.translation.y;
-  pose_stamped.pose.position.z = trans_stamped.transform.translation.z;
-  pose_stamped.pose.orientation.x = trans_stamped.transform.rotation.x;
-  pose_stamped.pose.orientation.y = trans_stamped.transform.rotation.y;
-  pose_stamped.pose.orientation.z = trans_stamped.transform.rotation.z;
-  pose_stamped.pose.orientation.w = trans_stamped.transform.rotation.w;
+  /* since we listen directly to odometry/filtered that provides the pose stamped, no need
+  to re-calculate the pose */
+  // geometry_msgs::TransformStamped trans_stamped;
+  // transformStampedTFToMsg(transform, trans_stamped);
+  // geometry_msgs::PoseStamped pose_stamped_;
+  // pose_stamped_.header = trans_stamped.header;
+  // pose_stamped_.pose.position.x = trans_stamped.transform.translation.x;
+  // pose_stamped_.pose.position.y = trans_stamped.transform.translation.y;
+  // pose_stamped_.pose.position.z = trans_stamped.transform.translation.z;
+  // pose_stamped_.pose.orientation.x = trans_stamped.transform.rotation.x;
+  // pose_stamped_.pose.orientation.y = trans_stamped.transform.rotation.y;
+  // pose_stamped_.pose.orientation.z = trans_stamped.transform.rotation.z;
+  // pose_stamped_.pose.orientation.w = trans_stamped.transform.rotation.w;
 
-  visualizeRobot(pose_stamped);
+  visualizeRobot(pose_stamped_);
 
-  static double last_x = transform.getOrigin().x();
-  static double last_y = transform.getOrigin().y();
-  static double last_z = transform.getOrigin().z();
-  double new_x = transform.getOrigin().x();
-  double new_y = transform.getOrigin().y();
-  double new_z = transform.getOrigin().z();
+  static double last_x = pose_stamped_.pose.position.x; //transform.getOrigin().x();
+  static double last_y = pose_stamped_.pose.position.y; //transform.getOrigin().y();
+  static double last_z = pose_stamped_.pose.position.z; //transform.getOrigin().z();
+  double new_x = pose_stamped_.pose.position.x; //transform.getOrigin().x();
+  double new_y = pose_stamped_.pose.position.y; //transform.getOrigin().y();
+  double new_z = pose_stamped_.pose.position.z; //transform.getOrigin().z();
 
   // We only update the path when we change position beyond certain value
   static nav_msgs::Path pathMsg;
-  pathMsg.header = pose_stamped.header;
-  if (sqrt((last_x - new_x) * (last_x - new_x) + (last_y - new_y) * (last_y - new_y) +
+  pathMsg.header = pose_stamped_.header;
+  if (pathMsg.poses.empty() || sqrt((last_x - new_x) * (last_x - new_x) + (last_y - new_y) * (last_y - new_y) +
             (last_z - new_z) * (last_z - new_z)) >= distance_till_update)
   {
-    last_x = new_x;
-    last_y = new_y;
-    last_z = new_z;
     // Update the visual path for the roboat
-    pathMsg.poses.push_back(pose_stamped);
+    pathMsg.poses.push_back(pose_stamped_);
   }
-  // else
-  //   return;
-
+  else {
+    /* replaces the last element with the current position to keep the path updated */
+    pathMsg.poses.back() = pose_stamped_;
+  }
+  /* stores current position as last recorded one for next iteration */
+  last_x = new_x;
+  last_y = new_y;
+  last_z = new_z;
   
   if (pub_path.getNumSubscribers() != 0)
     pub_path.publish(pathMsg);

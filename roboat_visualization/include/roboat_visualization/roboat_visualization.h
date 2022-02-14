@@ -40,6 +40,7 @@ private:
   double distance_till_update;
   double update_rate;
   double path_length;
+  geometry_msgs::PoseStamped pose_stamped_;
   double dx, dy, dTheta;
   double f1, f2, f3, f4;
   roboat_msgs::ThrustState current_thrust_state;
