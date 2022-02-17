@@ -16,8 +16,9 @@ find_package(catkin REQUIRED COMPONENTS
   roslint
   serial
   std_msgs
-   sensor_msgs
+  sensor_msgs
   geometry_msgs
+  roboat_msgs
   tf
 )
 
@@ -176,10 +177,10 @@ add_executable(command_node             src/command_node.cpp               src/C
 add_executable(csv_path_node            src/csv_path_node.cpp              src/CsvPath.cpp      src/Path.cpp)
 add_executable(pose_path_node           src/pose_path_node.cpp             src/PosePath.cpp     src/Path.cpp)
 add_executable(mpc_node                 src/mpc_node.cpp                   src/MPC.cpp)
-add_executable(sensor_node              src/sensor_node.cpp)
 add_executable(pid_node                 src/pid_node.cpp)
 add_executable(serial_node              src/serial_node.cpp)            
-add_executable(sim_node                 src/sim_node.cpp                   src/Sim.cpp)        
+add_executable(sim_node                 src/sim_node.cpp                   src/Sim.cpp)       
+add_executable(swarm_node               src/swarm_node.cxx                  src/swarm.cpp)        
 
 
 ## Rename C++ executable without prefix
@@ -191,21 +192,21 @@ add_executable(sim_node                 src/sim_node.cpp                   src/S
 ## Add cmake target dependencies of the executable
 ## same as for the library above
 add_dependencies(serial_node                 ${PROJECT_NAME}_generate_messages_cpp)
-add_dependencies(sensor_node                 ${PROJECT_NAME}_generate_messages_cpp)
 add_dependencies(pid_node                    ${PROJECT_NAME}_generate_messages_cpp)
 add_dependencies(mpc_node                    ${PROJECT_NAME}_generate_messages_cpp acado_mpc)
 add_dependencies(command_node                ${PROJECT_NAME}_generate_messages_cpp)
 add_dependencies(sim_node                    ${PROJECT_NAME}_generate_messages_cpp)
+add_dependencies(swarm_node                  ${PROJECT_NAME}_generate_messages_cpp)
 
 ## Specify libraries to link a library or executable target against
 target_link_libraries(serial_node                ${catkin_LIBRARIES})
 target_link_libraries(mpc_node                   ${catkin_LIBRARIES} acado_mpc)
-target_link_libraries(sensor_node                ${catkin_LIBRARIES})
 target_link_libraries(pid_node                   ${catkin_LIBRARIES})
 target_link_libraries(sim_node                   ${catkin_LIBRARIES})
 target_link_libraries(command_node               ${catkin_LIBRARIES})
 target_link_libraries(csv_path_node              ${catkin_LIBRARIES})
 target_link_libraries(pose_path_node             ${catkin_LIBRARIES})
+target_link_libraries(swarm_node                 ${catkin_LIBRARIES})
 #############
 ## Install ##
 #############
@@ -226,12 +227,12 @@ install(
   TARGETS
   acado_mpc
   command_node
-  sensor_node
   pid_node
   csv_path_node
   mpc_node
   serial_node
   sim_node
+  swarm_node
   ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
   LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
@@ -246,7 +247,7 @@ install(
 ## Mark other files for installation (e.g. launch and bag files, etc.)
 install(
   # FILES
-  DIRECTORY launch/
+  DIRECTORY config/ launch/
   DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/launch
 )
 

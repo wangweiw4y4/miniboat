@@ -5,6 +5,7 @@
 #include <geometry_msgs/PoseWithCovarianceStamped.h>
 #include <geometry_msgs/TwistWithCovarianceStamped.h>
 #include <nav_msgs/Path.h>
+#include <nav_msgs/Odometry.h>
 #include <std_msgs/Float32MultiArray.h>
 #include <std_msgs/Float64MultiArray.h>
 #include <acado_common.h>
@@ -22,19 +23,25 @@ private:
   //double yaw_tailor_reference;
   double last_state[6];
   std::vector<double> state;
+  int state_roll_over_count;
   ros::Publisher force_pub;
+  ros::Publisher prediction_pub;
   ros::Subscriber path_sub;
   ros::Subscriber pose_sub;
   ros::Subscriber twist_sub;
+  
+  std::string odom_frame_;
 
   // functions related to processing subscriber msgs
   void pathCallback(const nav_msgs::Path::ConstPtr& msg);
   void poseCallback(const geometry_msgs::PoseWithCovarianceStamped msg);
-  void stateCallback(const std_msgs::Float64MultiArray array);
+  void stateCallback(const nav_msgs::Odometry msg);
   void twistCallback(const geometry_msgs::TwistWithCovarianceStamped msg);
   void trajectoryFill(double* trajectory, int pathSize);
 
   std::vector<double> acadoForce(std::vector<double> state, double* trajectory);
+
+  nav_msgs::Path acadoPrediction();
 
 public:
   MPC(ros::NodeHandle n);

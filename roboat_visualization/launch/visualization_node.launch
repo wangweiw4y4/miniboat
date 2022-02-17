@@ -1,0 +1,15 @@
+<launch>
+
+    <!-- visualization node, publishing all the topics needed by RVIZ to visualize the boat and its trajectory 
+    WARNING!! Topics are published within each miniboat workspace so only one instance of the visualization_node should
+              running at any given time. 
+              Otherwise, topics will need to have separate names for each laptop, which will be a mess for RVIZ-->
+
+    <!-- loads ros visualization settings-->
+    <rosparam command="load" file="$(find roboat_core)/config/swarm.yaml" ns="swarm"/>
+    <rosparam command="load" file="$(find roboat_visualization)/config/settings.yaml" ns="visualization"/>
+    
+    <!-- Node generating the markers properly formatted -->
+    <node name="visualization_node"  pkg="roboat_visualization"  type="visualization_node" output="screen" respawn="true"/>
+
+</launch>

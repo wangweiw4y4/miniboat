@@ -74,3 +74,90 @@ dd if=path/to/your-backup.img of=/dev/sdX
 Finally, we can insert the sd card and start the cloned system. As the size of image could be much smaller than the sd card. If one wants to store more data later, we can use the disks tool on ubuntu to resize the partion of the sd card.
 
 
+## INSTALL & CONFIGURE CSSH
+
+ClusterSSH is a tool that allows to connect simultaneously to a group of machines through SSH, sending the commands typed to all of them at the same time. This is convenient to operate all the miniboats at the same time, when all need to receive the same command. 
+
+To install, simply
+```
+sudo apt update  
+sudo apt install clusterssh
+```
+
+To connect to all the miniboats, rather than typing all their addresses, it is simpler to save the cluster definition in the file `/etc/clusters`. If the file doesn't exist, you can create it it with `touch /etc/clusters`. Then, to load the miniboat info, 
+```
+sudo echo "miniboats ubuntu@192.168.31.14 ubuntu@192.168.31.16 <rest miniboats IPs >" >> /etc/clusters
+```
+
+At this point, to launch cssh and connect to the miniboat fleet, simply type `cssh miniboats`. 
+
+CSSH uses Xterm windows, rather simple. In order to visualize it better in screens with high definition, we need to modify the default configuration options as otherwise the text is too small. Two files need to be edited:
+
+1. To adjust the font size, modify the Xterm default configuration options by editing/creating the file `~/.Xresources` so it contains
+```
+Xft.dpi: 141
+xterm*faceName: xft:monospace:pixelsize=30
+```
+To apply the changes without re-starting the computer, simply type in a terminal `xrdb ~/.Xresources`
+
+2. To adjust the size/position of the terminals opened by CSSH, modify the cssh configuration file located at `~/.clusterssh/config`. All lines are commented with the default values. To adjust 
+```
+terminal_allow_send_events=-xrm '*.VT100.allowSendEvents:true'
+terminal_reserve_bottom=25
+terminal_reserve_left=50
+terminal_reserve_right=50
+terminal_reserve_top=50
+terminal_size=300x124
+```
+Depending on each screen, the values shown above might change. Just play with them until you find a good fit.
+
+For more information, check 
+- [linux.die.net](https://linux.die.net/man/1/cssh)
+- [linuxquestions.org](https://www.linuxquestions.org/questions/slackware-14/dpi-issues-on-high-resolution-screen-mainly-xterm-4175470553/)
+- [unix.stackexchange.com](https://unix.stackexchange.com/questions/219370/larger-xterm-fonts-on-hidpi-displays)
+- [linuxreviews.org](https://linuxreviews.org/HOWTO_set_DPI_in_Xorg)
+
+
+## RUN MINIBOATS
+
+Each of the miniboat runs locally the main software, providing independent and full autonomous control to each unit. In addition, a server laptop acts as a central hub providing the commands that trigger the different control schemes, can configure each unit, and visualizes the miniboat fleet in RVIZ. 
+
+First, after turning on all the miniboats, it is recommended to ensure that their clocks are synchronized. This can be done with
+```
+cd ~/catkin_ws/src/miniboat/scripts
+./sync_clocks.sh
+```
+
+Next, to initiate the control software in each miniboat, can be done simultaneously in all the units connecting to all of of them in a separate terminal with `cssh --fillscreen miniboats`. Once logged in, we can initiate the control software within the CSSH environment with
+```
+cd ~/catkin_ws
+source devel/setup.bash
+export HOSTNAME
+roslaunch roboat_launch miniboat.launch use_ekf:=true use_multimaster:=true
+./run_miniboat.sh
+```
+At this point, all miniboats should be ready to receive instructions and move autonomously. Note that we activate the use of the EKF filter for sensor data fusion, and also use multimaster to establish the communication channels between the miniboats. The latter requires that the file `/etc/hosts` in each miniboat and in the server contains the IP addresses of all the miniboats and the server. If not, they can be added manually in each machine editing that file, or using the provided script `scripts/setup_network.sh`. 
+
+To initiate the fleet visualization, in a new terminal window in the server:
+```
+cd ~/catkin_ws
+source devel/setup.bash
+roslaunch roboat_launch run_server.launch use_multimaster:=true
+```
+This should open a new RVIZ window, and visualize the miniboat fleet positions. 
+
+For manual control of an individual miniboat, we can do it connecting a joystick to the server and launching in a separate window a dedicated joy node
+```
+cd ~/catkin_ws
+source devel/setup.bash
+roslaunch roboat_launch run_joy.launch id:=<miniboat_id>
+```
+where you need to substitute `<miniboat_id>` with the miniboat hostname that want to be controlled.
+
+Similarly, to follow a predefined path loaded as a CSV file, 
+```
+cd ~/catkin_ws
+source devel/setup.bash
+roslaunch roboat_launch run_cvs_path.launch id:=<miniboat_id>
+```
+By default, it launches `miniboat_shapeshift_miniboat4.csv`. For a different path, add as launch parameter `file:=<file_name>`.

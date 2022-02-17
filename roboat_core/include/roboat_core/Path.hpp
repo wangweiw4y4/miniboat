@@ -16,7 +16,7 @@ protected:
   ros::Publisher path_pub;
   ros::Publisher ref_pose_pub;
 
-  nav_msgs::Path pathMsg(double* trajectory);
+  nav_msgs::Path pathMsg(double* trajectory, std::string nmpc_frame="nmpc");
   void setRotation(double angle);
   double* trajectoryPointSet(double* trajectory, int refNum, double x, double y, double theta);
 };

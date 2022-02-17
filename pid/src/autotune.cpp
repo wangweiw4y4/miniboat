@@ -79,8 +79,8 @@ int main(int argc, char** argv)
   ros::init(argc, argv, "autotune_node");
   ros::NodeHandle autotune_node;
   ros::start();
-  ros::Subscriber setpoint_sub = autotune_node.subscribe("/setpoint", 1, setpointCallback);
-  ros::Subscriber state_sub = autotune_node.subscribe("/state", 1, stateCallback);
+  ros::Subscriber setpoint_sub = autotune_node.subscribe("setpoint", 1, setpointCallback);
+  ros::Subscriber state_sub = autotune_node.subscribe("state", 1, stateCallback);
   ros::Rate loopRate(50);
 
   // Set Ki and Kd to zero for the ZN method with dynamic_reconfigure

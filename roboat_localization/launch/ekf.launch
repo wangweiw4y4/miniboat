@@ -1,0 +1,20 @@
+<launch>
+    <arg name="id" default="roboat"/>
+
+    <!-- EKF Fusion-->
+    <node pkg="robot_localization" type="ekf_localization_node" name="ekf_localization_node" respawn="true">
+        <rosparam command="load" file="$(find roboat_localization)/config/kalman_filter.yaml" />
+        <!-- updates odom & base_link_frame to include roboat_id and avoid conflicts with other roboats in the network -->
+        <param name="odom_frame" value="odom_$(arg id)"/>
+        <param name="world_frame" value="odom_$(arg id)"/>
+        <param name="base_link_frame" value="base_link_$(arg id)"/>
+        
+        <!-- In -->
+        <remap from="data/imu0"             to="data_filter/imu0" />
+        <!-- <remap from="data/imu1"             to="data_filter/imu1" /> -->
+        <remap from="data/paired_beacons"   to="data_filter/paired_beacons" />
+        <!-- Out (skipped, we use default topic names)-->
+        <!-- <remap from="accel/filtered"    to="roboat_localization/odometry_ekf/accel_filtered" /> -->
+        <!-- <remap from="odometry/filtered" to="roboat_localization/odometry_ekf/odometry_filtered" /> -->
+    </node>
+</launch>

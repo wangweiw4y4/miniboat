@@ -1,33 +1,57 @@
 <launch>
  
-    <include file="$(find roboat_core)/launch/master.launch">
-        <arg name="sim_node"                         default="false"/>
-    	<arg name="serial_node"                      default="true"/>
-    	<arg name="sensor_node"                      default="true"/>
-    	<arg name="csv_path_node"                    default="false"/>
-    	<arg name="mpc_node"                         default="true"/>
-    	<arg name="command_node"                     default="true"/>
-    	<arg name="joy_node"                         default="true"/>
-        <arg name="pid_node"                         default="false"/>
-    	<arg name="bag_node"	   		             default="false"/>
-    </include>
+    <!-- boat id
+         - remember to add 'export HOSTNAME' to the .bashrc file or script launching the program 
+         - namespaces with '-' character are not valid, need to be changed
+    -->
+    <arg    name="id"                   default="$(env HOSTNAME)"/>
+    <arg    name="use_multimaster"      default="true"/>
+    <arg    name="use_ekf"              default="true"/>
+
+    <!-- Multimaster synchronization -->
+    <node if="$(arg use_multimaster)" name="master_discovery"  pkg="fkie_master_discovery"   type="master_discovery"    output="screen">
+        <param name="mcast_group" type="str" value="224.0.0.1" />
+    </node>
     
-    <include file="$(find ros_imu_bno055)/launch/imu.launch">
-        <arg name = "serial_port" value="/dev/ttyUSB0" />
-        <arg name = "frame_id" value="imu_link" />
-        <arg name = "operation_mode" value="NDOF_FMC_OFF"/>
-        <arg name = "oscillator" value="INTERNAL" />
-        <arg name = "reset_orientation" value="true" />
-        <arg name = "frequency" value="50" /> 
-        <arg name = "use_magnetometer" value="true" />
-        <arg name = "use_temperature" value="true" /> 
-     </include>
-     
-      <include file="$(find marvelmind_nav)/launch/beacon.launch">
-      </include>
+    <!-- package namespace -->
+    <group ns="$(arg id)">
 
-      <include file="$(find pid)/launch/headingpid.launch">
-      </include>
+        <param  name="roboat_id"    type="string"   value="$(arg id)" />
 
+        <include file="$(find roboat_core)/launch/master.launch">
+            <arg name="sim_node"            value="false"/>
+            <arg name="serial_node"         value="true"/>
+            <arg name="csv_path_node"       value="false"/>
+            <arg name="mpc_node"            value="true"/>
+            <arg name="command_node"        value="true"/>
+            <arg name="joy_node"            value="false"/>
+            <arg name="pid_node"            value="false"/>
+            <arg name="swarm_node"          value="true"/>
+            <arg name="bag_node"            value="false"/>
+        </include>
+        
+        <include file="$(find ros_imu_bno055)/launch/imu.launch">
+            <arg name = "serial_port" value="/dev/ttyUSB0" />
+            <arg name = "frame_id" value="imu_link" />
+            <arg name = "operation_mode" value="NDOF_FMC_OFF"/>
+            <arg name = "oscillator" value="INTERNAL" />
+            <arg name = "reset_orientation" value="true" />
+            <arg name = "frequency" value="50" /> 
+            <arg name = "use_magnetometer" value="true" />
+            <arg name = "use_temperature" value="true" /> 
+        </include>
+        
+        <!-- paired beacons; arguments are "serial port & baudrate" -->
+        <node pkg="marvelmind_nav" type="hedge_rcv_bin" name="hedge_rcv_bin" args="/dev/ttyACM0 500000" output="screen"/>
+
+        <include file="$(find pid)/launch/headingpid.launch">
+        </include>
+
+        <include file="$(find roboat_localization)/launch/localization.launch" >
+            <arg name="id"                  value="$(arg id)"/>
+            <arg name="use_ekf"             value="$(arg use_ekf)"/>
+        </include>
+
+    </group>
      
 </launch>

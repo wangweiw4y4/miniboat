@@ -1,0 +1,8 @@
+<launch>
+    <!-- node name provided as argument, in case we want to initializa multiple visualization nodes on the same machine -->
+    <arg    name="name"     default="visualization_rviz"/>
+    
+    <!--- Loads RVIZ with the saved configuration -->
+    <node name="$(arg name)"  pkg="rviz" type="rviz" args="-d $(find roboat_visualization)/rviz/miniboats_visualization.rviz" />
+    
+</launch>

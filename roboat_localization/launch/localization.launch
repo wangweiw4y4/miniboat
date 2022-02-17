@@ -1,0 +1,26 @@
+<launch>
+    <arg name="id"                  default="roboat"/>
+    <arg name="use_ekf"             default="true"/>
+    
+    <!--- Robot State TF -->
+    <!-- <node pkg="tf" type="static_transform_publisher" name="tf_map_odom" args="0 0 0 0 0 0 1 map odom 100" /> -->
+    <include file="$(find roboat_localization)/launch/robot_state_publisher.launch">
+        <arg name="id" value="$(arg id)" />
+    </include>
+
+    <!--  Data filter  & EKF -->
+    <include if="$(arg use_ekf)" file="$(find roboat_localization)/launch/data_filter.launch">
+        <arg name="id"      value="$(arg id)"/>
+    </include>
+    <include if="$(arg use_ekf)" file="$(find roboat_localization)/launch/ekf.launch">
+        <arg name="id"      value="$(arg id)"/>
+    </include>
+
+    <!-- If not running EKF, executes directly the sensor node to determine miniboat position from beacons -->
+    <node if="$(eval not arg('use_ekf'))"  name="sensor_node"  pkg="roboat_localization"  type="sensor_node"  output="screen"/>  
+
+    <!-- test node, if wanted, can be run directly with
+        `rosrun roboat_localization test_node __ns:=$HOSTNAME` 
+    -->
+
+</launch>

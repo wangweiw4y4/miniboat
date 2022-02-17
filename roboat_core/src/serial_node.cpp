@@ -35,8 +35,8 @@ int main(int argc, char** argv)
   // publish sensor topic
   ros::Publisher sensor_pub = n.advertise<roboat_core::SensorFromMicroController>("sensor", 10);
 
-  n.param("/port/serial", port, std::string("/dev/ttyAMA0"));
-  n.param("/system_dynamics/step", step, 0.1);
+  n.param("port/serial", port, std::string("/dev/ttyAMA0"));
+  n.param("system_dynamics/step", step, 0.1);
 
   try
   {

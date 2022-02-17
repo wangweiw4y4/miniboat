@@ -1,0 +1,13 @@
+<launch>
+    <arg name="id"  default="roboat"/>
+
+    <!-- Parameters -->
+    <rosparam file="$(find roboat_localization)/config/filter_params.yaml" command="load"/>
+    
+    <!-- Data Filter -->
+    <node pkg="roboat_localization" type="data_filter_node" name="data_filter_node" output="screen" respawn="true">
+        <!-- Remaps topics (if sensors change between miniboats and use differen topcis) -->
+        <!-- <remap from="imu/data" to="imu/data"/> -->
+    </node>
+    
+</launch>

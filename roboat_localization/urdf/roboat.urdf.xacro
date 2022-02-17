@@ -1,0 +1,72 @@
+<?xml version="1.0"?>
+<robot name="miniboat" xmlns:xacro="http://roboat.org">
+    <!-- arguments -->
+    <xacro:arg name="id" default="miniboat" />
+    
+    <!-- constants -->
+    <xacro:property name="id" value="$(arg id)" />
+    <xacro:property name="PI" value="3.1415926535897931"/>
+    
+    <material name="dark_grey">
+        <color rgba="0.2 0.2 0.2 1.0"/>
+    </material>
+    <material name="light_grey">
+        <color rgba="0.4 0.4 0.4 1.0"/>
+    </material>
+    <material name="yellow">
+        <color rgba="0.8 0.8 0.0 1.0"/>
+    </material>
+    <material name="black">
+        <color rgba="0.15 0.15 0.15 1.0"/>
+    </material>
+
+    <!-- miniboat root link -->
+    <link name="base_link_${id}"/>
+
+    <!-- KDL does not support a base_link with an inertia. As workaround, we add an extra dummy link -->
+    <link name="chassis_link_${id}">
+        <collision>
+            <origin xyz="0 0 0.0"/>
+            <geometry>
+                <mesh filename="package://roboat_visualization/meshes/miniboat.dae" />
+            </geometry>
+        </collision>
+        <visual>
+            <origin xyz="0 0 0.0"/>
+            <geometry>
+                <mesh filename="package://roboat_visualization/meshes/miniboat.dae" />
+            </geometry>
+        </visual>
+        <inertial>
+            <!-- Center of mass -->
+            <origin xyz="0 0 0.05" rpy="0 0 0"/>
+            <mass value="0.6"/>
+            <!-- Moments of inertia -->
+            <inertia
+                    ixx="0.009" ixy="0.0" ixz="0.0"
+                    iyy="0.009" iyz="0.0"
+                    izz="0.006"/>
+        </inertial>
+    </link>
+    <joint name="chassis_joint_${id}" type="fixed">
+        <parent link="base_link_${id}"/>
+        <child link="chassis_link_${id}"/>
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+    </joint>
+
+    <!-- sensor joints -->
+    <link name="imu_link_${id}"/>
+    <joint name="imu_joint_${id}" type="fixed">
+        <parent link="base_link_${id}"/>
+        <child link="imu_link_${id}"/>
+        <origin xyz="0.0 0.0 0.04" rpy="0 0 0"/>
+    </joint>
+
+    <link name="dual_beacon_link_${id}"/>
+    <joint name="dual_beacon_joint_${id}" type="fixed">
+        <parent link="base_link_${id}"/>
+        <child link="dual_beacon_link_${id}"/>
+        <origin xyz="0.0 0.0 0.09" rpy="0 0 ${135*PI/180.0}"/>
+    </joint>
+
+</robot>

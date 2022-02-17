@@ -93,7 +93,7 @@ Sim::Sim(ros::NodeHandle n)
   force_sub = n.subscribe("command_force", 1, &Sim::forceCallback, this);
 
   // initial pose from rviz
-  initialpose_sub = n.subscribe("/initialpose", 1, &Sim::initialPoseCallback, this);
+  initialpose_sub = n.subscribe("initialpose", 1, &Sim::initialPoseCallback, this);
 
   ros::Rate loop_rate(1/step);
 
@@ -129,13 +129,13 @@ Sim::Sim(ros::NodeHandle n)
     pose_msg.pose.pose.position.y = -state[1]+disty(generator);
     pose_msg.pose.pose.orientation = tf::createQuaternionMsgFromYaw(-state[2]+distt(generator));
     pose_msg.header.stamp = currentTime;
-    pose_msg.header.frame_id = "map";
+    pose_msg.header.frame_id = "odom";
     pose_pub.publish(pose_msg);
     
     static tf::TransformBroadcaster odom_broadcaster;
 	geometry_msgs::TransformStamped odom_trans;
 	odom_trans.header.stamp = ros::Time::now();
-	odom_trans.header.frame_id = "map";
+	odom_trans.header.frame_id = "odom";
 	odom_trans.child_frame_id = "base_link";
 
 	odom_trans.transform.translation.x = pose_msg.pose.pose.position.x;

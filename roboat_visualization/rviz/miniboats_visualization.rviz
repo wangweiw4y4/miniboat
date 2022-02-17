@@ -1,0 +1,387 @@
+Panels:
+  - Class: rviz/Displays
+    Help Height: 0
+    Name: Displays
+    Property Tree Widget:
+      Expanded: ~
+      Splitter Ratio: 0.8510301113128662
+    Tree Height: 1783
+  - Class: rviz/Selection
+    Name: Selection
+  - Class: rviz/Views
+    Expanded:
+      - /Current View1
+    Name: Views
+    Splitter Ratio: 0.5981481671333313
+  - Class: rviz/Tool Properties
+    Expanded: ~
+    Name: Tool Properties
+    Splitter Ratio: 0.5
+Preferences:
+  PromptSaveOnExit: true
+Toolbars:
+  toolButtonStyle: 2
+Visualization Manager:
+  Class: ""
+  Displays:
+    - Alpha: 0.5
+      Cell Size: 0.4
+      Class: rviz/Grid
+      Color: 160; 160; 164
+      Enabled: true
+      Line Style:
+        Line Width: 0.03
+        Value: Lines
+      Name: Grid
+      Normal Cell Count: 0
+      Offset:
+        X: 5
+        Y: -3.5
+        Z: 0
+      Plane: XY
+      Plane Cell Count: 30
+      Reference Frame: <Fixed Frame>
+      Value: true
+    - Class: rviz/TF
+      Enabled: true
+      Frame Timeout: 15
+      Frames:
+        All Enabled: false
+        map:
+          Value: true
+        odom_miniboat4:
+          Value: false
+        nmpc_miniboat4:
+          Value: false
+        base_link_miniboat4:
+          Value: true
+        chassis_link_miniboat4:
+          Value: false
+        dual_beacon_link_miniboat4:
+          Value: false
+        imu_link_miniboat4:
+          Value: false
+        odom_miniboat6:
+          Value: false
+        nmpc_miniboat6:
+          Value: false
+        base_link_miniboat6:
+          Value: true
+        chassis_link_miniboat6:
+          Value: false
+        dual_beacon_link_miniboat6:
+          Value: false
+        imu_link_miniboat6:
+          Value: false
+        odom_miniboat7:
+          Value: false
+        nmpc_miniboat7:
+          Value: false
+        base_link_miniboat7:
+          Value: true
+        chassis_link_miniboat7:
+          Value: false
+        dual_beacon_link_miniboat7:
+          Value: false
+        imu_link_miniboat7:
+          Value: false
+        odom_miniboat8:
+          Value: false
+        nmpc_miniboat8:
+          Value: false
+        base_link_miniboat8:
+          Value: true
+        chassis_link_miniboat8:
+          Value: false
+        dual_beacon_link_miniboat8:
+          Value: false
+        imu_link_miniboat8:
+          Value: false
+      Marker Scale: 1
+      Name: TF
+      Show Arrows: false
+      Show Axes: true
+      Show Names: false
+      Tree:
+        {}
+      Update Interval: 0
+      Value: false
+    - Class: rviz/Group
+      Name: Miniboat4
+      Enabled: true
+      Displays:
+      - Class: rviz/Marker
+        Enabled: true
+        Marker Topic: /miniboat4/visual/robot
+        Name: Miniboat4
+        Namespaces:
+          miniboat6: true
+        Queue Size: 100
+        Value: true
+      - Name: Trajectory4
+        Class: rviz/Path
+        Enabled: true
+        Topic: /miniboat4/visual/path
+        Alpha: 1
+        Color: 25; 255; 0
+        Line Style: Billboards
+        Line Width: 0.01
+        Offset:
+          X: 0
+          Y: 0
+          Z: 0.1
+        Pose Style: None
+        Unreliable: false
+      - Name: Path_Command4
+        Class: rviz/Path
+        Enabled: true
+        Topic: /miniboat4/roboat_path
+        Alpha: 1
+        Color: 0; 0; 255
+        Line Style: Billboards
+        Line Width: 0.01
+        Offset:
+          X: 0
+          Y: 0
+          Z: 0.1
+        Pose Style: None
+        Unreliable: false
+      - Name: Path_Prediction4
+        Class: rviz/Path
+        Enabled: true
+        Topic: /miniboat4/nmpc/path_prediction
+        Alpha: 1
+        Color: 255; 127; 0
+        Line Style: Line
+        Offset:
+          X: 0
+          Y: 0
+          Z: 0.1
+        Pose Style: None
+        Unreliable: false
+    - Class: rviz/Group
+      Name: Miniboat6
+      Enabled: true
+      Displays:
+      - Class: rviz/Marker
+        Enabled: true
+        Marker Topic: /miniboat6/visual/robot
+        Name: Miniboat6
+        Namespaces:
+          miniboat6: true
+        Queue Size: 100
+        Value: true
+      - Name: Trajectory6
+        Class: rviz/Path
+        Enabled: true
+        Topic: /miniboat6/visual/path
+        Alpha: 1
+        Color: 25; 255; 0
+        Line Style: Billboards
+        Line Width: 0.01
+        Offset:
+          X: 0
+          Y: 0
+          Z: 0.1
+        Pose Style: None
+        Unreliable: false
+      - Name: Path_Command6
+        Class: rviz/Path
+        Enabled: true
+        Topic: /miniboat6/roboat_path
+        Alpha: 1
+        Color: 0; 0; 255
+        Line Style: Billboards
+        Line Width: 0.01
+        Offset:
+          X: 0
+          Y: 0
+          Z: 0.1
+        Pose Style: None
+        Unreliable: false
+      - Name: Path_Prediction6
+        Class: rviz/Path
+        Enabled: true
+        Topic: /miniboat6/nmpc/path_prediction
+        Alpha: 1
+        Color: 255; 127; 0
+        Line Style: Line
+        Offset:
+          X: 0
+          Y: 0
+          Z: 0.1
+        Pose Style: None
+        Unreliable: false
+    - Class: rviz/Group
+      Name: Miniboat7
+      Enabled: true
+      Displays:
+      - Class: rviz/Marker
+        Enabled: true
+        Marker Topic: /miniboat7/visual/robot
+        Name: Miniboat7
+        Namespaces:
+          {}
+        Queue Size: 100
+        Value: true
+      - Name: Trajectory7
+        Class: rviz/Path
+        Enabled: true
+        Topic: /miniboat7/visual/path
+        Alpha: 1
+        Color: 25; 255; 0
+        Line Style: Billboards
+        Line Width: 0.01
+        Offset:
+          X: 0
+          Y: 0
+          Z: 0.1
+        Pose Style: None
+        Unreliable: false
+      - Name: Path_Command7
+        Class: rviz/Path
+        Enabled: true
+        Topic: /miniboat7/roboat_path
+        Alpha: 1
+        Color: 0; 0; 255
+        Line Style: Billboards
+        Line Width: 0.01
+        Offset:
+          X: 0
+          Y: 0
+          Z: 0.1
+        Pose Style: None
+        Unreliable: false
+      - Name: Path_Prediction7
+        Class: rviz/Path
+        Enabled: true
+        Topic: /miniboat7/nmpc/path_prediction
+        Alpha: 1
+        Color: 255; 127; 0
+        Line Style: Line
+        Offset:
+          X: 0
+          Y: 0
+          Z: 0.1
+        Pose Style: None
+        Unreliable: false
+    - Class: rviz/Group
+      Name: Miniboat8
+      Enabled: true
+      Displays:
+      - Name: Miniboat8
+        Class: rviz/Marker
+        Enabled: true
+        Marker Topic: /miniboat8/visual/robot
+        Namespaces:
+          {}
+        Queue Size: 100
+        Value: true
+      - Name: Trajectory8
+        Class: rviz/Path
+        Enabled: true
+        Topic: /miniboat8/visual/path
+        Alpha: 1
+        Color: 25; 255; 0
+        Line Style: Billboards
+        Line Width: 0.01
+        Offset:
+          X: 0
+          Y: 0
+          Z: 0.1
+        Pose Style: None
+        Unreliable: false
+      - Name: Path_Command8
+        Class: rviz/Path
+        Enabled: true
+        Topic: /miniboat8/roboat_path
+        Alpha: 1
+        Color: 0; 0; 255
+        Line Style: Billboards
+        Line Width: 0.01
+        Offset:
+          X: 0
+          Y: 0
+          Z: 0.1
+        Pose Style: None
+        Unreliable: false
+      - Name: Path_Prediction8
+        Class: rviz/Path
+        Enabled: true
+        Topic: /miniboat8/nmpc/path_prediction
+        Alpha: 1
+        Color: 255; 127; 0
+        Line Style: Line
+        Offset:
+          X: 0
+          Y: 0
+          Z: 0.1
+        Pose Style: None
+        Unreliable: false
+  Enabled: true
+  Global Options:
+    Background Color: 0; 0; 0
+    Default Light: true
+    Fixed Frame: map
+    Frame Rate: 30
+  Name: root
+  Tools:
+    - Class: rviz/Interact
+      Hide Inactive Objects: true
+    - Class: rviz/FocusCamera
+    - Class: rviz/Measure
+  Value: true
+  Views:
+    Current:
+      Angle: -1.570796327
+      Class: rviz/TopDownOrtho
+      Enable Stereo Rendering:
+        Stereo Eye Separation: 0.06
+        Stereo Focal Distance: 1
+        Swap Stereo Eyes: false
+        Value: false
+      Invert Z Axis: false
+      Name: Current View
+      Near Clip Distance: 0.01
+      Scale: 150
+      Target Frame: base_link
+      Value: TopDownOrtho (rviz)
+      X: 5.0
+      Y: -3.3
+    Saved: 
+      - Name: XYOrbit
+        Class: rviz/XYOrbit
+        Distance: 1.0668736696243286
+        Enable Stereo Rendering:
+          Stereo Eye Separation: 0.05999999865889549
+          Stereo Focal Distance: 1
+          Swap Stereo Eyes: false
+          Value: false
+        Focal Point:
+          X: 0.0
+          Y: 0.0
+          Z: 0.0
+        Focal Shape Fixed Size: true
+        Focal Shape Size: 0.05000000074505806
+        Invert Z Axis: false
+        Near Clip Distance: 0.009999999776482582
+        Pitch: 0.6203979849815369
+        Target Frame: base_link
+        Value: XYOrbit (rviz)
+        Yaw: 5.438571453094482
+Window Geometry:
+  Displays:
+    collapsed: false
+  Height: 2049
+  Hide Left Dock: false
+  Hide Right Dock: false
+  QMainWindow State: 000000ff00000000fd00000004000000000000027900000765fc020000000afb0000001200530065006c0065006300740069006f006e000000006e000000b0000000b000fffffffb000000120056006900650077007300200054006f006f02000001df000002110000018500000122fb000000200054006f006f006c002000500072006f0070006500720074006900650073003203000002880000011d000002210000017afb000000100044006900730070006c006100790073010000006e000007650000018200fffffffb0000001a004600650061007400750072006500200049006d00610067006500000002fb000001000000000000000000fb0000002000730065006c0065006300740069006f006e00200062007500660066006500720200000138000000aa0000023a00000294fb00000014005700690064006500530074006500720065006f02000000e6000000d2000003ee0000030bfb0000000c004b0069006e0065006300740200000186000001060000030c00000261fb0000001e0054006f006f006c002000500072006f00700065007200740069006500730000000723000000b0000000b000fffffffb0000000a0049006d00610067006501000002cc000001b90000000000000000000000010000021e00000765fc0200000003fb0000001e0054006f006f006c002000500072006f00700065007200740069006500730100000041000000780000000000000000fb0000000a00560069006500770073010000006e000007650000013200fffffffb0000001200530065006c0065006300740069006f006e010000025a000000b200000000000000000000000200000490000000a9fc0100000001fb0000000a00560069006500770073030000004e00000080000002e10000019700000003000004b000000040fc0100000002fb0000000800540069006d00650000000000000004b00000000000000000fb0000000800540069006d00650100000000000004500000000000000000000009cb0000076500000004000000040000000800000008fc0000000100000002000000010000000a0054006f006f006c00730100000000ffffffff0000000000000000
+  Selection:
+    collapsed: false
+  Tool Properties:
+    collapsed: false
+  Views:
+    collapsed: false
+  Width: 3706
+  X: 134
+  Y: 55
