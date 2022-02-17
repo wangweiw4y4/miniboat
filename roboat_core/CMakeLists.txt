@@ -117,6 +117,9 @@ generate_messages(
 ## CATKIN_DEPENDS: catkin_packages dependent projects also need
 ## DEPENDS: system dependencies of this project that dependent projects also need
 catkin_package(
+  INCLUDE_DIRS
+  include 
+  ${EIGEN3_INCLUDE_DIR}
 #  LIBRARIES roboat_core
   CATKIN_DEPENDS 
   geometry_msgs
@@ -173,7 +176,7 @@ add_library(
 ## Declare a C++ executable
 ## With catkin_make all packages are built within a single CMake context
 ## The recommended prefix ensures that target names across packages don't collide
-add_executable(command_node             src/command_node.cpp               src/Command.cpp)
+add_executable(command_node             src/command_node.cpp               src/Command.cpp      src/model_identification.cpp  src/miscfun.cpp)
 add_executable(csv_path_node            src/csv_path_node.cpp              src/CsvPath.cpp      src/Path.cpp)
 add_executable(pose_path_node           src/pose_path_node.cpp             src/PosePath.cpp     src/Path.cpp)
 add_executable(mpc_node                 src/mpc_node.cpp                   src/MPC.cpp)

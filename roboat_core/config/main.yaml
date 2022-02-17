@@ -60,3 +60,16 @@ sensor_covariance: {
         }
     }
 }
+
+model_identification: {
+    bounds: [1.0, 0.0, 3.0, 7.0],
+    n_steps: 4,
+    ref_len: 0.4,           #(m)
+    ref_force: 1.0,         #(N)
+    ref_vel: 0.1,           #(m/s)
+    pos_threshold: 0.05,    #(m)
+    dir_threshold: deg(5),  #(rad)
+    vel_threshold: 0.02,    #(m/s)
+    yaw_cmd: 0.05,          #(N)
+    yaw_threshold: deg(15)  #(rad)
+}

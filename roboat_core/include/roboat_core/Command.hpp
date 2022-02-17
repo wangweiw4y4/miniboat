@@ -7,7 +7,9 @@
 
 #include <roboat_core/CommandToMicroController.h>
 #include <roboat_core/Force.h>
+#include <roboat_core/model_identification.h>
 #include <roboat_msgs/ThrustState.h>
+
 
 class Command
 {
@@ -18,13 +20,17 @@ private:
   ros::Publisher thrust_state_pub;
   ros::Publisher latch_override_pub;
   ros::Publisher latch_pub;
-  int command_priority = 3, stop_force_priority = 3;
+  int command_priority, stop_force_priority = 3, calibrating_priority = 4;
   unsigned char latchingaction[1] = {0}; 
   double force[4]; 
-  double joy_max_force;
+  double joy_max_force, force_available;
   const int pid_priority = 1;
   const int mpc_priority = 2;
   double stop_force[4] = {0, 0, 0, 0};
+  
+  ModelIdentification model_;
+
+  int missed_beats_, max_missed_beats_=4;
 
   void forceCallback(const roboat_core::Force::ConstPtr& msg, int priority);
   void joyCallback(const sensor_msgs::Joy msg);

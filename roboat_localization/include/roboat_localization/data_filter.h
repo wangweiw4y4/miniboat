@@ -24,6 +24,7 @@
 #include "marvelmind_nav/hedge_imu_raw.h"
 // #include "marvelmind_nav/hedge_imu_fusion.h"
 
+#include "roboat_core/miscfun.h"
 
 // class definition
 class DataFilter {
@@ -55,20 +56,6 @@ class DataFilter {
  public:
   DataFilter();  
 
-};
-
-class DataTS {
-private:
-  int ntime_ts_,itime_first_,itime_last_;
-  double time_span_ts_;
-  double min_covariance_;
-  std::vector<double> time_ts_, dat_ts_;
-  
-public:
-  DataTS(double time_span);
-  void addPoint(double time, double val);
-  double getMean();
-  double getCovariance();
 };
 
 #endif  // DATA_FILTER_H
