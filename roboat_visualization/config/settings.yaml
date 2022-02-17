@@ -4,4 +4,4 @@
 # ids of the boats composing the swarm
 update_rate: 30.0           #(Hz)
 distance_till_update: 0.05  #(m)
-path_length: 10.0           #(s), duration of the path plotted 
+path_length: 30.0           #(s), duration of the path plotted 

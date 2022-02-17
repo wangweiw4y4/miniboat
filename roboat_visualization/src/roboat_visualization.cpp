@@ -108,15 +108,15 @@ void RoboatVisualization::pathHandler(const ros::TimerEvent& event)
   {
     // Update the visual path for the roboat
     pathMsg.poses.push_back(pose_stamped_);
+    /* stores current position as last recorded one for next iteration */
+    last_x = new_x;
+    last_y = new_y;
+    last_z = new_z;
   }
   else {
     /* replaces the last element with the current position to keep the path updated */
     pathMsg.poses.back() = pose_stamped_;
   }
-  /* stores current position as last recorded one for next iteration */
-  last_x = new_x;
-  last_y = new_y;
-  last_z = new_z;
   
   if (pub_path.getNumSubscribers() != 0)
     pub_path.publish(pathMsg);

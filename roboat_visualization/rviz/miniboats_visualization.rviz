@@ -108,7 +108,7 @@ Visualization Manager:
       Value: false
     - Class: rviz/Group
       Name: Miniboat4
-      Enabled: false
+      Enabled: true
       Displays:
       - Class: rviz/Marker
         Enabled: true
@@ -161,7 +161,7 @@ Visualization Manager:
         Unreliable: false
     - Class: rviz/Group
       Name: Miniboat6
-      Enabled: false
+      Enabled: true
       Displays:
       - Class: rviz/Marker
         Enabled: true
@@ -214,7 +214,7 @@ Visualization Manager:
         Unreliable: false
     - Class: rviz/Group
       Name: Miniboat7
-      Enabled: false
+      Enabled: true
       Displays:
       - Class: rviz/Marker
         Enabled: true

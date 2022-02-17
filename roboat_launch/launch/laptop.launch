@@ -5,9 +5,10 @@
     <arg    name="use_multimaster"      default="true"/>
 
     <!-- Multimaster synchronization -->
-    <node if="$(arg use_multimaster)" name="master_discovery"  pkg="master_discovery_fkie"   type="master_discovery"    output="screen">
+    <node if="$(arg use_multimaster)" name="master_discovery"  pkg="fkie_master_discovery"   type="master_discovery"    output="screen">
         <param name="mcast_group" type="str" value="224.0.0.1" />
     </node>
+    <node if="$(arg use_multimaster)" name="master_sync"  pkg="fkie_master_sync"   type="master_sync"    output="screen"/>
     
     <!-- RVIZ (since each RVIZ node should have a unique name, it is loaded within the namespace -->
     <group ns="$(arg id)">
