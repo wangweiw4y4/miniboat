@@ -65,6 +65,8 @@ void MPC::stateCallback(const nav_msgs::Odometry msg) {
     state[4] = -msg.twist.twist.linear.y;
     state[5] = -msg.twist.twist.angular.z;
     
+    ROS_ERROR("miniboat state is %f, %f, %f, %f, %f, %f", state[0], state[1],state[2],state[3],state[4],state[5]);
+    
 }
 
 // void MPC::poseCallback(const geometry_msgs::PoseWithCovarianceStamped msg)
@@ -299,7 +301,7 @@ MPC::MPC(ros::NodeHandle n)
   n.param("system_dynamics/num_steps", num_steps, 40);
 
   // publisher for force topic
-  force_pub = n.advertise<roboat_core::Force>("mpc_force", 10);
+  force_pub = n.advertise<roboat_core::Force>("mpc_force", 1);
 
   // publisher of the path predicted by ACADO
   prediction_pub = n.advertise<nav_msgs::Path>("nmpc/path_prediction", 1);
@@ -398,7 +400,7 @@ MPC::MPC(ros::NodeHandle n)
     pose_received = false;
 
     double endTime = ros::Time::now().toSec();
-    ROS_DEBUG("[MPC NODE] loop runtime: %fs\n", endTime - currentTime);
+    ROS_ERROR("[MPC NODE] loop runtime: %fs\n", endTime - currentTime);
     loop_rate.sleep();
   }
 
