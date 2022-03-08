@@ -3,6 +3,7 @@
 # -----------------------------------------------------------------------------
 # ids of the boats composing the swarm
 boat_ids: [
+  "miniboat3",
   "miniboat4",
   "miniboat5",
   "miniboat6",
