@@ -15,7 +15,7 @@ int main(int argc, char *argv[])
     ros::init(argc, argv, "pf_node");
     ros::NodeHandle nh;
     PotentialField potentialField(nh);
-    int rate = 100;
+    int rate = 10;
     ros::Rate loop_rate(rate);
     ros::Duration(5).sleep();
     //force parameters

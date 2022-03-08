@@ -138,7 +138,7 @@ void PotentialField::timeStep(polygon_t _shape)
     // boat current position
     pose(0) = swarm_.state_[idx_][0]; //pose in x
     pose(1) = swarm_.state_[idx_][1]; //pose in y
-    psi = swarm_.state_[idx_][3]; //yaw
+    psi = swarm_.state_[idx_][2]; //yaw
     //detected neighbors position
     robots_detected.clear();
     number_of_robots = 0;
