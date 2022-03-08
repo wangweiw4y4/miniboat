@@ -400,7 +400,7 @@ MPC::MPC(ros::NodeHandle n)
     pose_received = false;
 
     double endTime = ros::Time::now().toSec();
-    ROS_ERROR("[MPC NODE] loop runtime: %fs\n", endTime - currentTime);
+   // ROS_ERROR("[MPC NODE] loop runtime: %fs\n", endTime - currentTime);
     loop_rate.sleep();
   }
 
