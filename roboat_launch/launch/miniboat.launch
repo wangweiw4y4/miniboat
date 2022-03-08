@@ -23,6 +23,7 @@
             <arg name="serial_node"         value="true"/>
             <arg name="csv_path_node"       value="false"/>
             <arg name="mpc_node"            value="true"/>
+            <arg name="pf_node"             value="true"/>
             <arg name="command_node"        value="true"/>
             <arg name="joy_node"            value="false"/>
             <arg name="pid_node"            value="false"/>

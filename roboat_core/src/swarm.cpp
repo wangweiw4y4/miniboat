@@ -7,9 +7,15 @@ Class that controls to motion of the boat to approach to the target
 
 #include "roboat_core/swarm.h"
 
-
 Swarm::Swarm(ros::NodeHandle &nh) : nh_(nh)
 {
+  initialize(nh_);
+}
+
+
+void Swarm::initialize(ros::NodeHandle &nh) 
+{
+  nh_ = nh;
   /*After being initialized, runs within the class the control node, since no
   other control scheme is considered for now*/
 
@@ -32,11 +38,12 @@ Swarm::Swarm(ros::NodeHandle &nh) : nh_(nh)
   
   //resize the arrays within showing the number 
   state_.resize(n_boats_);
+  last_beat_.resize(n_boats_);
   swarm_state_.resize(n_boats_);
 
   for (int i = 0; i<n_boats_; i++) {
     state_[i].resize(6);
-    swarm_state_[i].initialize(nh_, boat_ids_[i], &state_[i]);
+    swarm_state_[i].initialize(nh_, boat_ids_[i], &state_[i], &last_beat_[i]);
   }
 }
 
@@ -59,10 +66,11 @@ SwarmState::SwarmState()
 {
 }
 
-void SwarmState::initialize(ros::NodeHandle &nh, std::string id, std::vector<double>* state) 
+void SwarmState::initialize(ros::NodeHandle &nh, std::string id, std::vector<double>* state, double* last_beat) 
 {
   nh_ = nh;
   state_ = state;
+  last_beat_ = last_beat;
   //subscribe to the topic (keep "/" apart so topic name is relative as in the rest of code)
   std::string topic = "/" +  id + "/" + "odometry/filtered"; 
   // ROS_INFO("rostopic subscribed: %s", topic.c_str());
@@ -75,6 +83,8 @@ void SwarmState::stateCallback(const nav_msgs::Odometry msg) {
     /*If state is advertised as an array, data can just be copied */
     // for(int i=0; i<6; i++) state[i] = array.data[i];
     // pose_received = true;
+
+    *last_beat_ = msg.header.stamp.toSec();
     
     /*If state is advertised as odometry, easier to visualize in rviz*/
     double yaw;

@@ -21,12 +21,13 @@ private:
   ros::NodeHandle nh_;
   ros::Subscriber state_sub_;
   std::vector<double>* state_;
+  double* last_beat_; 
 
   void stateCallback(const nav_msgs::Odometry msg);
 
 public:
   SwarmState();
-  void initialize(ros::NodeHandle &nh, std::string id, std::vector<double>* state);
+  void initialize(ros::NodeHandle &nh, std::string id, std::vector<double>* state, double* last_beat);
 };
 
 
@@ -40,7 +41,9 @@ private:
   std::vector<SwarmState> swarm_state_;   //callbacks processing all messages
 
 public:
+  Swarm() {};
   Swarm(ros::NodeHandle &nh);
+  void initialize(ros::NodeHandle &nh);
   int getIdx();
   int getBoatN();
   std::vector<std::string> getBoatNames();
@@ -48,6 +51,7 @@ public:
   /* state is the main variable that swarm provides access to the running node, since it 
   process the callbacks from each miniboat and fills the state */
   std::vector<std::vector<double>> state_;
+  std::vector<double> last_beat_;
 };
 
 #endif  // SWARM_H

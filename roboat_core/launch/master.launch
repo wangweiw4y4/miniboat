@@ -6,6 +6,7 @@
     <arg name="serial_node"                      default="true"/>
     <arg name="csv_path_node"                    default="false"/>
     <arg name="mpc_node"                         default="true"/>
+    <arg name="pf_node"                          default="true"/>
     <arg name="command_node"                     default="true"/>
     <arg name="joy_node"                         default="true"/>
     <arg name="pid_node"                         default="false"/>
@@ -29,6 +30,7 @@
     <node if="$(arg sim_node)"                 name="sim_node"                pkg="roboat_core"       type="sim_node"           output="screen"/>
     <node if="$(arg serial_node)"              name="serial_node"             pkg="roboat_core"       type="serial_node"/>
     <node if="$(arg mpc_node)"                 name="mpc_node"                pkg="roboat_core"       type="mpc_node"           output="screen"/>
+    <node if="$(arg pf_node)"                  name="pf_node"                 pkg="roboat_core"       type="pf_node"            output="screen"/>
     <node if="$(arg command_node)"             name="command_node"            pkg="roboat_core"       type="command_node"       output="screen"/>
     <node if="$(arg csv_path_node)"            name="csv_path_node"           pkg="roboat_core"       type="csv_path_node"/>
     <node if="$(arg joy_node)"                 name="joy_node"                pkg="joy"               type="joy_node"/>
