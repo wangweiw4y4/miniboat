@@ -41,18 +41,18 @@ PotentialField::PotentialField(ros::NodeHandle nh) : nh_(nh)
     shape_pub_ = nh_.advertise<nav_msgs::Path>(ns+"visual/shape", 1);
     
 
-    static const float d_target_region = 4.0; //half of the target square side
+    static const float d_target_region = 0.3; //half of the target square side
     static const float d_target_r0 = 1.0; //target r0
     static const float d_target_stf = 0.004; //target lattice force coefficient
     static const float d_target_srf = 0.008; //target repulsive force coefficient
-    static const float d_multi_region = 3.0;
+    static const float d_multi_region = 2.0;
     static const float d_multi_r0 = 10.0;
     static const float d_multi_stf = 0.001;
     static const float d_multi_srf = 0.005;
     static const int d_shrink_time = 120;
     static const int d_inside_time = 45;
-    static const float d_x_center = 0.0;
-    static const float d_y_center = 0.0;
+    static const float d_x_center = 1.0;
+    static const float d_y_center = 3.0;
     static const float d_attractive_par_1 = 0.01;
     static const float d_attractive_par_2 = 0.5;
     
@@ -187,7 +187,7 @@ void PotentialField::timeStep(polygon_t _shape)
     for (int i=0; i<shape_vertexes.size(); i++ ) {
         shape_msg_.poses[i].header = shape_msg_.header;
         shape_msg_.poses[i].pose.position.x = shape_vertexes[i].x;
-        shape_msg_.poses[i].pose.position.y = shape_vertexes[i].y;
+        shape_msg_.poses[i].pose.position.y = -shape_vertexes[i].y; //back to odom frame
         shape_msg_.poses[i].pose.position.z = 0.0;
     }
     if (!shape_msg_.poses.empty()) {
@@ -221,6 +221,8 @@ void PotentialField::timeStep(polygon_t _shape)
     if (std::abs(linear_force(1)) > 0.05){
         linear_force(1) = copysign(0.05,linear_force(1));
     }
+
+    //ROS_INFO("fx %f, fy %f",linear_force(0), linear_force(1));
 
     //Transformation matrix
     rotation << cos(psi), -sin(psi),
@@ -279,12 +281,12 @@ std::vector<double> PotentialField::allocateForce(Vector3f tau)
     }
     //moment
     if (tau(2)>0) {
-        force[1] += tau(2)*mom2thruster;
-        force[2] += tau(2)*mom2thruster;
-    }
-    else {
         force[0] += tau(2)*mom2thruster;
         force[3] += tau(2)*mom2thruster;
+    }
+    else {
+        force[1] += -tau(2)*mom2thruster;
+        force[2] += -tau(2)*mom2thruster;
     }
     return force;
 }
