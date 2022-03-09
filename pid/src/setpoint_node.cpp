@@ -52,7 +52,7 @@ int main(int argc, char** argv)
   setpoint.data = 1.0;
   ros::Publisher setpoint_pub = setpoint_node.advertise<std_msgs::Float64>("setpoint", 1);
 
-  ros::Rate loop_rate(0.2);  // change setpoint every 5 seconds
+  ros::Rate loop_rate(10);  // change setpoint every 5 seconds
 
   while (ros::ok())
   {
