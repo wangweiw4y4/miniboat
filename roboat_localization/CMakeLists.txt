@@ -78,6 +78,7 @@ link_directories(
 
 # Data Modify
 add_executable(data_filter_node  src/data_filter_node.cxx  src/data_filter.cpp)
+add_dependencies(data_filter_node  ${catkin_EXPORTED_TARGETS})
 target_link_libraries(data_filter_node  ${catkin_LIBRARIES})
 
 add_executable(sensor_node  src/sensor_node.cxx)
