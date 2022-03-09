@@ -107,6 +107,72 @@ Visualization Manager:
       Update Interval: 0
       Value: false
     - Class: rviz/Group
+      Name: Miniboat3
+      Enabled: true
+      Displays:
+      - Class: rviz/Marker
+        Enabled: true
+        Marker Topic: /miniboat3/visual/robot
+        Name: Miniboat3
+        Namespaces:
+          miniboat6: true
+        Queue Size: 100
+        Value: true
+      - Name: Trajectory3
+        Class: rviz/Path
+        Enabled: true
+        Topic: /miniboat3/visual/path
+        Alpha: 1
+        Color: 25; 255; 0
+        Line Style: Billboards
+        Line Width: 0.01
+        Offset:
+          X: 0
+          Y: 0
+          Z: 0.1
+        Pose Style: None
+        Unreliable: false
+      - Name: Path_Command3
+        Class: rviz/Path
+        Enabled: true
+        Topic: /miniboat3/roboat_path
+        Alpha: 1
+        Color: 0; 0; 255
+        Line Style: Billboards
+        Line Width: 0.01
+        Offset:
+          X: 0
+          Y: 0
+          Z: 0.1
+        Pose Style: None
+        Unreliable: false
+      - Name: Path_Prediction3
+        Class: rviz/Path
+        Enabled: true
+        Topic: /miniboat3/nmpc/path_prediction
+        Alpha: 1
+        Color: 255; 127; 0
+        Line Style: Line
+        Offset:
+          X: 0
+          Y: 0
+          Z: 0.1
+        Pose Style: None
+        Unreliable: false
+      - Name: Shape3
+        Class: rviz/Path
+        Enabled: false
+        Topic: /miniboat3/visual/shape
+        Alpha: 1
+        Color: 25; 255; 0
+        Line Style: Lines
+        Offset:
+          X: 0
+          Y: 0
+          Z: 0.1
+        Pose Style: None
+        Unreliable: false
+    - Class: rviz/Group
       Name: Miniboat4
       Enabled: true
       Displays:
@@ -153,6 +219,85 @@ Visualization Manager:
         Alpha: 1
         Color: 255; 127; 0
         Line Style: Line
+        Offset:
+          X: 0
+          Y: 0
+          Z: 0.1
+        Pose Style: None
+        Unreliable: false
+      - Name: Shape4
+        Class: rviz/Path
+        Enabled: false
+        Topic: /miniboat4/visual/shape
+        Alpha: 1
+        Color: 25; 255; 0
+        Line Style: Lines
+        Offset:
+          X: 0
+          Y: 0
+          Z: 0.1
+        Pose Style: None
+        Unreliable: false
+    - Class: rviz/Group
+      Name: Miniboat5
+      Enabled: true
+      Displays:
+      - Class: rviz/Marker
+        Enabled: true
+        Marker Topic: /miniboat4/visual/robot
+        Name: Miniboat5
+        Namespaces:
+          miniboat6: true
+        Queue Size: 100
+        Value: true
+      - Name: Trajectory5
+        Class: rviz/Path
+        Enabled: true
+        Topic: /miniboat5/visual/path
+        Alpha: 1
+        Color: 25; 255; 0
+        Line Style: Billboards
+        Line Width: 0.01
+        Offset:
+          X: 0
+          Y: 0
+          Z: 0.1
+        Pose Style: None
+        Unreliable: false
+      - Name: Path_Command5
+        Class: rviz/Path
+        Enabled: true
+        Topic: /miniboat5/roboat_path
+        Alpha: 1
+        Color: 0; 0; 255
+        Line Style: Billboards
+        Line Width: 0.01
+        Offset:
+          X: 0
+          Y: 0
+          Z: 0.1
+        Pose Style: None
+        Unreliable: false
+      - Name: Path_Prediction5
+        Class: rviz/Path
+        Enabled: true
+        Topic: /miniboat5/nmpc/path_prediction
+        Alpha: 1
+        Color: 255; 127; 0
+        Line Style: Line
+        Offset:
+          X: 0
+          Y: 0
+          Z: 0.1
+        Pose Style: None
+        Unreliable: false
+      - Name: Shape4
+        Class: rviz/Path
+        Enabled: false
+        Topic: /miniboat5/visual/shape
+        Alpha: 1
+        Color: 25; 255; 0
+        Line Style: Lines
         Offset:
           X: 0
           Y: 0
@@ -212,6 +357,19 @@ Visualization Manager:
           Z: 0.1
         Pose Style: None
         Unreliable: false
+      - Name: Shape6
+        Class: rviz/Path
+        Enabled: false
+        Topic: /miniboat6/visual/shape
+        Alpha: 1
+        Color: 25; 255; 0
+        Line Style: Lines
+        Offset:
+          X: 0
+          Y: 0
+          Z: 0.1
+        Pose Style: None
+        Unreliable: false
     - Class: rviz/Group
       Name: Miniboat7
       Enabled: true
@@ -265,6 +423,19 @@ Visualization Manager:
           Z: 0.1
         Pose Style: None
         Unreliable: false
+      - Name: Shape7
+        Class: rviz/Path
+        Enabled: false
+        Topic: /miniboat7/visual/shape
+        Alpha: 1
+        Color: 25; 255; 0
+        Line Style: Lines
+        Offset:
+          X: 0
+          Y: 0
+          Z: 0.1
+        Pose Style: None
+        Unreliable: false
     - Class: rviz/Group
       Name: Miniboat8
       Enabled: true
@@ -312,6 +483,19 @@ Visualization Manager:
         Alpha: 1
         Color: 255; 127; 0
         Line Style: Line
+        Offset:
+          X: 0
+          Y: 0
+          Z: 0.1
+        Pose Style: None
+        Unreliable: false
+      - Name: Shape8
+        Class: rviz/Path
+        Enabled: false
+        Topic: /miniboat8/visual/shape
+        Alpha: 1
+        Color: 25; 255; 0
+        Line Style: Lines
         Offset:
           X: 0
           Y: 0

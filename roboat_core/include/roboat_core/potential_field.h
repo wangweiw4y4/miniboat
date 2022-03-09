@@ -13,6 +13,7 @@
 #include "ros/ros.h"
 #include "geometry_msgs/Pose2D.h"
 #include "geometry_msgs/Vector3.h"
+#include <nav_msgs/Path.h>
 #include <eigen3/Eigen/Dense>
 #include <tf2/LinearMath/Quaternion.h>
 #include "VFF/VirtualForceField.h"
@@ -98,8 +99,11 @@ private:
     ros::NodeHandle nh_;
     ros::Publisher tau_pub_;
     ros::Publisher force_pub_;
+    ros::Publisher shape_pub_;
     ros::Subscriber shape_sub_;
 
+    nav_msgs::Path shape_msg_;
+    
     Swarm swarm_;
     int swarm_size_, idx_;
     double detection_max_lapse_;

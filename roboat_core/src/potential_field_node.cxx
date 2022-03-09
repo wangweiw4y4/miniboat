@@ -17,7 +17,7 @@ int main(int argc, char *argv[])
     PotentialField potentialField(nh);
     int rate = 10;
     ros::Rate loop_rate(rate);
-    ros::Duration(5).sleep();
+    // ros::Duration(5).sleep();
     //force parameters
     forceparameters_t fp = { potentialField.attractive_par_1, potentialField.attractive_par_2, 1.0, 0.2, 1.0 }; //later 3 parameters are irrelevant to the attractive force
     //define shape

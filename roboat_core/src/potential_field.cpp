@@ -28,6 +28,19 @@ PotentialField::PotentialField(ros::NodeHandle nh) : nh_(nh)
     }
     nh_.param("/roboat_pf/detection_max_lapse_", detection_max_lapse_, 1.0);
 
+    std::string id, ns;
+    nh_.param<std::string>("roboat_id",id,"");
+    if (!id.empty()) {
+        ns="/"+id+"/"; //uses id to build global namespace
+        shape_msg_.header.frame_id = "odom_" +id;
+    }
+    else {
+        ns = id;
+        shape_msg_.header.frame_id = "odom";
+    }
+    shape_pub_ = nh_.advertise<nav_msgs::Path>(ns+"visual/shape", 1);
+    
+
     static const float d_target_region = 4.0; //half of the target square side
     static const float d_target_r0 = 1.0; //target r0
     static const float d_target_stf = 0.004; //target lattice force coefficient
@@ -75,6 +88,12 @@ void PotentialField::shapeCallback(const roboat_msgs::Shape &msg)
     stf = multi_stf*target_stf; //initial lattice force coefficient
     srf = multi_srf*target_srf; //initial repulsive force coefficient
     counter = 0;
+    //if no shape, 
+    if (des_shape<0) {
+        shape_msg_.header.stamp = ros::Time::now();
+        shape_msg_.poses.clear();
+        shape_pub_.publish(shape_msg_);
+    }
     return;
 }
 
@@ -154,9 +173,6 @@ void PotentialField::timeStep(polygon_t _shape)
         number_of_robots++;
     }
 
-    
-    
-
     //update shape and position
     shape_vertexes = updateShape(des_shape);
     _shape.segs = {};
@@ -164,6 +180,21 @@ void PotentialField::timeStep(polygon_t _shape)
     position = { pose(0), pose(1) };
     regf = _shape.RegionForce(position); //compute regional force
     attractive_force << regf.x, regf.y;
+
+    //publishes the message with the shape info, so it can be plotted in rviz
+    shape_msg_.header.stamp = ros::Time::now();
+    shape_msg_.poses.resize(shape_vertexes.size());
+    for (int i=0; i<shape_vertexes.size(); i++ ) {
+        shape_msg_.poses[i].header = shape_msg_.header;
+        shape_msg_.poses[i].pose.position.x = shape_vertexes[i].x;
+        shape_msg_.poses[i].pose.position.y = shape_vertexes[i].y;
+        shape_msg_.poses[i].pose.position.z = 0.0;
+    }
+    if (!shape_msg_.poses.empty()) {
+        shape_msg_.poses.push_back(shape_msg_.poses[0]);
+    }
+    shape_pub_.publish(shape_msg_);
+
 
     //compute repulsive force for each respective neighbor
     repulsive_force << 0.0, 0.0;
