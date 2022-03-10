@@ -16,8 +16,8 @@ PotentialField::PotentialField(ros::NodeHandle nh) : nh_(nh)
 {
     //ROS Publishers and Subscribers
     shape_sub_ = nh_.subscribe("/shape", 10, &PotentialField::shapeCallback, this);
-    tau_pub_ = nh_.advertise<geometry_msgs::Pose2D>("tau", 10);
-    force_pub_ = nh_.advertise<roboat_core::Force>("mpc_force", 10);
+    tau_pub_ = nh_.advertise<geometry_msgs::Pose2D>("tau", 1);
+    force_pub_ = nh_.advertise<roboat_core::Force>("pf_force", 1);
 
     swarm_.initialize(nh_);
     swarm_size_ = swarm_.getBoatN();
@@ -26,7 +26,7 @@ PotentialField::PotentialField(ros::NodeHandle nh) : nh_(nh)
         ROS_ERROR("wrong swarm definition");
         idx_ = 0; 
     }
-    nh_.param("/roboat_pf/detection_max_lapse_", detection_max_lapse_, 1.0);
+    nh_.param("/pf/detection_max_lapse_", detection_max_lapse_, 1.0);
 
     std::string id, ns;
     nh_.param<std::string>("roboat_id",id,"");
@@ -56,20 +56,20 @@ PotentialField::PotentialField(ros::NodeHandle nh) : nh_(nh)
     static const float d_attractive_par_1 = 0.01;
     static const float d_attractive_par_2 = 0.5;
     
-    nh_.param("/roboat_pf/target_region", target_region, d_target_region);
-    nh_.param("/roboat_pf/target_r0", target_r0, d_target_r0);
-    nh_.param("/roboat_pf/target_stf", target_stf, d_target_stf);
-    nh_.param("/roboat_pf/target_srf", target_srf, d_target_srf);
-    nh_.param("/roboat_pf/multi_region", multi_region, d_multi_region);
-    nh_.param("/roboat_pf/multi_r0", multi_r0, d_multi_r0);
-    nh_.param("/roboat_pf/multi_stf", multi_stf, d_multi_stf);
-    nh_.param("/roboat_pf/multi_srf", multi_srf, d_multi_srf);
-    nh_.param("/roboat_pf/shrink_time", shrink_time, d_shrink_time);
-    nh_.param("/roboat_pf/inside_time", inside_time, d_inside_time);
-    nh_.param("/roboat_pf/x_center", x_center, d_x_center);
-    nh_.param("/roboat_pf/y_center", y_center, d_y_center);
-    nh_.param("/roboat_pf/attractive_par_1", attractive_par_1, d_attractive_par_1);
-    nh_.param("/roboat_pf/attractive_par_2", attractive_par_2, d_attractive_par_2);
+    nh_.param("/pf/target_region", target_region, d_target_region);
+    nh_.param("/pf/target_r0", target_r0, d_target_r0);
+    nh_.param("/pf/target_stf", target_stf, d_target_stf);
+    nh_.param("/pf/target_srf", target_srf, d_target_srf);
+    nh_.param("/pf/multi_region", multi_region, d_multi_region);
+    nh_.param("/pf/multi_r0", multi_r0, d_multi_r0);
+    nh_.param("/pf/multi_stf", multi_stf, d_multi_stf);
+    nh_.param("/pf/multi_srf", multi_srf, d_multi_srf);
+    nh_.param("/pf/shrink_time", shrink_time, d_shrink_time);
+    nh_.param("/pf/inside_time", inside_time, d_inside_time);
+    nh_.param("/pf/x_center", x_center, d_x_center);
+    nh_.param("/pf/y_center", y_center, d_y_center);
+    nh_.param("/pf/attractive_par_1", attractive_par_1, d_attractive_par_1);
+    nh_.param("/pf/attractive_par_2", attractive_par_2, d_attractive_par_2);
     
     
     pose << 0.0, 0.0;

@@ -40,7 +40,7 @@ void Command::forceCallback(const roboat_core::Force::ConstPtr& msg, int priorit
 
   ROS_DEBUG("control force received with priority %d", priority);
 }
-// latch = 1, delatch = 2, otherwise 0.
+// latch = 1, delatch = 2, otherwise 0 (no action).
 void Command::joyCallback(sensor_msgs::Joy msg)
 {
   if (msg.buttons[4] == 1)
@@ -96,7 +96,7 @@ void Command::joyCallback(sensor_msgs::Joy msg)
 
 Command::Command(ros::NodeHandle n)
 {
-  Command::joy_max_force = 0.66;
+  Command::joy_max_force = 1.0;
 
   // publisher for command topic
   command_pub = n.advertise<roboat_core::CommandToMicroController>("command", 1);
@@ -105,11 +105,12 @@ Command::Command(ros::NodeHandle n)
   latch_pub = n.advertise<std_msgs::UInt16>("latching_open_close_int", 1);
   latch_override_pub = n.advertise<std_msgs::UInt16>("latching_override_int", 1);
 
-  // force subscriber topics for MPC and joypad
-  const int pid_priority = 1, mpc_priority = 2;
+  // force subscriber topics for PF, PID, MPC and joypad
+  const int pf_priority = 1, pid_priority = 2, mpc_priority = 3;
   ros::Subscriber joy_sub = n.subscribe("joy", 10, &Command::joyCallback, this);
   ros::Subscriber pid_sub = n.subscribe<roboat_core::Force>("pid_force", 1, boost::bind(&Command::forceCallback, this, _1, pid_priority));
   ros::Subscriber mpc_sub = n.subscribe<roboat_core::Force>("mpc_force", 1, boost::bind(&Command::forceCallback, this, _1, mpc_priority));
+  ros::Subscriber pf_sub = n.subscribe<roboat_core::Force>("pf_force", 1, boost::bind(&Command::forceCallback, this, _1, pf_priority));
   ros::Rate loopRate(10);
  
  

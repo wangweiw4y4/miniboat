@@ -1,0 +1,33 @@
+# -----------------------------------------------------------------------------
+# PF Parameter SETTINGS
+# -----------------------------------------------------------------------------
+#d_target_region:  half of the target square side
+#d_target_r0: target r0
+#d_target_stf: target lattice force coefficient
+#d_target_srf: target repulsive force coefficient
+#d_multi_region : shrink rate of the region
+#d_multi_r0 : 
+#d_multi_stf : 
+#d_multi_srf : 
+#d_shrink_time : 
+#d_inside_time : 
+#d_x_center : x position of the region center
+#d_y_center : y position of the region center
+#d_attractive_par_1 : 0.01
+#d_attractive_par_2 : 0.5
+
+ d_target_region : 0.3
+ d_target_r0 : 1.0
+ d_target_stf : 0.004
+ d_target_srf : 0.008
+ d_multi_region : 2.0
+ d_multi_r0 : 10.0
+ d_multi_stf : 0.001
+ d_multi_srf : 0.005
+ d_shrink_time : 120
+ d_inside_time : 45
+ d_x_center : 1.0
+ d_y_center : 3.0
+ d_attractive_par_1 : 0.01
+ d_attractive_par_2 : 0.5
+ detection_max_lapse_: 1

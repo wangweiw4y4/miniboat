@@ -18,12 +18,13 @@ private:
   ros::Publisher thrust_state_pub;
   ros::Publisher latch_override_pub;
   ros::Publisher latch_pub;
-  int command_priority = 3, stop_force_priority = 3;
+  int command_priority = 4, stop_force_priority = 4;
   unsigned char latchingaction[1] = {0}; 
   double force[4]; 
   double joy_max_force;
-  const int pid_priority = 1;
-  const int mpc_priority = 2;
+  const int pf_priority = 1;
+  const int pid_priority = 2;
+  const int mpc_priority = 3;
   double stop_force[4] = {0, 0, 0, 0};
 
   void forceCallback(const roboat_core::Force::ConstPtr& msg, int priority);
