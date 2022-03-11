@@ -18,6 +18,11 @@ PotentialField::PotentialField(ros::NodeHandle nh) : nh_(nh)
     shape_sub_ = nh_.subscribe("/shape", 10, &PotentialField::shapeCallback, this);
     tau_pub_ = nh_.advertise<geometry_msgs::Pose2D>("tau", 1);
     force_pub_ = nh_.advertise<roboat_core::Force>("pf_force", 1);
+    heading_setpoint_pub_ = nh_.advertise<std_msgs::Float64>("heading_setpoint", 1);
+    heading_pub_ = nh_.advertise<std_msgs::Float64>("heading", 1);
+    heading_controleffort_sub_ = nh_.subscribe("control_effort", 1, &PotentialField::heading_controleffortCallback,this);
+
+
 
     swarm_.initialize(nh_);
     swarm_size_ = swarm_.getBoatN();
@@ -77,6 +82,12 @@ PotentialField::PotentialField(ros::NodeHandle nh) : nh_(nh)
     counter = 0;
     des_shape = -1; //starts with no active shape being tracked
 }
+
+void PotentialField::heading_controleffortCallback(const std_msgs::Float64 & control_msg)
+{
+   control_effort =control_msg.data;
+}
+
 
 void PotentialField::shapeCallback(const roboat_msgs::Shape &msg) 
 {
@@ -230,11 +241,14 @@ void PotentialField::timeStep(polygon_t _shape)
     //set the force in the body frame
     body_force = rotation.transpose()*linear_force;
 
-    tau_nu << body_force(0), body_force(1), 0.0;
+    tau_nu << body_force(0), body_force(1), control_effort;
 
     tau.x = tau_nu(0);
     tau.y = tau_nu(1);
-    tau.theta = 0.0;
+    tau.theta = control_effort;
+    
+
+
 
     //Needs to allocate force to all thrusters to yield the required total tau
     allocated_force = allocateForce(tau_nu);
@@ -281,12 +295,17 @@ std::vector<double> PotentialField::allocateForce(Vector3f tau)
     }
     //moment
     if (tau(2)>0) {
-        force[0] += tau(2)*mom2thruster;
-        force[3] += tau(2)*mom2thruster;
+        //force[0] += tau(2)*mom2thruster;
+       // force[3] += tau(2)*mom2thruster;
+        force[0] += std::min(double(tau(2)), 1.0);
+  	    force[3] += std::min(double(tau(2)), 1.0);
+
     }
     else {
-        force[1] += -tau(2)*mom2thruster;
-        force[2] += -tau(2)*mom2thruster;
+        //force[1] += -tau(2)*mom2thruster;
+        //force[2] += -tau(2)*mom2thruster;
+        force[1] += std::min(-double(tau(2)), 1.0);
+  	    force[2] += std::min(-double(tau(2)), 1.0);
     }
     return force;
 }

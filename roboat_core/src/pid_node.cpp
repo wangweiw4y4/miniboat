@@ -208,7 +208,7 @@ int main(int argc, char **argv)
   if (rosNode.hasParam("PID/req_theta")) rosNode.getParam("PID/req_theta", req_theta);
   if (rosNode.hasParam("PID/req_force")) rosNode.getParam("PID/req_force", req_force);
   
-    if (rosNode.hasParam("PID/P")) rosNode.getParam("PID/P", P);
+  if (rosNode.hasParam("PID/P")) rosNode.getParam("PID/P", P);
   if (rosNode.hasParam("PID/I")) rosNode.getParam("PID/I", I);
   if (rosNode.hasParam("PID/D")) rosNode.getParam("PID/D", D);
  
@@ -245,7 +245,7 @@ int main(int argc, char **argv)
       heading_pub.publish(heading);
  
     //  force =  velocity_control(req_theta, req_force)+ pid_control();
-       force =  pid_control(ek);
+       force =  pid_control();
    //    force =  velocity_control(req_theta, req_force);
      // ROS_INFO("velocity force:  %f,%f,%f,%f\n", force(0), force(1), force(2),force(3)); 
       

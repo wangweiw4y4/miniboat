@@ -15,6 +15,7 @@
 #include "geometry_msgs/Vector3.h"
 #include <nav_msgs/Path.h>
 #include <eigen3/Eigen/Dense>
+#include <std_msgs/Float64.h>
 #include <tf2/LinearMath/Quaternion.h>
 #include "VFF/VirtualForceField.h"
 #include <roboat_core/swarm.h>
@@ -79,6 +80,8 @@ public:
     std::vector<Vector2f> robots_detected; //poses of every detected neighbor
     int number_of_robots; //number of neighbors
 
+    double control_effort;
+
     geometry_msgs::Pose2D tau;      //desired force and moment for publisher
     roboat_core::Force force_msg;   //allocate force to the thrusters
 
@@ -101,6 +104,9 @@ private:
     ros::Publisher force_pub_;
     ros::Publisher shape_pub_;
     ros::Subscriber shape_sub_;
+    ros::Publisher heading_setpoint_pub_;
+    ros::Publisher heading_pub_;
+    ros::Subscriber heading_controleffort_sub_;
 
     nav_msgs::Path shape_msg_;
     
@@ -111,5 +117,6 @@ private:
     std::vector<double> allocateForce(Vector3f tau);
 
     void shapeCallback(const roboat_msgs::Shape &msg);
+    void heading_controleffortCallback(const std_msgs::Float64 & control_msg);
 
 };
