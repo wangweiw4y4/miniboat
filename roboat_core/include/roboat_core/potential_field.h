@@ -81,6 +81,8 @@ public:
     int number_of_robots; //number of neighbors
 
     double control_effort;
+   // float heading;
+    //float heading_setpoint;
 
     geometry_msgs::Pose2D tau;      //desired force and moment for publisher
     roboat_core::Force force_msg;   //allocate force to the thrusters

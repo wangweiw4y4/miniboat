@@ -247,8 +247,13 @@ void PotentialField::timeStep(polygon_t _shape)
     tau.y = tau_nu(1);
     tau.theta = control_effort;
     
-
-
+    std_msgs::Float64 heading_setpoint; //Heading angle reference
+    heading_setpoint.data = 0;   
+    heading_setpoint_pub_.publish(heading_setpoint);
+   
+   std_msgs::Float64 heading; //Heading angle reference
+   heading.data = psi;   
+   heading_pub_.publish(heading);
 
     //Needs to allocate force to all thrusters to yield the required total tau
     allocated_force = allocateForce(tau_nu);
