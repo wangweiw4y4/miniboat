@@ -58,7 +58,7 @@ PotentialField::PotentialField(ros::NodeHandle nh) : nh_(nh)
     static const int d_inside_time = 45;
     static const float d_x_center = 1.0;
     static const float d_y_center = 3.0;
-    static const float d_attractive_par_1 = 0.01;
+    static const float d_attractive_par_1 = 0.02;
     static const float d_attractive_par_2 = 0.5;
     
     nh_.param("pf/target_region", target_region, d_target_region);
@@ -225,12 +225,12 @@ void PotentialField::timeStep(polygon_t _shape)
     linear_force = attractive_force + repulsive_force; //add attractive and repulsive forces
 
     //saturate the resulting force
-    if (std::abs(linear_force(0)) > 0.05){
-        linear_force(0) = copysign(0.05,linear_force(0));
+    if (std::abs(linear_force(0)) > 0.1){
+        linear_force(0) = copysign(0.1,linear_force(0));
     }
 
-    if (std::abs(linear_force(1)) > 0.05){
-        linear_force(1) = copysign(0.05,linear_force(1));
+    if (std::abs(linear_force(1)) > 0.1){
+        linear_force(1) = copysign(0.1,linear_force(1));
     }
 
     //ROS_INFO("fx %f, fy %f",linear_force(0), linear_force(1));
@@ -248,7 +248,7 @@ void PotentialField::timeStep(polygon_t _shape)
     tau.theta = control_effort;
     
     std_msgs::Float64 heading_setpoint; //Heading angle reference
-    heading_setpoint.data = 0;   
+    heading_setpoint.data = 0.0;   
     heading_setpoint_pub_.publish(heading_setpoint);
    
    std_msgs::Float64 heading; //Heading angle reference
