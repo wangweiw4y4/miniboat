@@ -11,9 +11,9 @@ ACADOWrapper::ACADOWrapper(const bool yaw_tracking, const double maxForceLimit, 
     f << dot(x1) == cos(x3)*x4-sin(x3)*x5; 
     f << dot(x2) == sin(x3)*x4+cos(x3)*x5;                   
     f << dot(x3) == x6;
-    f << dot(x4) == (m22*x5*x6-d11*x4)/m11+sqrt(2)/2*(u1+u2-u3-u4)/m11;      
-    f << dot(x5) == -(m11*x4*x6+d22*x5)/m22+sqrt(2)/2*(u1-u2+u3-u4)/m22;       
-    f << dot(x6) == (m11*x4*x5-m22*x4*x5-d33*x6)/m33+sqrt(2)/2*aa*(u1-u2-u3+u4)/m33;  
+    f << dot(x4) == -d11*x4/m11+sqrt(2)/2*(u1+u2-u3-u4)/m11;      
+    f << dot(x5) == -d22*x5/m22+sqrt(2)/2*(u1-u2+u3-u4)/m22;       
+    f << dot(x6) == -d33*x6/m33+sqrt(2)/2*aa*(u1-u2-u3+u4)/m33;  
 
     //Function being optimized
     //-----------------------------------

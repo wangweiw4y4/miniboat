@@ -43,7 +43,8 @@ Here are the steps to install ACADO:
 
         echo 'source '$HOME'/ACADOtoolkit/build/acado_env.sh' >> ~/.bashrc
 
-## Clone and restore an PI image
+## CLONE AND RESTORE A PI IMAGE
+
 If we need to produce multiple new miniboats, it is easier to use the image method to make the code ready. Here are the steps to clone and restore a codebase image for PI 4.
 
 
@@ -73,6 +74,8 @@ dd if=path/to/your-backup.img of=/dev/sdX
 
 Finally, we can insert the sd card and start the cloned system. As the size of image could be much smaller than the sd card. If one wants to store more data later, we can use the disks tool on ubuntu to resize the partion of the sd card.
 
+## FIXES NEEDED FOR PI IMAGE
+Check the [notes.md](notes.md) for a detailed description of the steps needed to fix the original Pi image, so it can compile correctly the miniboat software.
 
 ## INSTALL & CONFIGURE CSSH
 
@@ -122,27 +125,21 @@ For more information, check
 
 Each of the miniboat runs locally the main software, providing independent and full autonomous control to each unit. In addition, a server laptop acts as a central hub providing the commands that trigger the different control schemes, can configure each unit, and visualizes the miniboat fleet in RVIZ. 
 
-First, after turning on all the miniboats, it is recommended to ensure that their clocks are synchronized. This can be done with
-```
-cd ~/catkin_ws/src/miniboat/scripts
-./sync_clocks.sh
-```
-
-Next, to initiate the control software in each miniboat, can be done simultaneously in all the units connecting to all of of them in a separate terminal with `cssh --fillscreen miniboats`. Once logged in, we can initiate the control software within the CSSH environment with
+To initiate the control software in each miniboat, can be done simultaneously in all the units connecting to all of of them in a separate terminal with `cssh --fillscreen miniboats`. Once logged in, we can initiate the control software within the CSSH environment with
 ```
 cd ~/catkin_ws
-source devel/setup.bash
-export HOSTNAME
-roslaunch roboat_launch miniboat.launch use_ekf:=true use_multimaster:=true
-./run_miniboat.sh
+roslaunch roboat_launch miniboat.launch 
+./miniboat.sh
 ```
-At this point, all miniboats should be ready to receive instructions and move autonomously. Note that we activate the use of the EKF filter for sensor data fusion, and also use multimaster to establish the communication channels between the miniboats. The latter requires that the file `/etc/hosts` in each miniboat and in the server contains the IP addresses of all the miniboats and the server. If not, they can be added manually in each machine editing that file, or using the provided script `scripts/setup_network.sh`. 
+It uses ekf and multimaster by default. If you don't want to use them, add `use_ekf:=true` and/or `use_multimaster:=true` to the roslaunch command. Also, the instructions `source devel/setup.bash` and `export HOSTNAME` should be already preloaded in the `~/.bashrc` file, but if not you need to add them before you launch the nodes. By default also uses the HOSTNAME as the namespace used to load the nodes, but you can specify any other adding to the launch command `id:=<namespace_you_want>`.
+
+At this point, all miniboats should be ready to receive instructions and move autonomously. Note that when using multimaster to establish the communication channels between the miniboats, it requires that the file `/etc/hosts` in each miniboat and in the server contains the IP addresses of all the miniboats and the server. If not, they can be added manually in each machine editing that file, or using the provided script `scripts/setup_network.sh`. 
 
 To initiate the fleet visualization, in a new terminal window in the server:
 ```
 cd ~/catkin_ws
 source devel/setup.bash
-roslaunch roboat_launch run_server.launch use_multimaster:=true
+roslaunch roboat_launch server.launch
 ```
 This should open a new RVIZ window, and visualize the miniboat fleet positions. 
 
@@ -150,7 +147,7 @@ For manual control of an individual miniboat, we can do it connecting a joystick
 ```
 cd ~/catkin_ws
 source devel/setup.bash
-roslaunch roboat_launch run_joy.launch id:=<miniboat_id>
+roslaunch roboat_launch joy.launch id:=<miniboat_id>
 ```
 where you need to substitute `<miniboat_id>` with the miniboat hostname that want to be controlled.
 
@@ -160,4 +157,12 @@ cd ~/catkin_ws
 source devel/setup.bash
 roslaunch roboat_launch run_cvs_path.launch id:=<miniboat_id>
 ```
-By default, it launches `miniboat_shapeshift_miniboat4.csv`. For a different path, add as launch parameter `file:=<file_name>`.
+By default, it launches `miniboat_curve_speed_0.1.csv`. For a different path, add as launch parameter `file:=<file_name>`.
+
+Finally, to load the fleet visualization in an another laptop in addition to the server, 
+```
+cd ~/catkin_ws
+source devel/setup.bash
+roslaunch roboat_launch laptop.launch
+```
+This is needed because only one server can be running at a time, since it loads nodes that cannot have multiple instances in the ros network so if you attempt to run the `server.launch` in two differenct machines will conflict with each other and fail.
