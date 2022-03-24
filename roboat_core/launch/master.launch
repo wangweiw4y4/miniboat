@@ -12,6 +12,7 @@
     <arg name="pid_node"                         default="false"/>
     <arg name="swarm_node"                       default="false"/>
     <arg name="bag_node"	   		             default="true"/>
+    <arg name="capacitive_node"	   		         default="true"/>
     
 
     <!-- ROS PARAMETERS -->
@@ -38,6 +39,7 @@
     <node if="$(arg pid_node)"                 name="pid_node"                pkg="roboat_core"       type="pid_node"           output="screen"/>
     <node if="$(arg swarm_node)"               name="swarm_node"              pkg="roboat_core"       type="swarm_node"         output="screen"/>
     <node if="$(arg bag_node)"		           name="robot_bag"               pkg="rosbag"            type="record"             args="-a -o /home/ubuntu/bagfiles/" />
+    <node if="$(arg capacitive_node)"          name="capacitive_node"         pkg="roboat_core"       type="capacitive_node"    output="screen"/>
 
 
 </launch>

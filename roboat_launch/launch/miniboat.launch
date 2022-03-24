@@ -30,6 +30,7 @@
             <arg name="pid_node"            value="false"/>
             <arg name="swarm_node"          value="true"/>
             <arg name="bag_node"            value="false"/>
+            <arg name="capacitive_node"     value="true"/>
         </include>
         
         <include file="$(find ros_imu_bno055)/launch/imu.launch">
