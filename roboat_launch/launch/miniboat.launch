@@ -30,7 +30,7 @@
             <arg name="pid_node"            value="false"/>
             <arg name="swarm_node"          value="true"/>
             <arg name="bag_node"            value="false"/>
-            <arg name="capacitive_node"     value="true"/>
+            <arg name="capacitive_node"     value="false"/>
         </include>
         
         <include file="$(find ros_imu_bno055)/launch/imu.launch">
@@ -45,14 +45,14 @@
         </include>
         
         <!-- paired beacons; arguments are "serial port & baudrate" -->
-        <node pkg="marvelmind_nav" type="hedge_rcv_bin" name="hedge_rcv_bin" args="/dev/ttyACM1 500000" output="screen"/>
+        <node pkg="marvelmind_nav" type="hedge_rcv_bin" name="hedge_rcv_bin" args="/dev/ttyACM0 500000" output="screen"/>
         
         <!-- Run the serial node for the capacitive sensors-->
-        <node pkg="rosserial_python" type="serial_node.py" name="cap_serial_node"  respawn="true">
+    <!--    <node pkg="rosserial_python" type="serial_node.py" name="cap_serial_node"  respawn="true">
         <param name="port" value="/dev/ttyACM0"/>
         <param name="baud" value="57600"/>
         </node>        
-        
+    -->    
         
 
         <include file="$(find pid)/launch/headingpid.launch">

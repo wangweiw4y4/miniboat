@@ -80,7 +80,8 @@ PotentialField::PotentialField(ros::NodeHandle nh) : nh_(nh)
     pose << 0.0, 0.0;
     number_of_robots = 0;
     counter = 0;
-    des_shape = -1; //starts with no active shape being tracked
+   // des_shape = -1; //starts with no active shape being tracked
+    des_shape = 0;
 }
 
 void PotentialField::heading_controleffortCallback(const std_msgs::Float64 & control_msg)
@@ -242,7 +243,9 @@ void PotentialField::timeStep(polygon_t _shape)
     body_force = rotation.transpose()*linear_force;
 
     tau_nu << body_force(0), body_force(1), control_effort;
-
+    
+    tau_nu(0) = 0;
+    tau_nu(1) = 0;
     tau.x = tau_nu(0);
     tau.y = tau_nu(1);
     tau.theta = control_effort;

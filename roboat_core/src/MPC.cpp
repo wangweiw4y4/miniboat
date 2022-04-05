@@ -65,7 +65,7 @@ void MPC::stateCallback(const nav_msgs::Odometry msg) {
     state[4] = -msg.twist.twist.linear.y;
     state[5] = -msg.twist.twist.angular.z;
     
-    ROS_ERROR("miniboat state is %f, %f, %f, %f, %f, %f", state[0], state[1],state[2],state[3],state[4],state[5]);
+    //ROS_ERROR("miniboat state is %f, %f, %f, %f, %f, %f", state[0], state[1],state[2],state[3],state[4],state[5]);
     
 }
 
