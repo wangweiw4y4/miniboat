@@ -80,8 +80,8 @@ PotentialField::PotentialField(ros::NodeHandle nh) : nh_(nh)
     pose << 0.0, 0.0;
     number_of_robots = 0;
     counter = 0;
-   // des_shape = -1; //starts with no active shape being tracked
-    des_shape = 0;
+    des_shape = -1; //starts with no active shape being tracked
+   // des_shape = 0;
 }
 
 void PotentialField::heading_controleffortCallback(const std_msgs::Float64 & control_msg)

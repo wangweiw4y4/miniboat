@@ -13,7 +13,7 @@ Just two thrusters for now ...
 #include <roboat_core/Force.h>
 
 
-roboat_core::Force force_msg;
+//roboat_core::Force force_msg;
 
 
 // ROS spin settings
@@ -51,11 +51,6 @@ void increment_thruster() {
     else {
         // do nothing.
     }
-    // new thruster forces.
-    force_msg.data[0] = thruster_A;
-    force_msg.data[1] = thruster_B;
-    force_msg.data[2] = 0;
-    force_msg.data[3] = 0;
 }
 
 
@@ -91,14 +86,21 @@ int main(int argc, char** argv) {
     ros::NodeHandle nh;
 
       //subscriber for sensor state from microcontroller
-    ros::Subscriber state_sub = nh.subscribe("odometry/filtered", hz, stateCallback); 
-    ros::Publisher force_pub_ = nh.advertise<roboat_core::Force>("mpc_force", hz);
+    ros::Subscriber state_sub = nh.subscribe("/miniboat8/odometry/filtered", hz, stateCallback); 
+    ros::Publisher force_pub = nh.advertise<roboat_core::Force>("/miniboat8/mpc_force", hz);
     ros::Rate loop_rate(hz);
 
     while(ros::ok){
 
         // Publish the forces to the thrusters.
-        force_pub_.publish(force_msg);
+        // new thruster forces.
+        roboat_core::Force force_msg;
+    	// force_msg.data[0] = thruster_A;
+    	// force_msg.data[1] = thruster_B;
+    	// force_msg.data[2] = 0;
+    	// force_msg.data[3] = 0;
+    	force_msg.data = {thruster_A, thruster_B, 0, 0};
+        force_pub.publish(force_msg);
 
         t++; // increment time step
 
