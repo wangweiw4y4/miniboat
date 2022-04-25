@@ -193,6 +193,7 @@ add_executable(serial_node              src/serial_node.cpp)
 add_executable(sim_node                 src/sim_node.cpp                   src/Sim.cpp)       
 add_executable(swarm_node               src/swarm_node.cxx                 src/swarm.cpp)        
 add_executable(capacitive_node          src/capacitive_node.cpp)
+add_executable(thruster_calibration_node                                   src/thruster_calibration_node.cpp)
 
 
 ## Rename C++ executable without prefix
@@ -211,6 +212,7 @@ add_dependencies(command_node                ${PROJECT_NAME}_generate_messages_c
 add_dependencies(sim_node                    ${PROJECT_NAME}_generate_messages_cpp)
 add_dependencies(swarm_node                  ${PROJECT_NAME}_generate_messages_cpp)
 add_dependencies(capacitive_node             ${PROJECT_NAME}_generate_messages_cpp)
+add_dependencies(thruster_calibration_node   ${PROJECT_NAME}_generate_messages_cpp)
 
 
 ## Specify libraries to link a library or executable target against
@@ -224,6 +226,7 @@ target_link_libraries(csv_path_node              ${catkin_LIBRARIES})
 target_link_libraries(pose_path_node             ${catkin_LIBRARIES})
 target_link_libraries(swarm_node                 ${catkin_LIBRARIES})
 target_link_libraries(capacitive_node            ${catkin_LIBRARIES})
+target_link_libraries(thruster_calibration_node  ${catkin_LIBRARIES})
 
 #############
 ## Install ##
@@ -253,6 +256,7 @@ install(
   sim_node
   swarm_node
   capacitive_node
+  thruster_calibration_node
   ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
   LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
