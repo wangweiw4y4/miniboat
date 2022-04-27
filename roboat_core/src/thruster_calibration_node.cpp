@@ -81,8 +81,8 @@ int main(int argc, char** argv) {
 
     ros::init(argc, argv, "thruster_calibration_node");
     ros::NodeHandle nh;
-    ros::Subscriber state_sub = nh.subscribe("/miniboat8/odometry/filtered", hz, stateCallback);  // to get the angular velocity, odometry
-    ros::Publisher force_pub = nh.advertise<roboat_core::Force>("/miniboat8/mpc_force", hz); // to publish the forces to the thrusters
+    ros::Subscriber state_sub = nh.subscribe("/miniboat4/odometry/filtered", hz, stateCallback);  // to get the angular velocity, odometry
+    ros::Publisher force_pub = nh.advertise<roboat_core::Force>("/miniboat4/mpc_force", hz); // to publish the forces to the thrusters
     ros::Rate loop_rate(hz);
 
     while(ros::ok){
