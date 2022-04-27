@@ -18,8 +18,8 @@ int hz = 10; // time delay, 100 ms
 
 // Compare thruster A and B;
 float angular_v; //instantaneous angular velocity value, taken from mini-boat odometry.
-float thruster_A = 0.1; // thruster value, A
-float thruster_B = 0.1; // thruster value, B
+float thruster_A = 0.2; // thruster value, A
+float thruster_B = 0.2; // thruster value, B
 float calibration_factor = 1; // ratio between thrusters A and B. ----> write into .XML/.YAML file.
 
 
@@ -30,7 +30,7 @@ bool calibration = false;
 bool test_phase = false;
 int startup_time = 50; // 50 * 1/10 (10 hz loop rate) = 5 seconds
 int calibration_time = 300; // 300 * 1/10 (10hz loop rate) = 30 seconds
-int threshold = 0.05; // angular velocity threshold ... radians/s?
+float threshold = 0.05; // angular velocity threshold ... radians/s?
 int angular_stability = 0; // start counter when angular_v drops below threshold. To make usre it's stable, not just a blip in the angular_v.
 
 
@@ -70,7 +70,7 @@ void test_if_it_works() {
 void stateCallback(const nav_msgs::Odometry msg) {
     
     angular_v = -msg.twist.twist.angular.z;
-    ROS_INFO("angular velocity: %f", angular_v); 
+    ROS_INFO("angular velocity: %f  	|	  compared to our calibration threshold: %f", angular_v, threshold); 
 }
 
 
@@ -107,23 +107,24 @@ int main(int argc, char** argv) {
             // -----------------------------------
 
 
-            if (abs(angular_v) > threshold) {
+            if (angular_v > threshold || angular_v < -threshold) {
                 increment_thruster(); // either subtract or add to one of the thrusters based on the current angular velocity.
+                ROS_INFO("angular_v is above threshold!");
                 angular_stability = 0;
             }
-            else if (abs(angular_v) < threshold) {
-                
+            else {
                 angular_stability ++; // a simple counter; see for how many time-step the angular_velocity remains ~ 0 ...
                 ROS_INFO("Angular velocity < threshold :) ... waiting how long it lasts");
+                ROS_INFO("angular stability counter: %d", angular_stability);
 
-                if (angular_stability == 10 || t>calibration_time) { // once it's stable, or too much time has passed, call the calibration finished.
+                if (angular_stability == 5|| t>calibration_time) { // once it's stable, or too much time has passed, call the calibration finished.
                     calculate_calibration_factor(); // ratio of the two thruster values.
                     ROS_INFO("Finished calibration!");
                     ROS_INFO("calibration finished, calibration factor: %f", calibration_factor);
                     write_to_configfile();
                     calibration = false;
-                    t = 0;
-                    break;
+                    // t = 0;
+                    //break;
                 }
             }
         }

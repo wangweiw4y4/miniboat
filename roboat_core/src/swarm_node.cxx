@@ -20,7 +20,7 @@ int main(int argc, char** argv)
   // ros::spin();
 
   //publishes the positions stored synchronously instead for testing
-  ros::Rate loop_rate(1);
+  ros::Rate loop_rate(10);
   int n_boats = swarm.getBoatN();
   std::vector<std::string> ids = swarm.getBoatNames();
   while (ros::ok())
