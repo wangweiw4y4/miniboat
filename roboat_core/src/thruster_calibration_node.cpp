@@ -18,8 +18,8 @@ int hz = 10; // time delay, 100 ms
 
 // Compare thruster A and B;
 float angular_v; //instantaneous angular velocity value, taken from mini-boat odometry.
-float thruster_A = 0.2; // thruster value, A
-float thruster_B = 0.2; // thruster value, B
+float thruster_A = 0.1; // thruster value, A
+float thruster_B = 0.1; // thruster value, B
 float calibration_factor = 1; // ratio between thrusters A and B. ----> write into .XML/.YAML file.
 
 
@@ -114,10 +114,11 @@ int main(int argc, char** argv) {
             else if (abs(angular_v) < threshold) {
                 
                 angular_stability ++; // a simple counter; see for how many time-step the angular_velocity remains ~ 0 ...
+                ROS_INFO("Angular velocity < threshold :) ... waiting how long it lasts");
 
                 if (angular_stability == 10 || t>calibration_time) { // once it's stable, or too much time has passed, call the calibration finished.
                     calculate_calibration_factor(); // ratio of the two thruster values.
-                    printf("Finished calibration");
+                    ROS_INFO("Finished calibration!");
                     ROS_INFO("calibration finished, calibration factor: %f", calibration_factor);
                     write_to_configfile();
                     calibration = false;
