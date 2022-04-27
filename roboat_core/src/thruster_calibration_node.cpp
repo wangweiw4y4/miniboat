@@ -8,12 +8,8 @@ Just two thrusters for now ...
 // ROS
 #include <ros/ros.h>
 #include "math.h"
-// #include <yaml-cpp/yaml.h>
 #include <nav_msgs/Odometry.h>
 #include <roboat_core/Force.h>
-
-
-//roboat_core::Force force_msg;
 
 
 // ROS spin settings
@@ -28,13 +24,14 @@ float calibration_factor = 1; // ratio between thrusters A and B. ----> write in
 
 
 // calibration settings
-int t = 0;
+int t = 0; // time-step
 bool startup = true;
 bool calibration = false;
 bool test_phase = false;
 int startup_time = 50; // 50 * 1/10 (10 hz loop rate) = 5 seconds
-int calibration_time = 120; // 120 * 1/10 (10hz loop rate) = 12 seconds
+int calibration_time = 300; // 300 * 1/10 (10hz loop rate) = 30 seconds
 int threshold = 0.05; // angular velocity threshold ... radians/s?
+int angular_stability = 0; // start counter when angular_v drops below threshold. To make usre it's stable, not just a blip in the angular_v.
 
 
 // ------------------------------------------------
@@ -42,10 +39,10 @@ int threshold = 0.05; // angular velocity threshold ... radians/s?
 
 
 void increment_thruster() {
-    if (angular_v > threshold) {
+    if (angular_v > threshold) { // angular velocity is +ive, therefore increase thruster B.
         thruster_B = thruster_B*1.01;
     }
-    else if (angular_v < - threshold) {
+    else if (angular_v < - threshold) { // angular velocity is -ive, therefore decrease thruster B.
         thruster_B = thruster_B*0.99;
     }
     else {
@@ -84,23 +81,11 @@ int main(int argc, char** argv) {
 
     ros::init(argc, argv, "thruster_calibration_node");
     ros::NodeHandle nh;
-
-      //subscriber for sensor state from microcontroller
-    ros::Subscriber state_sub = nh.subscribe("/miniboat8/odometry/filtered", hz, stateCallback); 
-    ros::Publisher force_pub = nh.advertise<roboat_core::Force>("/miniboat8/mpc_force", hz);
+    ros::Subscriber state_sub = nh.subscribe("/miniboat8/odometry/filtered", hz, stateCallback);  // to get the angular velocity, odometry
+    ros::Publisher force_pub = nh.advertise<roboat_core::Force>("/miniboat8/mpc_force", hz); // to publish the forces to the thrusters
     ros::Rate loop_rate(hz);
 
     while(ros::ok){
-
-        // Publish the forces to the thrusters.
-        // new thruster forces.
-        roboat_core::Force force_msg;
-    	// force_msg.data[0] = thruster_A;
-    	// force_msg.data[1] = thruster_B;
-    	// force_msg.data[2] = 0;
-    	// force_msg.data[3] = 0;
-    	force_msg.data = {thruster_A, thruster_B, 0, 0};
-        force_pub.publish(force_msg);
 
         t++; // increment time step
 
@@ -113,17 +98,32 @@ int main(int argc, char** argv) {
         if (calibration){
             ROS_INFO("calibrating ...");
 
+            // -----------------------------------
+            // Publish the forces to the thrusters.
+            roboat_core::Force force_msg;
+            force_msg.data = {thruster_A, thruster_B, 0, 0};
+            ROS_INFO("Thruster values: %f and %f", force_msg.data[0], force_msg.data[1]); 
+            force_pub.publish(force_msg);
+            // -----------------------------------
+
+
             if (abs(angular_v) > threshold) {
                 increment_thruster(); // either subtract or add to one of the thrusters based on the current angular velocity.
+                angular_stability = 0;
             }
-            else if (abs(angular_v) < threshold || t>calibration_time) {
-                calculate_calibration_factor(); // ratio of the two thruster values.
-                printf("Finished calibration");
-                ROS_INFO("calibration finished, calibration factor: %f", calibration_factor);
-                write_to_configfile();
-                calibration = false;
-                t = 0;
-                break;
+            else if (abs(angular_v) < threshold) {
+                
+                angular_stability ++; // a simple counter; see for how many time-step the angular_velocity remains ~ 0 ...
+
+                if (angular_stability == 10 || t>calibration_time) { // once it's stable, or too much time has passed, call the calibration finished.
+                    calculate_calibration_factor(); // ratio of the two thruster values.
+                    printf("Finished calibration");
+                    ROS_INFO("calibration finished, calibration factor: %f", calibration_factor);
+                    write_to_configfile();
+                    calibration = false;
+                    t = 0;
+                    break;
+                }
             }
         }
         else if (test_phase) {
