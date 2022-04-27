@@ -111,7 +111,7 @@ int main(int argc, char** argv) {
                 increment_thruster(); // either subtract or add to one of the thrusters based on the current angular velocity.
                 angular_stability = 0;
             }
-            else if (abs(angular_v) < threshold) {
+            else {
                 
                 angular_stability ++; // a simple counter; see for how many time-step the angular_velocity remains ~ 0 ...
                 ROS_INFO("Angular velocity < threshold :) ... waiting how long it lasts");
@@ -122,8 +122,7 @@ int main(int argc, char** argv) {
                     ROS_INFO("calibration finished, calibration factor: %f", calibration_factor);
                     write_to_configfile();
                     calibration = false;
-                    t = 0;
-                    break;
+                    // t = 0;
                 }
             }
         }
