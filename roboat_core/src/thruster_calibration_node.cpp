@@ -92,7 +92,7 @@ int main(int argc, char** argv) {
         t++; // increment time step
 
         if (startup == true && t > startup_time) {
-            ROS_INFO("Startup finished.")
+            ROS_INFO("Startup finished.");
             startup = false;
             calibration = true;
             t = 0;
