@@ -2,7 +2,7 @@
 
 #include <roboat_core/Sim.hpp>
 
-int main(int argc, char** argv)
+int main(int argc, char **argv)
 {
   ros::init(argc, argv, "sim_node");
   ros::NodeHandle n;

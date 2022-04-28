@@ -4,7 +4,7 @@
 // Roboat
 #include <roboat_core/MPC.hpp>
 
-int main(int argc, char** argv)
+int main(int argc, char **argv)
 {
   ros::init(argc, argv, "mpc_node");
 
