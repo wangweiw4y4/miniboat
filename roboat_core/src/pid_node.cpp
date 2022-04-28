@@ -104,7 +104,7 @@ double control_effort;
 double req_theta = M_PI/4;
 double req_force = 0.25;
 
-double desired_yaw = 0;
+double desired_yaw = 0.0;
 double desired_angular_velocity = 0;
 
 std::vector<double> state(6);
@@ -150,12 +150,12 @@ Eigen::VectorXd pid_yaw_control(double yaw, double angular_velocity, double desi
   
   /*Exteral PID, the output of external PID is the reference of internal PID*/
    external_e_yaw = desired_yaw - yaw;
-  if(external_e_yaw >= M_PI) external_e_yaw = external_e_yaw - 2*M_PI;
-	if(external_e_yaw <= -M_PI) external_e_yaw = external_e_yaw + 2*M_PI; 
+  //if(external_e_yaw >= M_PI) external_e_yaw = external_e_yaw - 2*M_PI;
+	//if(external_e_yaw <= -M_PI) external_e_yaw = external_e_yaw + 2*M_PI; 
   
   external_dout_yaw = external_K_yaw * external_Td_yaw * external_e_yaw_differential;
 	external_dout_pre_yaw = (external_dout_yaw + (DOUT_LPF_ORDER - 1) * external_dout_pre_yaw) / DOUT_LPF_ORDER;
-  external_out_yaw = -(external_K_yaw * external_e_yaw + external_dout_pre_yaw);  
+  external_out_yaw = (external_K_yaw * external_e_yaw + external_dout_pre_yaw);  
   
   external_e_yaw_differential = external_e_yaw - external_e_yaw_last;
 	external_e_yaw_integral = external_e_yaw_integral + external_e_yaw;
@@ -168,37 +168,38 @@ Eigen::VectorXd pid_yaw_control(double yaw, double angular_velocity, double desi
 
   if ( (internal_e_yaw >= internal_e_yaw_integral_a) || (internal_e_yaw <= - internal_e_yaw_integral_a) ) 
 	{
-		internal_out_yaw = - (internal_K_yaw * internal_e_yaw + internal_dout_pre_yaw);  //内环PD控制
+		internal_out_yaw =  (internal_K_yaw * internal_e_yaw + internal_dout_pre_yaw);  //内环PD控制
 		internal_e_yaw_differential = internal_e_yaw - internal_e_yaw_last;
 		internal_e_yaw_last = internal_e_yaw;
 	}
 	if ( (internal_e_yaw > - internal_e_yaw_integral_a) & (internal_e_yaw < internal_e_yaw_integral_a) ) 
 	{
-		internal_out_yaw = - (internal_K_yaw * internal_e_yaw + internal_K_yaw / internal_Ti_yaw * internal_e_yaw_integral + internal_dout_pre_yaw);  //内环PID控制
+		internal_out_yaw = (internal_K_yaw * internal_e_yaw + internal_K_yaw / internal_Ti_yaw * internal_e_yaw_integral + internal_dout_pre_yaw);  //内环PID控制
 		internal_e_yaw_differential = internal_e_yaw - internal_e_yaw_last;
 		internal_e_yaw_integral = internal_e_yaw_integral + internal_e_yaw;
 		internal_e_yaw_last = internal_e_yaw;
 	}
+  
+  ROS_INFO("desired_yaw, external_pid_output, internal_pid_output: %f,%f,%f\n", desired_yaw, external_out_yaw, internal_out_yaw); 
 
   Eigen::VectorXd force(4);
 
   if ( internal_out_yaw > 0 || internal_out_yaw == 0)
  {   
- 	  force(0) = 0;
-  	force(1) = std::min(0.5 * internal_out_yaw, 1.0);
-  	force(2) = std::min(0.5 * internal_out_yaw, 1.0);
-  	force(3) = 0;
+ 	  force(0) = std::min(0.5 * internal_out_yaw, 1.0);
+  	force(1) = 0;
+  	force(2) = 0;
+  	force(3) = std::min(0.5 * internal_out_yaw, 1.0);
  } 
  else
  {
- 	  force(0) = std::min( - 0.5 * internal_out_yaw, 1.0);
-  	force(1) = 0;
-  	force(2) = 0;
-  	force(3) = std::min( - 0.5 * internal_out_yaw, 1.0);
+ 	  force(0) = 0;
+  	force(1) = std::min( - 0.5 * internal_out_yaw, 1.0);
+  	force(2) = std::min( - 0.5 * internal_out_yaw, 1.0);
+  	force(3) = 0;
  }
   return force;
 }
-
 
 
 Eigen::VectorXd pid_control2(double ek)
@@ -352,7 +353,7 @@ int main(int argc, char **argv)
   if (rosNode.hasParam("cascadepid/internal_dout_pre_yaw")) rosNode.getParam("cascadepid/internal_dout_pre_yaw", internal_dout_pre_yaw);
   if (rosNode.hasParam("cascadepid/internal_e_yaw_integral_a")) rosNode.getParam("cascadepid/internal_e_yaw_integral_a", internal_e_yaw_integral_a);
 
-
+  if (rosNode.hasParam("cascadepid/desired_yaw")) rosNode.getParam("cascadepid/desired_yaw", desired_yaw);
 
   ros::Publisher setpoint_pub = rosNode.advertise<std_msgs::Float64>("setpoint", 1);
 
@@ -386,13 +387,15 @@ int main(int argc, char **argv)
     //  force =  velocity_control(req_theta, req_force)+ pid_control();
    //    force =  pid_control();
    //    force =  velocity_control(req_theta, req_force);
-      if(pid_flag) force = pid_yaw_control(state[2],state[5],desired_yaw);
+      if(pid_flag) {
+        
+        force = pid_yaw_control(state[2],state[5],desired_yaw);
      // ROS_INFO("velocity force:  %f,%f,%f,%f\n", force(0), force(1), force(2),force(3)); 
       
       roboat_core::Force forceMsg;
       Eigen::VectorXd::Map(&forceMsg.data[0], force.size()) = force;
       force_pub.publish(forceMsg);
-
+      }
 
     loop_rate.sleep();
   }
