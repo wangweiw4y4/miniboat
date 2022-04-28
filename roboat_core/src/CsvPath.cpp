@@ -27,34 +27,37 @@ CsvPath::CsvPath(ros::NodeHandle n)
   n.param("system_dynamics/num_steps", num_steps, 20);
 
   std::string id, nmpc_frame;
-  n.param<std::string>("roboat_id",id,"");
-  if (id.empty()) {
+  n.param<std::string>("roboat_id", id, "");
+  if (id.empty())
+  {
     nmpc_frame = "nmpc";
   }
-  else {
-    nmpc_frame = "nmpc_"+id;
+  else
+  {
+    nmpc_frame = "nmpc_" + id;
   }
-  
+
   setRotation(angle);
-  
-  ROS_DEBUG("[CSV_PATH_NODE] relative filename: %s", relativeFileName.c_str()); 
-  
+
+  ROS_DEBUG("[CSV_PATH_NODE] relative filename: %s", relativeFileName.c_str());
+
   std::string fileName = ros::package::getPath("roboat_core") + relativeFileName;
-  
-  ROS_DEBUG("[CSV_PATH_NODE] filename: %s", fileName.c_str()); 
-  
+
+  ROS_DEBUG("[CSV_PATH_NODE] filename: %s", fileName.c_str());
+
   double trajectory[3 * num_steps], x, y, theta;
   bool started = false;
 
-  while(ros::ok() && (repeat || !started)){
+  while (ros::ok() && (repeat || !started))
+  {
 
     started = true;
 
     io::CSVReader<3> in(fileName);
     in.read_header(io::ignore_extra_column, "x", "y", "theta");
-    
-    ROS_DEBUG("[CSV_PATH_NODE] start file read with header"); 
-  
+
+    ROS_DEBUG("[CSV_PATH_NODE] start file read with header");
+
     for (int i = 0; i < num_steps; i++)
     {
       if (in.read_row(x, y, theta))
@@ -66,30 +69,29 @@ CsvPath::CsvPath(ros::NodeHandle n)
         break;
       }
     }
-  
-    ros::Rate loopRate(1/step);
+
+    ros::Rate loopRate(1 / step);
     ros::Time begin = ros::Time::now();
-  
+
     while (ros::ok() && in.read_row(x, y, theta))
     {
       ros::spinOnce();
-  
+
       if ((ros::Time::now() - begin).toSec() > sim_time)
         break;
-  
+
       for (int i = 0; i < 3 * num_steps; i++)
         trajectory[i] = trajectory[i + 3];
-  
-      trajectoryPointSet(trajectory, num_steps-1, x, y, theta);
-  
-      nav_msgs::Path path_msg = pathMsg(trajectory,nmpc_frame); //nmpc frame tailored for each boat
+
+      trajectoryPointSet(trajectory, num_steps - 1, x, y, theta);
+
+      nav_msgs::Path path_msg = pathMsg(trajectory, nmpc_frame); // nmpc frame tailored for each boat
       path_pub.publish(path_msg);
-  
+
       // publish pose representation of state
       ref_pose_pub.publish(path_msg.poses[0]);
-  
+
       loopRate.sleep();
     }
   }
 }
-
