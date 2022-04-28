@@ -27,7 +27,7 @@
             <arg name="pf_node"             value="true"/>
             <arg name="command_node"        value="true"/>
             <arg name="joy_node"            value="false"/>
-            <arg name="pid_node"            value="false"/>
+            <arg name="pid_node"            value="true"/>
             <arg name="swarm_node"          value="true"/>
             <arg name="bag_node"            value="false"/>
             <arg name="capacitive_node"     value="false"/>

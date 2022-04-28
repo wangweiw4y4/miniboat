@@ -55,8 +55,7 @@ DAMAGE.
 #define ROS_NODE_NAME "pid_node"
 
 
-#define PI 3.1415926
-
+#define DOUT_LPF_ORDER 4
 
 double orientation_qx;
 double orientation_qy;
@@ -70,14 +69,42 @@ double ek;
 double ek_old;
 double e_total;
 
+/*External Loop PID Parameters*/
+double external_K_yaw = 0.5;
+double external_Td_yaw = 0.1;
+double external_Ti_yaw = 50.0;
+double external_e_yaw_differential = 0.0;
+double external_e_yaw_integral = 0.0;
+double external_e_yaw_last = 0.0;
+double external_e_yaw = 0.0;
+double external_out_yaw = 0.0; 
+double external_dout_yaw = 0.0f;
+double external_dout_pre_yaw = 0.0f;
+double external_e_yaw_integral_a = 25.0;
 
+/*Internal Loop PID Parameters*/
+double internal_K_yaw = 0.6;
+double internal_Td_yaw = 0.6;
+double internal_Ti_yaw = 200.0;
+double internal_e_yaw_differential = 0.0;
+double internal_e_yaw_integral = 0.0;
+double internal_e_yaw_last = 0.0;
+double internal_e_yaw = 0.0; 
+double internal_out_yaw = 0.0;
+double internal_dout_yaw = 0.0f;
+double internal_dout_pre_yaw = 0.0f;
+double internal_e_yaw_integral_a = 16.5;
 
 
 double step;
 double control_effort;
 
-double req_theta = PI/4;
+double req_theta = M_PI/4;
 double req_force = 0.25;
+
+double desired_yaw = 0;
+double desired_angular_velocity = 0;
+
 std::vector<double> state(6);
 
 void statecallback(const std_msgs::Float64MultiArray & array_msg) {
@@ -88,6 +115,60 @@ void statecallback(const std_msgs::Float64MultiArray & array_msg) {
 void controleffortcallback(const std_msgs::Float64 & control_msg)
 {
    control_effort =control_msg.data;
+}
+
+Eigen::VectorXd pid_yaw_control(double yaw, double angular_velocity, double desired_yaw)
+{ 
+  
+  /*Exteral PID, the output of external PID is the reference of internal PID*/
+   external_e_yaw = desired_yaw - yaw;
+  if(external_e_yaw >= M_PI) external_e_yaw = external_e_yaw - 2*M_PI;
+	if(external_e_yaw <= -M_PI) external_e_yaw = external_e_yaw + 2*M_PI; 
+  
+  external_dout_yaw = external_K_yaw * external_Td_yaw * external_e_yaw_differential;
+	external_dout_pre_yaw = (external_dout_yaw + (DOUT_LPF_ORDER - 1) * external_dout_pre_yaw) / DOUT_LPF_ORDER;
+  external_out_yaw = -(external_K_yaw * external_e_yaw + external_dout_pre_yaw);  
+  
+  external_e_yaw_differential = external_e_yaw - external_e_yaw_last;
+	external_e_yaw_integral = external_e_yaw_integral + external_e_yaw;
+	external_e_yaw_last = external_e_yaw;
+  
+  /*Internal PID*/
+  internal_e_yaw = external_out_yaw - angular_velocity; 
+  internal_dout_yaw = internal_K_yaw * internal_Td_yaw * internal_e_yaw_differential;
+	internal_dout_pre_yaw = (internal_dout_yaw + (DOUT_LPF_ORDER - 1) * internal_dout_pre_yaw) / DOUT_LPF_ORDER;
+
+  if ( (internal_e_yaw >= internal_e_yaw_integral_a) || (internal_e_yaw <= - internal_e_yaw_integral_a) ) 
+	{
+		internal_out_yaw = - (internal_K_yaw * internal_e_yaw + internal_dout_pre_yaw);  //内环PD控制
+		internal_e_yaw_differential = internal_e_yaw - internal_e_yaw_last;
+		internal_e_yaw_last = internal_e_yaw;
+	}
+	if ( (internal_e_yaw > - internal_e_yaw_integral_a) & (internal_e_yaw < internal_e_yaw_integral_a) ) 
+	{
+		internal_out_yaw = - (internal_K_yaw * internal_e_yaw + internal_K_yaw / internal_Ti_yaw * internal_e_yaw_integral + internal_dout_pre_yaw);  //内环PID控制
+		internal_e_yaw_differential = internal_e_yaw - internal_e_yaw_last;
+		internal_e_yaw_integral = internal_e_yaw_integral + internal_e_yaw;
+		internal_e_yaw_last = internal_e_yaw;
+	}
+
+  Eigen::VectorXd force(4);
+
+  if ( internal_out_yaw > 0 || internal_out_yaw == 0)
+ {   
+ 	  force(0) = 0;
+  	force(1) = std::min(0.5 * internal_out_yaw, 1.0);
+  	force(2) = std::min(0.5 * internal_out_yaw, 1.0);
+  	force(3) = 0;
+ } 
+ else
+ {
+ 	  force(0) = std::min( - 0.5 * internal_out_yaw, 1.0);
+  	force(1) = 0;
+  	force(2) = 0;
+  	force(3) = std::min( - 0.5 * internal_out_yaw, 1.0);
+ }
+  return force;
 }
 
 
@@ -153,8 +234,8 @@ Eigen::VectorXd velocity_control(double theta, double req_force)
 {
 
   Eigen::VectorXd force(4);
-  double theta1 = PI / 4;
-  if ((theta > 0 && theta < PI / 2) || theta == 0)
+  double theta1 = M_PI / 4;
+  if ((theta > 0 && theta < M_PI / 2) || theta == 0)
  {
  	force(0) = req_force * cos(theta) / sin(theta1) + req_force * sin(theta) / cos(theta1);
   	force(1) = req_force * sin(theta) / cos(theta1);
@@ -162,7 +243,7 @@ Eigen::VectorXd velocity_control(double theta, double req_force)
   	force(3) = 0;
  }
 
-  else if ((theta > PI / 2 && theta < PI) || theta == PI /2)
+  else if ((theta > M_PI / 2 && theta < M_PI) || theta == M_PI /2)
  {
  	force(0) = req_force * sin(theta) / cos(theta1);
   	force(1) = 0;
@@ -170,7 +251,7 @@ Eigen::VectorXd velocity_control(double theta, double req_force)
   	force(3) = req_force * abs (cos(theta)) / sin(theta1);
  }
 
-  else if ((theta > PI && theta < PI / 2 * 3) || theta == PI )
+  else if ((theta > M_PI && theta < M_PI / 2 * 3) || theta == M_PI )
  {
  	force(0) = 0;
   	force(1) = req_force * abs (sin(theta)) / cos(theta1);
@@ -178,7 +259,7 @@ Eigen::VectorXd velocity_control(double theta, double req_force)
   	force(3) = req_force * abs (cos(theta)) / sin(theta1) + req_force * abs (sin(theta)) / cos(theta1);
  }
 
-  else if ((theta > PI / 2 * 3 && theta < 2* PI) || theta == PI /2 * 3)
+  else if ((theta > M_PI / 2 * 3 && theta < 2* M_PI) || theta == M_PI /2 * 3)
  {
  	force(0) = req_force * cos(theta) / sin(theta1);
   	force(1) = req_force * cos(theta) / sin(theta1) + req_force * abs (sin(theta)) / cos(theta1);
@@ -211,7 +292,33 @@ int main(int argc, char **argv)
   if (rosNode.hasParam("PID/P")) rosNode.getParam("PID/P", P);
   if (rosNode.hasParam("PID/I")) rosNode.getParam("PID/I", I);
   if (rosNode.hasParam("PID/D")) rosNode.getParam("PID/D", D);
- 
+  
+
+  if (rosNode.hasParam("cascadepid/external_K_yaw")) rosNode.getParam("cascadepid/external_K_yaw", external_K_yaw);
+  if (rosNode.hasParam("cascadepid/external_Td_yaw")) rosNode.getParam("cascadepid/external_Td_yaw", external_Td_yaw);
+  if (rosNode.hasParam("cascadepid/external_Ti_yaw")) rosNode.getParam("cascadepid/external_Ti_yaw", external_Ti_yaw);
+  if (rosNode.hasParam("cascadepid/external_e_yaw_differential")) rosNode.getParam("cascadepid/external_e_yaw_differential", external_e_yaw_differential);
+  if (rosNode.hasParam("cascadepid/external_e_yaw_integral")) rosNode.getParam("cascadepid/external_e_yaw_integral", external_e_yaw_integral);
+  if (rosNode.hasParam("cascadepid/external_e_yaw_last")) rosNode.getParam("cascadepid/external_e_yaw_last", external_e_yaw_last);
+  if (rosNode.hasParam("cascadepid/external_e_yaw")) rosNode.getParam("cascadepid/external_e_yaw", external_e_yaw);
+  if (rosNode.hasParam("cascadepid/external_out_yaw")) rosNode.getParam("cascadepid/external_out_yaw", external_out_yaw);
+  if (rosNode.hasParam("cascadepid/external_dout_yaw")) rosNode.getParam("cascadepid/external_dout_yaw", external_dout_yaw);
+  if (rosNode.hasParam("cascadepid/external_dout_pre_yaw")) rosNode.getParam("cascadepid/external_dout_pre_yaw", external_dout_pre_yaw);
+  if (rosNode.hasParam("cascadepid/external_e_yaw_integral_a")) rosNode.getParam("cascadepid/external_e_yaw_integral_a", external_e_yaw_integral_a);
+
+  if (rosNode.hasParam("cascadepid/internal_K_yaw")) rosNode.getParam("cascadepid/internal_K_yaw", internal_K_yaw);
+  if (rosNode.hasParam("cascadepid/internal_Td_yaw")) rosNode.getParam("cascadepid/internal_Td_yaw", internal_Td_yaw);
+  if (rosNode.hasParam("cascadepid/internal_Ti_yaw")) rosNode.getParam("cascadepid/internal_Ti_yaw", internal_Ti_yaw);
+  if (rosNode.hasParam("cascadepid/internal_e_yaw_differential")) rosNode.getParam("cascadepid/internal_e_yaw_differential", internal_e_yaw_differential);
+  if (rosNode.hasParam("cascadepid/internal_e_yaw_integral")) rosNode.getParam("cascadepid/internal_e_yaw_integral", internal_e_yaw_integral);
+  if (rosNode.hasParam("cascadepid/internal_e_yaw_last")) rosNode.getParam("cascadepid/internal_e_yaw_last", internal_e_yaw_last);
+  if (rosNode.hasParam("cascadepid/internal_e_yaw")) rosNode.getParam("cascadepid/internal_e_yaw", internal_e_yaw);
+  if (rosNode.hasParam("cascadepid/internal_out_yaw")) rosNode.getParam("cascadepid/internal_out_yaw", internal_out_yaw);
+  if (rosNode.hasParam("cascadepid/internal_dout_yaw")) rosNode.getParam("cascadepid/internal_dout_yaw", internal_dout_yaw);
+  if (rosNode.hasParam("cascadepid/internal_dout_pre_yaw")) rosNode.getParam("cascadepid/internal_dout_pre_yaw", internal_dout_pre_yaw);
+  if (rosNode.hasParam("cascadepid/internal_e_yaw_integral_a")) rosNode.getParam("cascadepid/internal_e_yaw_integral_a", internal_e_yaw_integral_a);
+
+
 
   ros::Publisher setpoint_pub = rosNode.advertise<std_msgs::Float64>("setpoint", 1);
 
@@ -222,7 +329,7 @@ int main(int argc, char **argv)
 
   // Declare need to subscribe data from topic
   ros::Subscriber substate = rosNode.subscribe("state", 1, statecallback);
-  ros::Subscriber subcontroleffort = rosNode.subscribe("control_effort", 1, controleffortcallback);
+ // ros::Subscriber subcontroleffort = rosNode.subscribe("control_effort", 1, controleffortcallback);
 
 
   rosNode.param("system_dynamics/step", step, 0.1);
@@ -245,8 +352,9 @@ int main(int argc, char **argv)
       heading_pub.publish(heading);
  
     //  force =  velocity_control(req_theta, req_force)+ pid_control();
-       force =  pid_control();
+   //    force =  pid_control();
    //    force =  velocity_control(req_theta, req_force);
+       force = pid_yaw_control(state[2],state[5],desired_yaw);
      // ROS_INFO("velocity force:  %f,%f,%f,%f\n", force(0), force(1), force(2),force(3)); 
       
       roboat_core::Force forceMsg;
