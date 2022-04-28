@@ -32,6 +32,7 @@ int startup_time = 50; // 50 * 1/10 (10 hz loop rate) = 5 seconds
 int calibration_time = 300; // 300 * 1/10 (10hz loop rate) = 30 seconds
 float threshold = 0.05; // angular velocity threshold ... radians/s?
 int angular_stability = 0; // start counter when angular_v drops below threshold. To make usre it's stable, not just a blip in the angular_v.
+int thruster_waiting_time = 10; // when it first starts, don't have a delay.
 
 
 // ------------------------------------------------
@@ -39,6 +40,7 @@ int angular_stability = 0; // start counter when angular_v drops below threshold
 
 
 void increment_thruster() {
+
     if (angular_v > threshold) { // angular velocity is +ive, therefore increase thruster B.
         thruster_B = thruster_B*1.01;
     }
@@ -90,6 +92,7 @@ int main(int argc, char** argv) {
         t++; // increment time step
 
         if (startup == true && t > startup_time) {
+            ROS_INFO("Startup finished.")
             startup = false;
             calibration = true;
             t = 0;
@@ -97,6 +100,7 @@ int main(int argc, char** argv) {
 
         if (calibration){
             ROS_INFO("calibrating ...");
+
 
             // -----------------------------------
             // Publish the forces to the thrusters.
@@ -108,9 +112,14 @@ int main(int argc, char** argv) {
 
 
             if (angular_v > threshold || angular_v < -threshold) {
-                increment_thruster(); // either subtract or add to one of the thrusters based on the current angular velocity.
                 ROS_INFO("angular_v is above threshold!");
-                angular_stability = 0;
+
+                if (thruster_waiting_time == 10) {
+                    thruster_waiting_time = 0; // reset timer, so that we always wait a bit before updating the thrusters again.
+                    increment_thruster(); // either subtract or add to one of the thrusters based on the current angular velocity.
+                    ROS_INFO("Thruster value has been changed");
+                }
+                thruster_waiting_time ++;
             }
             else {
                 angular_stability ++; // a simple counter; see for how many time-step the angular_velocity remains ~ 0 ...
