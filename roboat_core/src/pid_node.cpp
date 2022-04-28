@@ -41,7 +41,7 @@ DAMAGE.
 #include <tf/transform_broadcaster.h>
 #include <tf/transform_listener.h>
 #include <tf/transform_datatypes.h>
-
+#include <nav_msgs/Odometry.h>
 // other
 #include <Eigen/Dense>
 #include <math.h>
@@ -69,6 +69,8 @@ double ek;
 double ek_old;
 double e_total;
 
+bool pid_flag = false;
+int state_roll_over_count = 0;
 /*External Loop PID Parameters*/
 double external_K_yaw = 0.5;
 double external_Td_yaw = 0.1;
@@ -107,10 +109,36 @@ double desired_angular_velocity = 0;
 
 std::vector<double> state(6);
 
-void statecallback(const std_msgs::Float64MultiArray & array_msg) {
-    for(int i = 0; i < 6; i++) 
-      state[i] = array_msg.data[i];
+void stateCallback(const nav_msgs::Odometry msg) {
+    
+    double yaw;
+
+    state[0] = msg.pose.pose.position.x;
+    state[1] = -msg.pose.pose.position.y; //
+    yaw = -tf::getYaw(tf::Quaternion(msg.pose.pose.orientation.x, msg.pose.pose.orientation.y,
+                                    msg.pose.pose.orientation.z, msg.pose.pose.orientation.w));
+
+    // Unwrap the angle when roll over happens
+    double yaw_diff = state[2] - yaw - state_roll_over_count * 2 * M_PI;
+    if (yaw_diff > M_PI)
+    {
+      state_roll_over_count += 1;
+    }
+    else if (yaw_diff < -M_PI)
+    {
+      state_roll_over_count -= 1;
+    }
+    state[2] = yaw + state_roll_over_count * 2 * M_PI;
+    
+    state[3] = msg.twist.twist.linear.x;
+    state[4] = -msg.twist.twist.linear.y;
+    state[5] = -msg.twist.twist.angular.z;
+    
+    ROS_INFO("miniboat state is %f, %f, %f, %f, %f, %f", state[0], state[1],state[2],state[3],state[4],state[5]);
+    
 }
+
+
 
 void controleffortcallback(const std_msgs::Float64 & control_msg)
 {
@@ -286,6 +314,12 @@ int main(int argc, char **argv)
   
   // ROS node reference 
   ros::NodeHandle rosNode;
+  rosNode.param("system_dynamics/step", step, 0.1);
+  ros::Rate loop_rate(1/step);
+  ros::Time begin = ros::Time::now();
+  Eigen::VectorXd force = Eigen::VectorXd::Zero(4);
+
+
   if (rosNode.hasParam("PID/req_theta")) rosNode.getParam("PID/req_theta", req_theta);
   if (rosNode.hasParam("PID/req_force")) rosNode.getParam("PID/req_force", req_force);
   
@@ -293,7 +327,7 @@ int main(int argc, char **argv)
   if (rosNode.hasParam("PID/I")) rosNode.getParam("PID/I", I);
   if (rosNode.hasParam("PID/D")) rosNode.getParam("PID/D", D);
   
-
+  if (rosNode.hasParam("cascadepid/pid_flag")) rosNode.getParam("cascadepid/pid_flag", pid_flag);
   if (rosNode.hasParam("cascadepid/external_K_yaw")) rosNode.getParam("cascadepid/external_K_yaw", external_K_yaw);
   if (rosNode.hasParam("cascadepid/external_Td_yaw")) rosNode.getParam("cascadepid/external_Td_yaw", external_Td_yaw);
   if (rosNode.hasParam("cascadepid/external_Ti_yaw")) rosNode.getParam("cascadepid/external_Ti_yaw", external_Ti_yaw);
@@ -328,14 +362,12 @@ int main(int argc, char **argv)
 
 
   // Declare need to subscribe data from topic
-  ros::Subscriber substate = rosNode.subscribe("state", 1, statecallback);
+ // ros::Subscriber substate = rosNode.subscribe("state", 1/step, statecallback);
+  ros::Subscriber state_sub = rosNode.subscribe("odometry/filtered", 1/step, stateCallback);  // to get the angular velocity, odometry
  // ros::Subscriber subcontroleffort = rosNode.subscribe("control_effort", 1, controleffortcallback);
 
 
-  rosNode.param("system_dynamics/step", step, 0.1);
-  ros::Rate loop_rate(1/step);
-  ros::Time begin = ros::Time::now();
-  Eigen::VectorXd force = Eigen::VectorXd::Zero(4);
+
 
   while (ros::ok())
   {
@@ -354,7 +386,7 @@ int main(int argc, char **argv)
     //  force =  velocity_control(req_theta, req_force)+ pid_control();
    //    force =  pid_control();
    //    force =  velocity_control(req_theta, req_force);
-       force = pid_yaw_control(state[2],state[5],desired_yaw);
+      if(pid_flag) force = pid_yaw_control(state[2],state[5],desired_yaw);
      // ROS_INFO("velocity force:  %f,%f,%f,%f\n", force(0), force(1), force(2),force(3)); 
       
       roboat_core::Force forceMsg;

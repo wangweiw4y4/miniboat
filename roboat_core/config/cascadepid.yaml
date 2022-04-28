@@ -25,7 +25,8 @@
 #double internal_e_yaw_integral_a = 16.5;
 #double desired_yaw = 0;
 
- external_K_yaw : 0.5
+ pid_flag: false
+ external_K_yaw : 0.4
  external_Td_yaw : 0.1
  external_Ti_yaw : 50.0
  external_e_yaw_differential : 0.0
