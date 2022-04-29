@@ -41,9 +41,6 @@ int n = 0; // calibration cycles; after each cycle we log the new calibration va
 // ------------------------------------------------
 // functions
 
-void increment_thruster()
-{
-
 void increment_thruster() {
 
     if (angular_v > threshold) { // angular velocity is +ive, therefore increase thruster B.
@@ -123,7 +120,7 @@ int main(int argc, char **argv)
 
 			if (t > initial_accel ){
 	            if (angular_v > threshold || angular_v < -threshold) {
-                    
+
                 	ROS_INFO("angular_v is above threshold!");
                 	angular_stability = 0;
 
