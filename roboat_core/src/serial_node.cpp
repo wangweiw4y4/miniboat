@@ -26,7 +26,7 @@ void callback(roboat_core::CommandToMicroController Command)
   CommandFrameSize = ros_ser.write(&Command.CommandtoLower[0], SendFramesize);
 }
 
-int main(int argc, char** argv)
+int main(int argc, char **argv)
 {
   ros::init(argc, argv, "serial_node");
   ros::NodeHandle n;
@@ -46,7 +46,7 @@ int main(int argc, char** argv)
     ros_ser.setTimeout(to);
     ros_ser.open();
   }
-  catch (serial::IOException& e)
+  catch (serial::IOException &e)
   {
     ROS_ERROR_STREAM("[SERIAL NODE]Unable to open port");
     return -1;
@@ -61,12 +61,12 @@ int main(int argc, char** argv)
     return -1;
   }
 
-  ros::Rate loop_rate(1/step);
+  ros::Rate loop_rate(1 / step);
   while (ros::ok())
   {
     if (ros_ser.available())
     {
-      //ROS_INFO("[SERIAL NODE]loop - serial available");
+      // ROS_INFO("[SERIAL NODE]loop - serial available");
       roboat_core::SensorFromMicroController SensorData;
 
       size_t SensorFrameSize;
@@ -83,10 +83,10 @@ int main(int argc, char** argv)
       if ((ReceivingPacket.StartByte == STARTBYTE) && (ReceivingPacket.EndByte == ENDBYTE) &&
           (ReceivingPacket.RobotID == ROBOT_ID))
       {
-        //ROS_INFO("[SERIAL NODE]GPS and IMU data:%f,%f,%f,%f,%f,%f,%f,%f\n", ReceivingPacket.GPSData[1],
-        //         ReceivingPacket.GPSData[2], ReceivingPacket.IMUData[0], ReceivingPacket.IMUData[1],
-         //        ReceivingPacket.IMUData[2], ReceivingPacket.IMUData[3], ReceivingPacket.IMUData[4],
-         //        ReceivingPacket.IMUData[5]);
+        // ROS_INFO("[SERIAL NODE]GPS and IMU data:%f,%f,%f,%f,%f,%f,%f,%f\n", ReceivingPacket.GPSData[1],
+        //          ReceivingPacket.GPSData[2], ReceivingPacket.IMUData[0], ReceivingPacket.IMUData[1],
+        //         ReceivingPacket.IMUData[2], ReceivingPacket.IMUData[3], ReceivingPacket.IMUData[4],
+        //         ReceivingPacket.IMUData[5]);
 
         memcpy(&SensorData.SensorDataFromLower[0], &SensorFrame[UARTHEARDER_NUMBER - 1], ReceivingPacket.DataLength);
         sensor_pub.publish(SensorData);
@@ -94,7 +94,7 @@ int main(int argc, char** argv)
     }
     else
     {
-      //ROS_ERROR_STREAM("[SERIAL NODE]loop - serial not available");
+      // ROS_ERROR_STREAM("[SERIAL NODE]loop - serial not available");
     }
 
     ros::spinOnce();

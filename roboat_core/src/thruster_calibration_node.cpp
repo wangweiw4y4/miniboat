@@ -11,17 +11,14 @@ Just two thrusters for now ...
 #include <nav_msgs/Odometry.h>
 #include <roboat_core/Force.h>
 
-
 // ROS spin settings
 int hz = 10; // time delay, 100 ms
-
 
 // Compare thruster A and B;
 float angular_v; //instantaneous angular velocity value, taken from mini-boat odometry.
 float thruster_A = 0.2; // thruster value, A
 float calibration_factor = 1; // ratio between thrusters A and B. ----> write into .XML/.YAML file.
 float thruster_B = thruster_A*calibration_factor; // thruster value, B - 1.257
-
 
 // calibration settings
 int t = 0; // time-step
@@ -41,10 +38,11 @@ float delta = 0.01; // factor by which we we change the thruster value when we m
 int n = 0; // calibration cycles; after each cycle we log the new calibration value and recalculate the thrusters.
 
 
-
 // ------------------------------------------------
 // functions
 
+void increment_thruster()
+{
 
 void increment_thruster() {
 
@@ -54,32 +52,33 @@ void increment_thruster() {
     else if (angular_v < - threshold) { // angular velocity is -ive, therefore decrease thruster B.
         thruster_B = thruster_B*(1-delta);
     }
-    else {
+    else
+    {
         // do nothing.
     }
 }
 
-
-void calculate_calibration_factor() {
-    calibration_factor = thruster_B/thruster_A;
+void calculate_calibration_factor()
+{
+    calibration_factor = thruster_B / thruster_A;
 }
 
-
-void write_to_configfile() {
+void write_to_configfile()
+{
     // write to main.yaml?
 }
 
-
-void test_if_it_works() {
+void test_if_it_works()
+{
     // use the new configuration factor to move straight(?)
     test_phase = true;
 }
 
+void stateCallback(const nav_msgs::Odometry msg)
+{
 
-void stateCallback(const nav_msgs::Odometry msg) {
-    
     angular_v = -msg.twist.twist.angular.z;
-    ROS_INFO("angular velocity: %f  	|	  compared to our calibration threshold: %f", angular_v, threshold); 
+    ROS_INFO("angular velocity: %f  	|	  compared to our calibration threshold: %f", angular_v, threshold);
 }
 
 
@@ -88,39 +87,43 @@ void stateCallback(const nav_msgs::Odometry msg) {
 
 // ------------------------------------------------
 // main
-int main(int argc, char** argv) {
+int main(int argc, char **argv)
+{
 
     ros::init(argc, argv, "thruster_calibration_node");
     ros::NodeHandle nh;
-    ros::Subscriber state_sub = nh.subscribe("/miniboat4/odometry/filtered", hz, stateCallback);  // to get the angular velocity, odometry
-    ros::Publisher force_pub = nh.advertise<roboat_core::Force>("/miniboat4/mpc_force", hz); // to publish the forces to the thrusters
+    ros::Subscriber state_sub = nh.subscribe("/miniboat4/odometry/filtered", hz, stateCallback); // to get the angular velocity, odometry
+    ros::Publisher force_pub = nh.advertise<roboat_core::Force>("/miniboat4/mpc_force", hz);     // to publish the forces to the thrusters
     ros::Rate loop_rate(hz);
 
-    while(ros::ok){
+    while (ros::ok)
+    {
 
         t++; // increment time step
 
-        if (startup == true && t > startup_time) {
+        if (startup == true && t > startup_time)
+        {
             ROS_INFO("Startup finished.");
             startup = false;
             calibration = true;
             t = 0;
         }
 
-        if (calibration){
+        if (calibration)
+        {
             ROS_INFO("calibrating ...");
-
 
             // -----------------------------------
             // Publish the forces to the thrusters.
             roboat_core::Force force_msg;
             force_msg.data = {thruster_A, thruster_B, 0, 0};
-            ROS_INFO("Thruster values: %f and %f", force_msg.data[0], force_msg.data[1]); 
+            ROS_INFO("Thruster values: %f and %f", force_msg.data[0], force_msg.data[1]);
             force_pub.publish(force_msg);
             // -----------------------------------
 
 			if (t > initial_accel ){
 	            if (angular_v > threshold || angular_v < -threshold) {
+                    
                 	ROS_INFO("angular_v is above threshold!");
                 	angular_stability = 0;
 
@@ -154,7 +157,8 @@ int main(int argc, char** argv) {
 			}
 
         }
-        else if (test_phase) {
+        else if (test_phase)
+        {
             // try out the new calibration factor.
         }
 
@@ -164,4 +168,3 @@ int main(int argc, char** argv) {
 
     return 0;
 }
-

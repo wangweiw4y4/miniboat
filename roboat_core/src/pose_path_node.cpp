@@ -2,7 +2,7 @@
 
 #include <roboat_core/PosePath.hpp>
 
-int main(int argc, char** argv)
+int main(int argc, char **argv)
 {
   ros::init(argc, argv, "pose_path_node");
   ros::NodeHandle n;

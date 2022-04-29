@@ -26,7 +26,7 @@
 #double desired_yaw = 0;
 
  pid_flag: false
- external_K_yaw : 0.4
+ external_K_yaw : 0.1
  external_Td_yaw : 0.1
  external_Ti_yaw : 50.0
  external_e_yaw_differential : 0.0
@@ -36,11 +36,11 @@
  external_out_yaw : 0.0 
  external_dout_yaw : 0.0
  external_dout_pre_yaw : 0.0
- external_e_yaw_integral_a : 25.0
+ external_e_yaw_integral_a : 0.5
 
 
- internal_K_yaw : 0.6
- internal_Td_yaw : 0.6
+ internal_K_yaw : 0.5
+ internal_Td_yaw : 0.2
  internal_Ti_yaw : 200.0
  internal_e_yaw_differential : 0.0
  internal_e_yaw_integral : 0.0
@@ -49,6 +49,6 @@
  internal_out_yaw : 0.0
  internal_dout_yaw : 0.0
  internal_dout_pre_yaw : 0.0
- internal_e_yaw_integral_a : 16.5
+ internal_e_yaw_integral_a : 0.5
 
  desired_yaw : 0.0
