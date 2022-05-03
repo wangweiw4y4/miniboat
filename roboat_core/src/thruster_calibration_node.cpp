@@ -14,11 +14,13 @@ Just two thrusters for now ...
 // ROS spin settings
 int hz = 10; // time delay, 100 ms
 
+
 // Compare thruster A and B;
 float angular_v; //instantaneous angular velocity value, taken from mini-boat odometry.
 float thruster_A = 0.2; // thruster value, A
 float calibration_factor = 1; // ratio between thrusters A and B. ----> write into .XML/.YAML file.
 float thruster_B = thruster_A*calibration_factor; // thruster value, B - 1.257
+
 
 // calibration settings
 int t = 0; // time-step
