@@ -108,7 +108,7 @@ int main(int argc, char **argv)
             t = 0;
         }
 
-        if (calibration)
+        else if (calibration)
         {
             ROS_INFO("calibrating ...");
 
@@ -121,10 +121,14 @@ int main(int argc, char **argv)
             // -----------------------------------
 
 			if (t > initial_accel ){
-	            if (angular_v > threshold || angular_v < -threshold) {
+
+                ROS_INFO("Initial acceleration phase complete");
+
+	            if (abs(angular_v) > threshold) {
+
+                    angular_stability = 0; // reset angular stability index, i.e. it's not in the stable region:)
 
                 	ROS_INFO("angular_v is above threshold!");
-                	angular_stability = 0;
 
                 	if (thruster_waiting_time == 10) {
                     	thruster_waiting_time = 0; // reset timer, so that we always wait a bit before updating the thrusters again.
@@ -133,13 +137,16 @@ int main(int argc, char **argv)
                 	}
                 	thruster_waiting_time ++;
             	}
+
             	else {
-                	angular_stability ++; // a simple counter; see for how many time-step the angular_velocity remains ~ 0 ...
+
+                	angular_stability ++; // stability index: to check how long the angular_velocity remains stable ...
+
                 	ROS_INFO("Angular velocity < threshold :) ... waiting how long it lasts");
-                	ROS_INFO("angular stability counter: %d", angular_stability);
+                	ROS_INFO("Angular stability counter: %d", angular_stability);
 
                 	if (angular_stability == 10 || t>calibration_time) { // once it's stable, or too much time has passed, call the calibration finished.
-                        n++;
+                        n++; // go through n calibration cycles (with each cycle the sensitivity of the thruster adjustments is reduced, ie. we feel increasingly secure about our calibrated value)
                         delta = delta/(n+1); // i.e. decrease the adjustment factor every go round ... i.e. the amount by which the thruster value is changed. i.e. it becomes more stable/more damped.
                     	calculate_calibration_factor(); // ratio of the two thruster values.
 
@@ -154,11 +161,17 @@ int main(int argc, char **argv)
                 	}
             	}
 			}
+            else {
+                // nothing
+            }
 
         }
         else if (test_phase)
         {
             // try out the new calibration factor.
+        }
+        else {
+            // nothing
         }
 
         ros::spinOnce();
