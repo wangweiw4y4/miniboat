@@ -4,6 +4,7 @@ M.I.T. April 2022
 Just two thrusters for now ...
 ------------------------------------------------*/
 
+
 // libraries
 // ROS
 #include <ros/ros.h>
@@ -11,14 +12,15 @@ Just two thrusters for now ...
 #include <nav_msgs/Odometry.h>
 #include <roboat_core/Force.h>
 
+
 // ROS spin settings
 int hz = 10; // time delay, 100 ms
 
 
 // Compare thruster A and B;
 float angular_v; //instantaneous angular velocity value, taken from mini-boat odometry.
-float thruster_A = 0.2; // thruster value, A
-float calibration_factor = 1; // ratio between thrusters A and B. ----> write into .XML/.YAML file.
+float thruster_A = 0.22; // thruster value, A
+float calibration_factor = 1.25; // 1.27, ratio between thrusters A and B. ----> write into .XML/.YAML file.
 float thruster_B = thruster_A*calibration_factor; // thruster value, B - 1.257
 
 
@@ -33,8 +35,8 @@ int thruster_waiting_time = 0; // counter so that the thruster only gets updated
 
 
 // calibration settings
-int calibration_time = 1200; // 300 * 1/10 (10hz loop rate) = 30 seconds
-float threshold = 0.05; // angular velocity threshold ... radians/s?
+int calibration_time = 1500; // 300 * 1/10 (10hz loop rate) = 30 seconds
+float threshold = 0.10; // angular velocity threshold ... radians/s?
 int angular_stability = 0; // start counter when angular_v drops below threshold.
 float delta = 0.01; // factor by which we we change the thruster value when we make an adjustment. i.e. 0.01 = 1%.
 int n = 0; // calibration cycles; after each cycle we log the new calibration value and recalculate the thrusters.
@@ -44,17 +46,22 @@ int n = 0; // calibration cycles; after each cycle we log the new calibration va
 // functions
 
 void increment_thruster() {
+	
+	float d;
 
     if (angular_v > threshold) { // angular velocity is +ive, therefore increase thruster B.
-        thruster_B = thruster_B*(1+delta);
+        d = delta;
+        ROS_INFO("angular velocity is too +ve");
     }
     else if (angular_v < - threshold) { // angular velocity is -ive, therefore decrease thruster B.
-        thruster_B = thruster_B*(1-delta);
+    	d = - delta;
+    	ROS_INFO("angular velocity is too -ve");
     }
-    else
-    {
-        // do nothing.
-    }
+    
+    float q = 1+d;
+    thruster_B = thruster_B*q;
+    ROS_INFO("Scaling factor for thruster B: %f", q);
+	ROS_INFO("-------------------------------------");
 }
 
 void calculate_calibration_factor()
@@ -77,7 +84,6 @@ void stateCallback(const nav_msgs::Odometry msg)
 {
 
     angular_v = -msg.twist.twist.angular.z;
-    ROS_INFO("angular velocity: %f  	|	  compared to our calibration threshold: %f", angular_v, threshold);
 }
 
 
@@ -89,16 +95,21 @@ void stateCallback(const nav_msgs::Odometry msg)
 int main(int argc, char **argv)
 {
 
+
     ros::init(argc, argv, "thruster_calibration_node");
     ros::NodeHandle nh;
     ros::Subscriber state_sub = nh.subscribe("/miniboat4/odometry/filtered", hz, stateCallback); // to get the angular velocity, odometry
     ros::Publisher force_pub = nh.advertise<roboat_core::Force>("/miniboat4/mpc_force", hz);     // to publish the forces to the thrusters
     ros::Rate loop_rate(hz);
 
+
+
     while (ros::ok)
     {
 
         t++; // increment time step
+
+
 
         if (startup == true && t > startup_time)
         {
@@ -108,9 +119,12 @@ int main(int argc, char **argv)
             t = 0;
         }
 
+
+
         else if (calibration)
         {
-            ROS_INFO("calibrating ...");
+            // ROS_INFO("calibrating ...");
+             ROS_INFO("~ angular velocity: %f  (vs. threshold: %f ) ~", angular_v, threshold);
 
             // -----------------------------------
             // Publish the forces to the thrusters.
@@ -122,18 +136,16 @@ int main(int argc, char **argv)
 
 			if (t > initial_accel ){
 
-                ROS_INFO("Initial acceleration phase complete");
-
-	            if (abs(angular_v) > threshold) {
+	            if (angular_v > threshold || angular_v < -threshold) {
 
                     angular_stability = 0; // reset angular stability index, i.e. it's not in the stable region:)
 
-                	ROS_INFO("angular_v is above threshold!");
+                	ROS_INFO("Above threshold!");
 
                 	if (thruster_waiting_time == 10) {
                     	thruster_waiting_time = 0; // reset timer, so that we always wait a bit before updating the thrusters again.
                     	increment_thruster(); // either subtract or add to one of the thrusters based on the current angular velocity.
-                    	ROS_INFO("Thruster value has been changed");
+                    	ROS_INFO("---------------- Thruster value has been changed ----------------");
                 	}
                 	thruster_waiting_time ++;
             	}
@@ -145,18 +157,27 @@ int main(int argc, char **argv)
                 	ROS_INFO("Angular velocity < threshold :) ... waiting how long it lasts");
                 	ROS_INFO("Angular stability counter: %d", angular_stability);
 
-                	if (angular_stability == 10 || t>calibration_time) { // once it's stable, or too much time has passed, call the calibration finished.
-                        n++; // go through n calibration cycles (with each cycle the sensitivity of the thruster adjustments is reduced, ie. we feel increasingly secure about our calibrated value)
-                        delta = delta/(n+1); // i.e. decrease the adjustment factor every go round ... i.e. the amount by which the thruster value is changed. i.e. it becomes more stable/more damped.
-                    	calculate_calibration_factor(); // ratio of the two thruster values.
+                	if (angular_stability == 20 || t>calibration_time) { // once it's stable, or too much time has passed
+                        
+                        n++; // go through n calibration cycles 
+                        
+                        if (n==1) {
+                            delta = delta*0.6;
+                        }
+                        if (n==2 || n==3) {
+                            delta = delta*0.4;
+                        }
+
+                        ROS_INFO("---------------------- Completed calibration cycle, n: %d ---------------------- ", n);
+                        ROS_INFO("new delta: %f", delta);
+                    	calculate_calibration_factor();
+                    	angular_stability = 0;
 
                         if (n==4) {
-                            ROS_INFO("Finished calibration!");
+                            ROS_INFO("------------------  Finished calibration!  ------------------");
                     	    ROS_INFO("calibration finished, calibration factor: %f", calibration_factor);
-                    	    write_to_configfile();
+                    	    // write_to_configfile();
                     	    calibration = false;
-                    	    // t = 0;
-                    	    //break;
                         }
                 	}
             	}

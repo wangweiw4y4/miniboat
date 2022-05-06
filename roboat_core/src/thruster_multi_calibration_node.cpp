@@ -56,7 +56,7 @@ void increment_thruster()
 
         change = delta;
     }
-    else if (angular_v < threshold) {
+    else if (angular_v < -threshold) {
 
         change = -delta;
     }
