@@ -289,3 +289,6 @@ install(
 # catkin_add_nosetests(test)
 
 roslint_cpp()
+
+add_executable(position_pid src/position_pid.cpp)
+target_link_libraries(position_pid ${catkin_LIBRARIES})
