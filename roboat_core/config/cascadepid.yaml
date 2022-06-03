@@ -1,34 +1,11 @@
 
-#double external_K_yaw = 0.5;
-#double external_Td_yaw = 0.1;
-#double external_Ti_yaw = 50.0;
-#double external_e_yaw_differential = 0.0;
-#double external_e_yaw_integral = 0.0;
-#double external_e_yaw_last = 0.0;
-#double external_e_yaw = 0.0;
-#double external_out_yaw = 0.0; 
-#double external_dout_yaw = 0.0f;
-#double external_dout_pre_yaw = 0.0f;
-#double external_e_yaw_integral_a = 25.0;
-
-#/*Internal Loop PID Parameters*/
-#double internal_K_yaw = 0.6;
-#double internal_Td_yaw = 0.6;
-#double internal_Ti_yaw = 200.0;
-#double internal_e_yaw_differential = 0.0;
-#double internal_e_yaw_integral = 0.0;
-#double internal_e_yaw_last = 0.0;
-#double internal_e_yaw = 0.0; 
-#double internal_out_yaw = 0.0;
-#double internal_dout_yaw = 0.0f;
-#double internal_dout_pre_yaw = 0.0f;
-#double internal_e_yaw_integral_a = 16.5;
-#double desired_yaw = 0;
-
- pid_flag: false
+ pid_flag: true
+ thruster12ratio: 1.07
+ pid_maxforce: 0.05
+ base_force: 0.1
  external_K_yaw : 0.1
- external_Td_yaw : 0.1
- external_Ti_yaw : 50.0
+ external_Td_yaw : 0.0
+ external_Ti_yaw : 200.0
  external_e_yaw_differential : 0.0
  external_e_yaw_integral : 0.0
  external_e_yaw_last : 0.0
@@ -36,12 +13,12 @@
  external_out_yaw : 0.0 
  external_dout_yaw : 0.0
  external_dout_pre_yaw : 0.0
- external_e_yaw_integral_a : 0.5
+ external_e_yaw_integral_a : 0.2
 
 
- internal_K_yaw : 0.5
- internal_Td_yaw : 0.2
- internal_Ti_yaw : 200.0
+ internal_K_yaw : 0.25
+ internal_Td_yaw : 0.1
+ internal_Ti_yaw : 400.0
  internal_e_yaw_differential : 0.0
  internal_e_yaw_integral : 0.0
  internal_e_yaw_last : 0.0
@@ -49,6 +26,6 @@
  internal_out_yaw : 0.0
  internal_dout_yaw : 0.0
  internal_dout_pre_yaw : 0.0
- internal_e_yaw_integral_a : 0.5
+ internal_e_yaw_integral_a : 0.3
 
  desired_yaw : 0.0

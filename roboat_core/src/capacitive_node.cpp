@@ -27,13 +27,13 @@ int latched(int i);
 int main(int argc, char **argv)
 {
 
+    // ROS initialisations
     ros::init(argc, argv, "capacitive_node");
     ros::NodeHandle nh;
-
     ros::Subscriber cap_sub = nh.subscribe("capacitive", td, arrayCallback);
     ros::Publisher cap_pub = nh.advertise<std_msgs::Int16MultiArray>("latch_state", td);
-
     ros::Rate loop_rate(td);
+
 
     // initialise values used for calibration
     int sensorMax[4] = {0};
