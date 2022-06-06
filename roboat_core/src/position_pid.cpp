@@ -27,6 +27,14 @@
 
 #define ROS_NODE_NAME "position_pid"
 
+
+Eigen::VectorXd force(4);
+
+Eigen::MatrixXd B(3,4);
+Eigen::MatrixXd B_inv(4,3);
+
+std::vector<double> state(6);
+
 class ProportionalIntegralDerivative
 {
 public:
@@ -66,7 +74,6 @@ public:
     double desired_y = 1.5;
     double desired_y_velocity = 0;
 
-    std::vector<double> state;
     double x_dot;
     double y_dot;
 
@@ -83,7 +90,6 @@ public:
     double epsii;
     double epsid;
 
-    Eigen::VectorXd force;
     double Tx;
     double Ty;
     double Tu;
@@ -94,8 +100,6 @@ public:
     Eigen::Vector3d miniboat_tau;
 
     Eigen::Matrix2d rotation;
-    Eigen::MatrixXd B;
-    Eigen::MatrixXd B_inv;
 
     roboat_core::Force forceMsg;
 
@@ -131,6 +135,13 @@ public:
         desired_x_velocity = 0;
         desired_y = 1.5;
         desired_y_velocity = 0;
+
+        state[0] = 0.0;
+        state[1] = 0.0;
+        state[2] = 0.0;
+        state[3] = 0.0;
+        state[4] = 0.0;
+        state[5] = 0.0;
 
         ex_last = 0;
         ey_last = 0;
