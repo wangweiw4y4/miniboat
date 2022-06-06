@@ -13,29 +13,38 @@ Just two thrusters for now ...
 #include <roboat_core/Force.h>
 
 
-// ROS spin settings
-int hz = 10; // time delay, 100 ms
+#define BUFFER_SIZE 20 // buffer size for the moving average.
+#define STARTUP_TIME 50 // allow for startup. 50 * 1/10 (10 hz loop rate) = 5 seconds
+#define INITIAL_ACCEL 50 // allow for initial acceleration, after startup.
+#define HZ 10 // ROS spin setting, 100ms.
 
+// ----------------------------------------------
 
-// Compare thruster A and B;
+// Compare thruster A and B; MOVING AVERAGE
 float angular_v; //instantaneous angular velocity value, taken from mini-boat odometry.
+int b = 0; // index of the buffer array.
+float angular_v_buffer[BUFFER_SIZE]; 
+float moving_average; // calculated from the values in the buffer array
+
+// ----------------------------------------------
+
+// Initial Thruster values
 float thruster_A = 0.22; // thruster value, A
 float calibration_factor = 1.25; // 1.27, ratio between thrusters A and B. ----> write into .XML/.YAML file.
 float thruster_B = thruster_A*calibration_factor; // thruster value, B - 1.257
 
+// ----------------------------------------------
 
 // calibration settings
 int t = 0; // time-step
 bool startup = true;
 bool calibration = false;
 bool test_phase = false;
-int startup_time = 50; // 50 * 1/10 (10 hz loop rate) = 5 seconds
-int initial_accel = 50; // time for the boat thrusters to have an effect when you first switch on.
 int thruster_waiting_time = 0; // counter so that the thruster only gets updated intermittently.
 
 
-// calibration settings
-int calibration_time = 1500; // 300 * 1/10 (10hz loop rate) = 30 seconds
+// more calibration settings
+const int calibration_time = 1500; // 300 * 1/10 (10hz loop rate) = 30 seconds
 float threshold = 0.10; // angular velocity threshold ... radians/s?
 int angular_stability = 0; // start counter when angular_v drops below threshold.
 float delta = 0.01; // factor by which we we change the thruster value when we make an adjustment. i.e. 0.01 = 1%.
@@ -47,7 +56,7 @@ int n = 0; // calibration cycles; after each cycle we log the new calibration va
 
 void increment_thruster() {
 	
-	float d;
+	float d; // delta
 
     if (angular_v > threshold) { // angular velocity is +ive, therefore increase thruster B.
         d = delta;
@@ -59,8 +68,8 @@ void increment_thruster() {
     }
     
     float q = 1+d;
+    ROS_INFO("Multiplying thruster B by: %f", q);
     thruster_B = thruster_B*q;
-    ROS_INFO("Scaling factor for thruster B: %f", q);
 	ROS_INFO("-------------------------------------");
 }
 
@@ -82,8 +91,25 @@ void test_if_it_works()
 
 void stateCallback(const nav_msgs::Odometry msg)
 {
-
     angular_v = -msg.twist.twist.angular.z;
+
+    // always overwrite the next increment in the buffer (b++). When we reach the end, circle back around (b = 0).
+    if (b < BUFFER_SIZE) {
+        angular_v_buffer[b] = angular_v;
+        b ++;
+    }
+    else {
+        b = 0;
+    }
+
+    // calculate the sum of the buffer. If at the beginning, e.g. [value, 0, 0, 0] the sum will be small, so the average will look small, which is ok since it won't make any corrections (i.e. it will look like the angular velocity is small)
+    float sum;
+    for (int i = 0; i < BUFFER_SIZE; i++) {
+        sum =+ angular_v_buffer[i];
+    }
+    
+    // calculate the average
+    moving_average = sum/BUFFER_SIZE;
 }
 
 
@@ -98,9 +124,9 @@ int main(int argc, char **argv)
 
     ros::init(argc, argv, "thruster_calibration_node");
     ros::NodeHandle nh;
-    ros::Subscriber state_sub = nh.subscribe("/miniboat4/odometry/filtered", hz, stateCallback); // to get the angular velocity, odometry
-    ros::Publisher force_pub = nh.advertise<roboat_core::Force>("/miniboat4/mpc_force", hz);     // to publish the forces to the thrusters
-    ros::Rate loop_rate(hz);
+    ros::Subscriber state_sub = nh.subscribe("/miniboat4/odometry/filtered", HZ, stateCallback); // to get the angular velocity, odometry
+    ros::Publisher force_pub = nh.advertise<roboat_core::Force>("/miniboat4/mpc_force", HZ);     // to publish the forces to the thrusters
+    ros::Rate loop_rate(HZ);
 
 
 
@@ -111,7 +137,7 @@ int main(int argc, char **argv)
 
 
 
-        if (startup == true && t > startup_time)
+        if (startup == true && t > STARTUP_TIME)
         {
             ROS_INFO("Startup finished.");
             startup = false;
@@ -124,25 +150,24 @@ int main(int argc, char **argv)
         else if (calibration)
         {
             // ROS_INFO("calibrating ...");
-             ROS_INFO("~ angular velocity: %f  (vs. threshold: %f ) ~", angular_v, threshold);
+            ROS_INFO("~ angular velocity (moving average): %f  (vs. threshold: %f ) ~", moving_average, threshold);
 
-            // -----------------------------------
+            
             // Publish the forces to the thrusters.
             roboat_core::Force force_msg;
             force_msg.data = {thruster_A, thruster_B, 0, 0};
             ROS_INFO("Thruster values: %f and %f", force_msg.data[0], force_msg.data[1]);
             force_pub.publish(force_msg);
-            // -----------------------------------
 
-			if (t > initial_accel ){
 
-	            if (angular_v > threshold || angular_v < -threshold) {
+			if (t > INITIAL_ACCEL ){
+
+	            if (moving_average > abs(threshold)) {
 
                     angular_stability = 0; // reset angular stability index, i.e. it's not in the stable region:)
-
                 	ROS_INFO("Above threshold!");
 
-                	if (thruster_waiting_time == 10) {
+                	if (thruster_waiting_time == 5) {
                     	thruster_waiting_time = 0; // reset timer, so that we always wait a bit before updating the thrusters again.
                     	increment_thruster(); // either subtract or add to one of the thrusters based on the current angular velocity.
                     	ROS_INFO("---------------- Thruster value has been changed ----------------");
@@ -154,10 +179,10 @@ int main(int argc, char **argv)
 
                 	angular_stability ++; // stability index: to check how long the angular_velocity remains stable ...
 
-                	ROS_INFO("Angular velocity < threshold :) ... waiting how long it lasts");
+                	ROS_INFO("Angular velocity is BELOW threshold ... waiting how long it lasts");
                 	ROS_INFO("Angular stability counter: %d", angular_stability);
 
-                	if (angular_stability == 20 || t>calibration_time) { // once it's stable, or too much time has passed
+                	if (angular_stability == 5 || t>calibration_time) { // once it's stable, or too much time has passed
                         
                         n++; // go through n calibration cycles 
                         
