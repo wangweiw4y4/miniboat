@@ -2,13 +2,13 @@
 
     <node name="position_pid" pkg="roboat_core" type="position_pid" >
 	<param name = "p_x" value = "0.5" />
-	<param name = "i_x" value = "0,2" />
+	<param name = "i_x" value = "0.2" />
 	<param name = "d_x" value = "0.1" />
 	<param name = "p_y" value = "0.5" />
-	<param name = "i_y" value = "0,2" />
+	<param name = "i_y" value = "0.2" />
 	<param name = "d_y" value = "0.1" />
 	<param name = "p_psi" value = "0.5" />
-	<param name = "i_psi" value = "0,2" />
+	<param name = "i_psi" value = "0.2" />
 	<param name = "d_psi" value = "0.1" />
     </node>
 

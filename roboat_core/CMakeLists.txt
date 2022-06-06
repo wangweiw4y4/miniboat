@@ -296,3 +296,6 @@ roslint_cpp()
 
 add_executable(position_pid src/position_pid.cpp)
 target_link_libraries(position_pid ${catkin_LIBRARIES})
+
+add_executable(velocity_pid src/velocity_pid.cpp)
+target_link_libraries(velocity_pid ${catkin_LIBRARIES})
