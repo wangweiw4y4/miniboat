@@ -1,5 +1,5 @@
 
- pid_flag: true
+ pid_flag: false
  thruster12ratio: 1.07
  pid_maxforce: 0.05
  base_force: 0.1

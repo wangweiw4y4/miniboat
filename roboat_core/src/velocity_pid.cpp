@@ -25,7 +25,7 @@
 
 #include <roboat_core/Force.h>
 
-#define ROS_NODE_NAME "position_pid"
+#define ROS_NODE_NAME "velocity_pid"
 
 
 Eigen::VectorXd force(4);
@@ -48,13 +48,13 @@ public:
     double base_force = 0.1;
     double a = 0.12;
 
-    double p_x = 3.0;
-    double i_x = 2.0;
-    double d_x = 0.1;
+    double p_u = 3.0;
+    double i_u = 2.0;
+    double d_u = 0.1;
 
-    double p_y = 3.0;
-    double i_y = 2.0;
-    double d_y = 0.1;
+    double p_v = 3.0;
+    double i_v = 2.0;
+    double d_v = 0.1;
 
     double p_psi = 3.0;
     double i_psi = 2.0;
@@ -69,34 +69,25 @@ public:
 
     double desired_yaw = 0.0;
     double desired_angular_velocity = 0;
-    double desired_x = 2.0;
-    double desired_x_velocity = 0;
-    double desired_y = 1.5;
-    double desired_y_velocity = 0;
+    double desired_u = 0.0;
+    double desired_v = 0.0;
 
-    double x_dot;
-    double y_dot;
-
-    double ex;
-    double ex_last = 0;
-    double exi;
-    double exd;
-    double ey;
-    double ey_last = 0;
-    double eyi;
-    double eyd;
+    double eu;
+    double eu_last = 0;
+    double eui;
+    double eud;
+    double ev;
+    double ev_last = 0;
+    double evi;
+    double evd;
     double epsi;
     double epsi_last = 0;
     double epsii;
     double epsid;
 
-    double Tx;
-    double Ty;
     double Tu;
     double Tv;
     double Tr;
-    Eigen::Vector2d T_inertial;
-    Eigen::Vector2d T_body;
     Eigen::Vector3d miniboat_tau;
 
     Eigen::Matrix2d rotation;
@@ -109,32 +100,30 @@ public:
         force_pub = n.advertise<roboat_core::Force>("pid_force", 1);
         state_sub = n.subscribe("odometry/filtered", 1, &ProportionalIntegralDerivative::stateCallback, this);
 
-        static const double dp_x = 0.5;
-        static const double di_x = 0.2;
-        static const double dd_x = 0.1;
-        static const double dp_y = 0.5;
-        static const double di_y = 0.2;
-        static const double dd_y = 0.1;
+        static const double dp_u = 0.5;
+        static const double di_u = 0.2;
+        static const double dd_u = 0.1;
+        static const double dp_v = 0.5;
+        static const double di_v = 0.2;
+        static const double dd_v = 0.1;
         static const double dp_psi = 0.5;
         static const double di_psi = 0.2;
         static const double dd_psi = 0.1;
 
-        n.param("/position_pid/p_x", p_x, dp_x);
-        n.param("/position_pid/i_x", i_x, di_x);
-        n.param("/position_pid/d_x", d_x, dd_x);
-        n.param("/position_pid/p_y", p_y, dp_y);
-        n.param("/position_pid/i_y", i_y, di_y);
-        n.param("/position_pid/d_y", d_y, dd_y);
+        n.param("/position_pid/p_u", p_u, dp_u);
+        n.param("/position_pid/i_u", i_u, di_u);
+        n.param("/position_pid/d_u", d_u, dd_u);
+        n.param("/position_pid/p_v", p_v, dp_v);
+        n.param("/position_pid/i_v", i_v, di_v);
+        n.param("/position_pid/d_v", d_v, dd_v);
         n.param("/position_pid/p_psi", p_psi, dp_psi);
         n.param("/position_pid/i_psi", i_psi, di_psi);
         n.param("/position_pid/d_psi", d_psi, dd_psi);
 
         desired_yaw = 0.0;
         desired_angular_velocity = 0;
-        desired_x = 2.0;
-        desired_x_velocity = 0;
-        desired_y = 1.5;
-        desired_y_velocity = 0;
+        desired_u = 0.0;
+        desired_v = 0.0;
 
         state[0] = 0.0;
         state[1] = 0.0;
@@ -143,8 +132,8 @@ public:
         state[4] = 0.0;
         state[5] = 0.0;
 
-        ex_last = 0;
-        ey_last = 0;
+        eu_last = 0;
+        eu_last = 0;
         epsi_last = 0;
         
         force = Eigen::VectorXd::Zero(4);
@@ -195,17 +184,15 @@ public:
     {
         if (pid_flag)
         {
-            ex = desired_x - state[0];
-            x_dot = state[3]*cos(state[2]) - state[4]*sin(state[2]);
-            exd = desired_x_velocity - x_dot;
-            exi = (step)*(ex + ex_last)/2 + exi;
-            ex_last = ex;
+            eu = desired_u - state[3];
+            eui = (step)*(eu + eu_last)/2 + eui; //integral of the surge speed error
+            eud = (eu - eu_last) / step; //derivate of the surge speed error
+            eu_last = eu;
 
-            ey = desired_y - state[1];
-            y_dot = state[3]*sin(state[2]) + state[4]*cos(state[2]);
-            eyd = desired_y_velocity - y_dot;
-            eyi = (step)*(ey + ey_last)/2 + eyi;
-            ey_last = ey;
+            ev = desired_v - state[4];
+            evi = (step)*(ev + ev_last)/2 + evi; //integral of the sway speed error
+            evd = (ev - ev_last) / step; //derivate of the sway speed error
+            ev_last = ev;
 
             epsi = desired_yaw - state[2];
             if (abs(epsi) > M_PI)
@@ -216,20 +203,10 @@ public:
             epsii = (step)*(epsi + epsi_last)/2 + epsii;
             epsi_last = epsi;
 
-            Tx = (p_x * ex) + (i_x * exi) + (d_x * exd);
-            Ty = (p_y * ey) + (i_y * eyi) + (d_y * eyd);
+            Tu = (p_u * eu) + (i_u * eui) + (d_u * eud);
+            Tv = (p_v * ev) + (i_v * evi) + (d_v * evd);
             Tr = (p_psi * epsi) + (i_psi * epsii) + (d_psi * epsid);
             
-            rotation << cos(state[2]), -sin(state[2]),
-                        sin(state[2]), cos(state[2]);
-            
-            T_inertial(0) = Tx;
-            T_inertial(1) = Ty;
-
-            T_body = rotation.transpose()*T_inertial;
-
-            Tu = T_body(0);
-            Tv = T_body(1);
             miniboat_tau << Tu, Tv, Tr;
 
             B << pos_tau(Tu), pos_tau(Tu), neg_tau(Tu), neg_tau(Tu),
