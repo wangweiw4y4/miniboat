@@ -159,36 +159,6 @@ public:
         state[5] = -msg.twist.twist.angular.z;
 
         ROS_WARN("miniboat state is %f, %f, %f, %f, %f, %f", state[0], state[1], state[2], state[3], state[4], state[5]);
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
-=======
->>>>>>> 7caad2e3d751a2726799a5d61ca5fc7f337d0ce8
-    }
-
-    double pos_tau(double tau)
-    {
-        double val;
-        if (tau >= 0){
-            val = 1;
-        }
-        else{
-            val = 0;
-        }
-        return val;
-    }
-
-    double neg_tau(double tau)
-    {
-        double val;
-        if (tau <= 0){
-            val = -1;
-        }
-        else{
-            val = 0;
-        }
-        return val;
->>>>>>> 7caad2e3d751a2726799a5d61ca5fc7f337d0ce8
     }
 
     void control()
@@ -214,7 +184,7 @@ public:
             epsii = (step)*(epsi + epsi_last)/2 + epsii;
             epsi_last = epsi;
 
-            Tu = 0.0;//(p_u * eu) + (i_u * eui) + (d_u * eud);
+            Tu = (p_u * eu) + (i_u * eui) + (d_u * eud);
             Tv = (p_v * ev) + (i_v * evi) + (d_v * evd);
             Tr = (p_psi * epsi) + (i_psi * epsii) + (d_psi * epsid);
             
@@ -226,8 +196,7 @@ public:
 
             B_inv = B.transpose()*(B*B.transpose()).inverse();
 
-            force = B_inv*miniboat_tau*2/sqrt(2);
-<<<<<<< HEAD
+            force = B_inv*miniboat_tau;
 
             minf = std::min(force(0),force(1));
             minf = std::min(force(1),force(2));
@@ -252,8 +221,6 @@ public:
                 force(2) = force(2)*pid_maxforce/maxf;
                 force(3) = force(3)*pid_maxforce/maxf;
             }
-=======
->>>>>>> 7caad2e3d751a2726799a5d61ca5fc7f337d0ce8
 
             if (force(0) > pid_maxforce){
                 force(0) = pid_maxforce;

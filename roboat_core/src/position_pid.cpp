@@ -171,30 +171,6 @@ public:
         ROS_WARN("miniboat state is %f, %f, %f, %f, %f, %f", state[0], state[1], state[2], state[3], state[4], state[5]);
     }
 
-    double pos_tau(double tau)
-    {
-        double val;
-        if (tau >= 0){
-            val = 1;
-        }
-        else{
-            val = 0;
-        }
-        return val;
-    }
-
-    double neg_tau(double tau)
-    {
-        double val;
-        if (tau <= 0){
-            val = -1;
-        }
-        else{
-            val = 0;
-        }
-        return val;
-    }
-
     void control()
     {
         if (pid_flag)
@@ -242,7 +218,7 @@ public:
 
             B_inv = B.transpose()*(B*B.transpose()).inverse();
 
-            force = B_inv*miniboat_tau*2/sqrt(2);
+            force = B_inv*miniboat_tau;
 
             minf = std::min(force(0),force(1));
             minf = std::min(force(1),force(2));
