@@ -44,7 +44,7 @@ public:
     double orientation_qz;
     double orientation_qw;
 
-    double pid_maxforce = 0.2;
+    double pid_maxforce = 0.4;
     double base_force = 0.1;
     double a = 0.12;
     double d = 0.078; //distance between thruster and boat center
@@ -126,8 +126,8 @@ public:
 
         desired_yaw = 0.0;
         desired_angular_velocity = 0;
-        desired_u = 0.05;
-        desired_v = 0.05;
+        desired_u = 0.08;
+        desired_v = 0.08;
 
         state[0] = 0.0;
         state[1] = 0.0;
@@ -167,11 +167,19 @@ public:
         {
             eu = desired_u - state[3];
             eui = (step)*(eu + eu_last)/2 + eui; //integral of the surge speed error
+            if (abs(eu) < 0.005)
+            {
+                eui = 0;
+            }
             eud = (eu - eu_last) / step; //derivate of the surge speed error
             eu_last = eu;
 
             ev = desired_v - state[4];
             evi = (step)*(ev + ev_last)/2 + evi; //integral of the sway speed error
+            if (abs(ev) < 0.005)
+            {
+                evi = 0;
+            }
             evd = (ev - ev_last) / step; //derivate of the sway speed error
             ev_last = ev;
 
@@ -182,6 +190,10 @@ public:
             }
             epsid = desired_angular_velocity - state[5];
             epsii = (step)*(epsi + epsi_last)/2 + epsii;
+            if (abs(epsi) < 0.005)
+            {
+                epsii = 0;
+            }
             epsi_last = epsi;
 
             Tu = (p_u * eu) + (i_u * eui) + (d_u * eud);
