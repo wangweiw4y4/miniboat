@@ -44,7 +44,7 @@ public:
     double orientation_qz;
     double orientation_qw;
 
-    double pid_maxforce = 0.05;
+    double pid_maxforce = 0.2;
     double base_force = 0.1;
     double a = 0.12;
 
@@ -109,26 +109,25 @@ public:
         force_pub = n.advertise<roboat_core::Force>("pid_force", 1);
         state_sub = n.subscribe("odometry/filtered", 1, &ProportionalIntegralDerivative::stateCallback, this);
 
-        static const double dp_x = 0.5;
-        static const double di_x = 0.2;
-        static const double dd_x = 0.1;
-        static const double dp_y = 0.5;
-        static const double di_y = 0.2;
-        static const double dd_y = 0.1;
-        static const double dp_psi = 0.5;
-        static const double di_psi = 0.2;
-        static const double dd_psi = 0.1;
+        static const double dp_x = 0.005;
+        static const double di_x = 0.002;
+        static const double dd_x = 0.001;
+        static const double dp_y = 0.005;
+        static const double di_y = 0.002;
+        static const double dd_y = 0.001;
+        static const double dp_psi = 0.005;
+        static const double di_psi = 0.002;
+        static const double dd_psi = 0.001;
 
-        n.param("/position_pid/p_x", p_x, dp_x);
-        n.param("/position_pid/i_x", i_x, di_x);
-        n.param("/position_pid/d_x", d_x, dd_x);
-        n.param("/position_pid/p_y", p_y, dp_y);
-        n.param("/position_pid/i_y", i_y, di_y);
-        n.param("/position_pid/d_y", d_y, dd_y);
-        n.param("/position_pid/p_psi", p_psi, dp_psi);
-        n.param("/position_pid/i_psi", i_psi, di_psi);
-        n.param("/position_pid/d_psi", d_psi, dd_psi);
-
+        n.param("position_pid/p_x", p_x, dp_x);
+        n.param("position_pid/i_x", i_x, di_x);
+        n.param("position_pid/d_x", d_x, dd_x);
+        n.param("position_pid/p_y", p_y, dp_y);
+        n.param("position_pid/i_y", i_y, di_y);
+        n.param("position_pid/d_y", d_y, dd_y);
+        n.param("position_pid/p_psi", p_psi, dp_psi);
+        n.param("position_pid/i_psi", i_psi, di_psi);
+        n.param("position_pid/d_psi", d_psi, dd_psi);
         desired_yaw = 0.0;
         desired_angular_velocity = 0;
         desired_x = 2.0;
@@ -164,7 +163,7 @@ public:
         state[4] = -msg.twist.twist.linear.y;
         state[5] = -msg.twist.twist.angular.z;
 
-        ROS_INFO("miniboat state is %f, %f, %f, %f, %f, %f", state[0], state[1], state[2], state[3], state[4], state[5]);
+        ROS_WARN("miniboat state is %f, %f, %f, %f, %f, %f", state[0], state[1], state[2], state[3], state[4], state[5]);
     }
 
     double pos_tau(double tau)
@@ -238,7 +237,7 @@ public:
 
             B_inv = B.transpose()*(B*B.transpose()).inverse();
 
-            force = B_inv*miniboat_tau;
+            force = B_inv*miniboat_tau*2/sqrt(2);
 
             if (force(0) > pid_maxforce){
                 force(0) = pid_maxforce;
@@ -252,7 +251,21 @@ public:
             if (force(3) > pid_maxforce){
                 force(3) = pid_maxforce;
             }
-            ROS_INFO("pid force:  %f,%f,%f,%f\n", force(0), force(1), force(2),force(3));
+            if (force(0) < 0){
+                force(0) = 0;
+            }
+            if (force(1) < 0){
+                force(1) = 0;
+            }
+            if (force(2) < 0){
+                force(2) = 0;
+            }
+            if (force(3) < 0){
+                force(3) = 0;
+            }
+            ROS_WARN("pid force:  %f,%f,%f,%f\n", force(0), force(1), force(2),force(3));
+            ROS_WARN("PID error is %f, %f, %f", ex, ey, epsi);
+            ROS_WARN("PID tau is %f, %f, %f, %f, %f", Tx, Ty, Tu, Tv, Tr);
 
             Eigen::VectorXd::Map(&forceMsg.data[0], force.size()) = force;
             force_pub.publish(forceMsg);

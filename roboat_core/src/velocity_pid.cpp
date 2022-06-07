@@ -44,21 +44,21 @@ public:
     double orientation_qz;
     double orientation_qw;
 
-    double pid_maxforce = 0.05;
+    double pid_maxforce = 0.2;
     double base_force = 0.1;
     double a = 0.12;
 
-    double p_u = 3.0;
-    double i_u = 2.0;
-    double d_u = 0.1;
+    double p_u;
+    double i_u;
+    double d_u;
 
-    double p_v = 3.0;
-    double i_v = 2.0;
-    double d_v = 0.1;
+    double p_v;
+    double i_v;
+    double d_v;
 
-    double p_psi = 3.0;
-    double i_psi = 2.0;
-    double d_psi = 0.1;
+    double p_psi;
+    double i_psi;
+    double d_psi;
 
     bool pid_flag = true;
 
@@ -106,24 +106,24 @@ public:
         static const double dp_v = 0.5;
         static const double di_v = 0.2;
         static const double dd_v = 0.1;
-        static const double dp_psi = 0.5;
-        static const double di_psi = 0.2;
-        static const double dd_psi = 0.1;
+        static const double dp_psi = 0.004;
+        static const double di_psi = 0.0;
+        static const double dd_psi = 0.006;
 
-        n.param("/position_pid/p_u", p_u, dp_u);
-        n.param("/position_pid/i_u", i_u, di_u);
-        n.param("/position_pid/d_u", d_u, dd_u);
-        n.param("/position_pid/p_v", p_v, dp_v);
-        n.param("/position_pid/i_v", i_v, di_v);
-        n.param("/position_pid/d_v", d_v, dd_v);
-        n.param("/position_pid/p_psi", p_psi, dp_psi);
-        n.param("/position_pid/i_psi", i_psi, di_psi);
-        n.param("/position_pid/d_psi", d_psi, dd_psi);
+        n.param("velocity_pid/p_u", p_u, dp_u);
+        n.param("velocity_pid/i_u", i_u, di_u);
+        n.param("velocity_pid/d_u", d_u, dd_u);
+        n.param("velocity_pid/p_v", p_v, dp_v);
+        n.param("velocity_pid/i_v", i_v, di_v);
+        n.param("velocity_pid/d_v", d_v, dd_v);
+        n.param("velocity_pid/p_psi", p_psi, dp_psi);
+        n.param("velocity_pid/i_psi", i_psi, di_psi);
+        n.param("velocity_pid/d_psi", d_psi, dd_psi);
 
         desired_yaw = 0.0;
         desired_angular_velocity = 0;
-        desired_u = 0.0;
-        desired_v = 0.0;
+        desired_u = 0.05;
+        desired_v = 0.05;
 
         state[0] = 0.0;
         state[1] = 0.0;
@@ -153,7 +153,7 @@ public:
         state[4] = -msg.twist.twist.linear.y;
         state[5] = -msg.twist.twist.angular.z;
 
-        ROS_INFO("miniboat state is %f, %f, %f, %f, %f, %f", state[0], state[1], state[2], state[3], state[4], state[5]);
+        ROS_WARN("miniboat state is %f, %f, %f, %f, %f, %f", state[0], state[1], state[2], state[3], state[4], state[5]);
     }
 
     double pos_tau(double tau)
@@ -203,7 +203,7 @@ public:
             epsii = (step)*(epsi + epsi_last)/2 + epsii;
             epsi_last = epsi;
 
-            Tu = (p_u * eu) + (i_u * eui) + (d_u * eud);
+            Tu = 0.0;//(p_u * eu) + (i_u * eui) + (d_u * eud);
             Tv = (p_v * ev) + (i_v * evi) + (d_v * evd);
             Tr = (p_psi * epsi) + (i_psi * epsii) + (d_psi * epsid);
             
@@ -215,7 +215,7 @@ public:
 
             B_inv = B.transpose()*(B*B.transpose()).inverse();
 
-            force = B_inv*miniboat_tau;
+            force = B_inv*miniboat_tau*2/sqrt(2);
 
             if (force(0) > pid_maxforce){
                 force(0) = pid_maxforce;
@@ -229,7 +229,21 @@ public:
             if (force(3) > pid_maxforce){
                 force(3) = pid_maxforce;
             }
-            ROS_INFO("pid force:  %f,%f,%f,%f\n", force(0), force(1), force(2),force(3));
+            if (force(0) < 0){
+                force(0) = 0;
+            }
+            if (force(1) < 0){
+                force(1) = 0;
+            }
+            if (force(2) < 0){
+                force(2) = 0;
+            }
+            if (force(3) < 0){
+                force(3) = 0;
+            }
+            ROS_WARN("pid force:  %f,%f,%f,%f\n", force(0), force(1), force(2),force(3));
+            ROS_WARN("PID error is %f, %f, %f", eu, ev, epsi);
+            ROS_WARN("PID tau is %f, %f, %f", Tu, Tv, Tr);
 
             Eigen::VectorXd::Map(&forceMsg.data[0], force.size()) = force;
             force_pub.publish(forceMsg);
