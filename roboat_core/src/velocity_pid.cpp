@@ -51,6 +51,8 @@ public:
     double cs45;
     double minf;
     double maxf;
+    double pid_aux_1 = -1.42;
+    double pid_aux_2 = -0.0063;
 
     double p_u;
     double i_u;
@@ -93,6 +95,7 @@ public:
     double Tv;
     double Tr;
     Eigen::Vector3d miniboat_tau;
+    Eigen::Vector3d auxiliar_tau;
 
     Eigen::Matrix2d rotation;
 
@@ -198,7 +201,7 @@ public:
 
             Tu = (p_u * eu) + (i_u * eui) + (d_u * eud);
             Tv = (p_v * ev) + (i_v * evi) + (d_v * evd);
-            Tr = (p_psi * epsi) + (i_psi * epsii) + (d_psi * epsid);
+            Tr = (p_psi * epsi) + (i_psi * epsii) + (d_psi * epsid) - (pid_aux_1*state[3]*state[4]) - (pid_aux_2*sqrt(state[3]*state[3] + state[4]*state[4])*state[5]);
             
             miniboat_tau << Tu, Tv, Tr;
 
@@ -209,6 +212,35 @@ public:
             B_inv = B.transpose()*(B*B.transpose()).inverse();
 
             force = B_inv*miniboat_tau;
+
+            minf = std::min(force(0),force(1));
+            minf = std::min(force(1),force(2));
+            minf = std::min(force(2),force(3));
+
+            if (minf < 0)
+            {
+                force(0) = force(0) - minf;
+                force(1) = force(1) - minf;
+                force(2) = force(2) - minf;
+                force(3) = force(3) - minf;
+            }
+
+            maxf = std::max(force(0),force(1));
+            maxf = std::max(force(1),force(2));
+            maxf = std::max(force(2),force(3));
+
+            if (maxf > pid_maxforce)
+            {
+                force(0) = force(0)*pid_maxforce/maxf;
+                force(1) = force(1)*pid_maxforce/maxf;
+                force(2) = force(2)*pid_maxforce/maxf;
+                force(3) = force(3)*pid_maxforce/maxf;
+            }
+
+            auxiliar_tau = B*force;
+            auxiliar_tau(2) = miniboat_tau(2);
+
+            force = B_inv*auxiliar_tau;
 
             minf = std::min(force(0),force(1));
             minf = std::min(force(1),force(2));
