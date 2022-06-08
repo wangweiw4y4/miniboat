@@ -10,6 +10,7 @@
 #include <std_msgs/Int16MultiArray.h>
 #include <geometry_msgs/PoseStamped.h>
 #include <geometry_msgs/Pose.h>
+#include <geometry_msgs/Pose2D.h>
 #include <geometry_msgs/PoseArray.h>
 #include <tf/transform_datatypes.h>
 #include <tf/transform_broadcaster.h>
@@ -51,7 +52,7 @@ public:
     double cs45;
     double minf;
     double maxf;
-    double pid_aux_1 = -1.42;
+    double pid_aux_1 = -2.5;
     double pid_aux_2 = -0.0063;
 
     double p_u;
@@ -106,6 +107,7 @@ public:
 
         force_pub = n.advertise<roboat_core::Force>("pid_force", 1);
         state_sub = n.subscribe("odometry/filtered", 1, &ProportionalIntegralDerivative::stateCallback, this);
+        reference_sub = n.subscribe("velocity_reference", 1, &ProportionalIntegralDerivative::referenceCallback, this);
 
         static const double dp_u = 0.5;
         static const double di_u = 0.2;
@@ -164,6 +166,12 @@ public:
         ROS_WARN("miniboat state is %f, %f, %f, %f, %f, %f", state[0], state[1], state[2], state[3], state[4], state[5]);
     }
 
+    void referenceCallback(const geometry_msgs::Pose2D msg)
+    {
+        desired_u = msg.x;
+        desired_v = msg.y; 
+    }
+
     void control()
     {
         if (pid_flag)
@@ -187,7 +195,7 @@ public:
             ev_last = ev;
 
             epsi = desired_yaw - state[2];
-            if (abs(epsi) > M_PI)
+            if (abs(epsi) >= M_PI)
             {
                 epsi = (epsi/abs(epsi))*(abs(epsi)-2*M_PI);
             }
@@ -306,6 +314,7 @@ public:
         ros::Publisher force_pub;
 
         ros::Subscriber state_sub;
+        ros::Subscriber reference_sub;
 };
 
 int main(int argc, char *argv[])

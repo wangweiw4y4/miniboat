@@ -66,8 +66,8 @@
         <!--include file="$(find roboat_core)/launch/position_pid.launch">
         </include-->
 
-        <include file="$(find roboat_core)/launch/velocity_pid.launch">
-        </include>
+        <!--include file="$(find roboat_core)/launch/velocity_pid.launch">
+        </include-->
 
     </group>
      

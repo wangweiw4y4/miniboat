@@ -182,21 +182,33 @@ public:
             x_dot = state[3]*cos(state[2]) - state[4]*sin(state[2]);
             exd = desired_x_velocity - x_dot;
             exi = (step)*(ex + ex_last)/2 + exi;
+            if (abs(ex) < 0.002)
+            {
+                exi = 0;
+            }
             ex_last = ex;
 
             ey = desired_y - state[1];
             y_dot = state[3]*sin(state[2]) + state[4]*cos(state[2]);
             eyd = desired_y_velocity - y_dot;
+            if (abs(ey) < 0.002)
+            {
+                eyi = 0;
+            }
             eyi = (step)*(ey + ey_last)/2 + eyi;
             ey_last = ey;
 
             epsi = desired_yaw - state[2];
-            if (abs(epsi) > M_PI)
+            if (abs(epsi) >= M_PI)
             {
                 epsi = (epsi/abs(epsi))*(abs(epsi)-2*M_PI);
             }
             epsid = desired_angular_velocity - state[5];
             epsii = (step)*(epsi + epsi_last)/2 + epsii;
+            if (abs(epsi) < 0.005)
+            {
+                epsii = 0;
+            }
             epsi_last = epsi;
 
             Tx = (p_x * ex) + (i_x * exi) + (d_x * exd);
