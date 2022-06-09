@@ -299,3 +299,6 @@ target_link_libraries(position_pid ${catkin_LIBRARIES})
 
 add_executable(velocity_pid src/velocity_pid.cpp)
 target_link_libraries(velocity_pid ${catkin_LIBRARIES})
+
+add_executable(velocity_smc src/velocity_smc.cpp)
+target_link_libraries(velocity_smc ${catkin_LIBRARIES})

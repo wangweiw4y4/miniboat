@@ -69,6 +69,9 @@
         <!--include file="$(find roboat_core)/launch/velocity_pid.launch">
         </include-->
 
+        <include file="$(find roboat_core)/launch/velocity_smc.launch">
+        </include>
+
     </group>
      
 </launch>
