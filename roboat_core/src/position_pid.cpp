@@ -51,7 +51,7 @@ public:
     double cs45;
     double minf;
     double maxf;
-    double pid_aux_1 = -1.42;
+    double pid_aux_1 = -3.42;
     double pid_aux_2 = -0.0063;
 
     double p_x = 3.0;
@@ -68,7 +68,7 @@ public:
 
     bool pid_flag = true;
 
-    double step = 0.1;
+    double step = 0.02;
 
     double req_theta = M_PI / 4;
     double req_force = 0.25;
@@ -334,7 +334,7 @@ int main(int argc, char *argv[])
 {
     ros::init(argc,argv,ROS_NODE_NAME);
     ProportionalIntegralDerivative proportionalIntegralDerivative;
-    int rate = 10;
+    int rate = 50;
     ros::Rate loop_rate(rate);
 
     while (ros::ok())

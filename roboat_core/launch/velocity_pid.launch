@@ -7,9 +7,9 @@
 	<param name = "p_v" value = "0.4" />
 	<param name = "i_v" value = "0.2" />
 	<param name = "d_v" value = "0.2" />
-	<param name = "p_psi" value = "0.001" />
+	<param name = "p_psi" value = "0.002" />
 	<param name = "i_psi" value = "0.0" />
-	<param name = "d_psi" value = "0.002" />
+	<param name = "d_psi" value = "0.004" />
     </node>
 
 </launch>

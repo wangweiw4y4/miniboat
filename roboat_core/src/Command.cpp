@@ -112,7 +112,7 @@ Command::Command(ros::NodeHandle n)
   ros::Subscriber pid_sub = n.subscribe<roboat_core::Force>("pid_force", 1, boost::bind(&Command::forceCallback, this, _1, pid_priority));
   ros::Subscriber mpc_sub = n.subscribe<roboat_core::Force>("mpc_force", 1, boost::bind(&Command::forceCallback, this, _1, mpc_priority));
   ros::Subscriber pf_sub = n.subscribe<roboat_core::Force>("pf_force", 1, boost::bind(&Command::forceCallback, this, _1, pf_priority));
-  ros::Rate loopRate(10);
+  ros::Rate loopRate(50);
 
   if (n.hasParam("joypad/max_force"))
     n.getParam("joypad/max_force", Command::joy_max_force);
