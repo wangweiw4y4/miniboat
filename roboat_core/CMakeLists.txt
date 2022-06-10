@@ -302,3 +302,6 @@ target_link_libraries(velocity_pid ${catkin_LIBRARIES})
 
 add_executable(velocity_smc src/velocity_smc.cpp)
 target_link_libraries(velocity_smc ${catkin_LIBRARIES})
+
+add_executable(velocity_asmc src/velocity_asmc.cpp)
+target_link_libraries(velocity_asmc ${catkin_LIBRARIES})
