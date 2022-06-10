@@ -2,10 +2,10 @@
 
     <node name="velocity_smc" pkg="roboat_core" type="velocity_smc" >
 	<param name = "k1_u" value = "0.1" />
-	<param name = "k2_u" value = "0.01" />
+	<param name = "k2_u" value = "0.1" />
 	<param name = "lambda_u" value = "0.001" />
 	<param name = "k1_v" value = "0.1" />
-	<param name = "k2_v" value = "0.01" />
+	<param name = "k2_v" value = "0.1" />
 	<param name = "lambda_v" value = "0.001" />
 	<param name = "k1_psi" value = "0.002" />
 	<param name = "k2_psi" value = "0.001" />

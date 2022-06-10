@@ -53,7 +53,7 @@ public:
     double minf;
     double maxf;
     double pid_aux_1 = -3.5;
-    double pid_aux_2 = -0.0063;
+    double pid_aux_2 = -0.1;
 
     double k1_u;
     double k2_u;
@@ -226,7 +226,7 @@ public:
 
             Tu = k1_u*pow(abs(su),0.5)*sign_su + k2_u*su;
             Tv = k1_v*pow(abs(sv),0.5)*sign_sv + k2_v*sv;
-            Tr = k1_psi*pow(abs(spsi),0.5)*sign_spsi + k2_psi*spsi - (pid_aux_1*state[3]*state[4]) - (pid_aux_2*sqrt(state[3]*state[3] + state[4]*state[4])*state[5]);
+            Tr = k1_psi*pow(abs(spsi),0.5)*sign_spsi + k2_psi*spsi - (pid_aux_1*abs(state[3])*state[4]) - (pid_aux_2*sqrt(state[3]*state[3] + state[4]*state[4])*state[5]);
             
             miniboat_tau << Tu, Tv, Tr;
 
