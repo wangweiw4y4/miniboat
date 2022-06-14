@@ -52,9 +52,9 @@ PotentialField::PotentialField(ros::NodeHandle nh) : nh_(nh)
     static const float d_multi_srf = 0.005;
     static const int d_shrink_time = 120;
     static const int d_inside_time = 45;
-    static const float d_x_center = 1.0;
-    static const float d_y_center = 3.0;
-    static const float d_attractive_par_1 = 0.02;
+    static const float d_x_center = 3.0;
+    static const float d_y_center = 1.0;
+    static const float d_attractive_par_1 = 0.05;
     static const float d_attractive_par_2 = 0.5;
 
     nh_.param("pf/target_region", target_region, d_target_region);
@@ -229,19 +229,6 @@ void PotentialField::timeStep(polygon_t _shape)
     // ROS_FATAL_STREAM("rep_f = " << repulsive_force);
     linear_force = attractive_force + repulsive_force; // add attractive and repulsive forces
 
-    // saturate the resulting force
-    /*if (std::abs(linear_force(0)) > 0.1)
-    {
-        linear_force(0) = copysign(0.1, linear_force(0));
-    }
-
-    if (std::abs(linear_force(1)) > 0.1)
-    {
-        linear_force(1) = copysign(0.1, linear_force(1));
-    }*/
-
-    // ROS_INFO("fx %f, fy %f",linear_force(0), linear_force(1));
-
     // Transformation matrix
     rotation << cos(psi), -sin(psi),
         sin(psi), cos(psi);
@@ -250,10 +237,10 @@ void PotentialField::timeStep(polygon_t _shape)
 
     max_vel = std::max(body_force(0),body_force(1));
     
-    if (max_vel > 0.1)
+    if (max_vel > 0.2)
     {
-        body_force(0) = body_force(0)*0.1/max_vel;
-        body_force(1) = body_force(1)*0.1/max_vel;
+        body_force(0) = body_force(0)*0.2/max_vel;
+        body_force(1) = body_force(1)*0.2/max_vel;
     }
 
     vel_ref.x = body_force(0);
