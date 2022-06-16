@@ -42,10 +42,10 @@ PotentialField::PotentialField(ros::NodeHandle nh) : nh_(nh)
     }
     shape_pub_ = nh_.advertise<nav_msgs::Path>("visual/shape", 1);
 
-    static const float d_target_region = 0.3; // half of the target square side
-    static const float d_target_r0 = 0.5;     // target r0
-    static const float d_target_stf = 0.004;  // target lattice force coefficient
-    static const float d_target_srf = 0.008;  // target repulsive force coefficient
+    static const float d_target_region = 0.1; // half of the target square side
+    static const float d_target_r0 = 0.2;     // target r0
+    static const float d_target_stf = 0.008;  // target lattice force coefficient
+    static const float d_target_srf = 0.016;  // target repulsive force coefficient
     static const float d_multi_region = 2.0;
     static const float d_multi_r0 = 2.0;
     static const float d_multi_stf = 0.001;
