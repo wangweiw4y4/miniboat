@@ -1,0 +1,21 @@
+<launch>
+
+    <node name="velocity_asmc" pkg="roboat_core" type="velocity_asmc" >
+	<param name = "ka_u" value = "0.01" />
+	<param name = "k2_u" value = "0.05" />
+	<param name = "lambda_u" value = "0.001" />
+	<param name = "mu_u" value = "0.04" />
+	<param name = "km_u" value = "0.01" />
+	<param name = "ka_v" value = "0.01" />
+	<param name = "k2_v" value = "0.05" />
+	<param name = "lambda_v" value = "0.001" />
+	<param name = "mu_v" value = "0.04" />
+	<param name = "km_v" value = "0.01" />
+	<param name = "ka_psi" value = "0.0005" />
+	<param name = "k2_psi" value = "0.001" />
+	<param name = "lambda_psi" value = "1.0" />
+	<param name = "mu_psi" value = "0.5" />
+	<param name = "km_psi" value = "0.001" />
+    </node>
+
+</launch>

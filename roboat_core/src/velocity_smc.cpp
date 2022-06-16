@@ -10,6 +10,7 @@
 #include <std_msgs/Int16MultiArray.h>
 #include <geometry_msgs/PoseStamped.h>
 #include <geometry_msgs/Pose.h>
+#include <geometry_msgs/Pose2D.h>
 #include <geometry_msgs/PoseArray.h>
 #include <tf/transform_datatypes.h>
 #include <tf/transform_broadcaster.h>
@@ -25,7 +26,7 @@
 
 #include <roboat_core/Force.h>
 
-#define ROS_NODE_NAME "position_pid"
+#define ROS_NODE_NAME "velocity_smc"
 
 
 Eigen::VectorXd force(4);
@@ -51,20 +52,20 @@ public:
     double cs45;
     double minf;
     double maxf;
-    double pid_aux_1 = -3.42;
-    double pid_aux_2 = -0.0063;
+    double pid_aux_1 = -3.5;
+    double pid_aux_2 = -0.1;
 
-    double p_x = 3.0;
-    double i_x = 2.0;
-    double d_x = 0.1;
+    double k1_u;
+    double k2_u;
+    double lambda_u;
 
-    double p_y = 3.0;
-    double i_y = 2.0;
-    double d_y = 0.1;
+    double k1_v;
+    double k2_v;
+    double lambda_v;
 
-    double p_psi = 3.0;
-    double i_psi = 2.0;
-    double d_psi = 0.1;
+    double k1_psi;
+    double k2_psi;
+    double lambda_psi;
 
     bool pid_flag = true;
 
@@ -75,34 +76,31 @@ public:
 
     double desired_yaw = 0.0;
     double desired_angular_velocity = 0;
-    double desired_x = 2.0;
-    double desired_x_velocity = 0;
-    double desired_y = 1.5;
-    double desired_y_velocity = 0;
+    double desired_u = 0.0;
+    double desired_v = 0.0;
 
-    double x_dot;
-    double y_dot;
-
-    double ex;
-    double ex_last = 0;
-    double exi;
-    double exd;
-    double ey;
-    double ey_last = 0;
-    double eyi;
-    double eyd;
+    double su;
+    double sign_su;
+    double eu;
+    double eu_last = 0;
+    double eui;
+    double eud;
+    double sv;
+    double sign_sv;
+    double ev;
+    double ev_last = 0;
+    double evi;
+    double evd;
+    double spsi;
+    double sign_spsi;
     double epsi;
     double epsi_last = 0;
     double epsii;
     double epsid;
 
-    double Tx;
-    double Ty;
     double Tu;
     double Tv;
     double Tr;
-    Eigen::Vector2d T_inertial;
-    Eigen::Vector2d T_body;
     Eigen::Vector3d miniboat_tau;
     Eigen::Vector3d auxiliar_tau;
 
@@ -115,32 +113,32 @@ public:
 
         force_pub = n.advertise<roboat_core::Force>("pid_force", 1);
         state_sub = n.subscribe("odometry/filtered", 1, &ProportionalIntegralDerivative::stateCallback, this);
+        reference_sub = n.subscribe("velocity_reference", 1, &ProportionalIntegralDerivative::referenceCallback, this);
 
-        static const double dp_x = 0.005;
-        static const double di_x = 0.002;
-        static const double dd_x = 0.001;
-        static const double dp_y = 0.005;
-        static const double di_y = 0.002;
-        static const double dd_y = 0.001;
-        static const double dp_psi = 0.005;
-        static const double di_psi = 0.002;
-        static const double dd_psi = 0.001;
+        static const double dk1_u = 0.1;
+        static const double dk2_u = 0.001;
+        static const double dlambda_u = 0.001;
+        static const double dk1_v = 0.1;
+        static const double dk2_v = 0.001;
+        static const double dlambda_v = 0.001;
+        static const double dk1_psi = 0.01;
+        static const double dk2_psi = 0.001;
+        static const double dlambda_psi = 1.0;
 
-        n.param("position_pid/p_x", p_x, dp_x);
-        n.param("position_pid/i_x", i_x, di_x);
-        n.param("position_pid/d_x", d_x, dd_x);
-        n.param("position_pid/p_y", p_y, dp_y);
-        n.param("position_pid/i_y", i_y, di_y);
-        n.param("position_pid/d_y", d_y, dd_y);
-        n.param("position_pid/p_psi", p_psi, dp_psi);
-        n.param("position_pid/i_psi", i_psi, di_psi);
-        n.param("position_pid/d_psi", d_psi, dd_psi);
+        n.param("velocity_smc/k1_u", k1_u, dk1_u);
+        n.param("velocity_smc/k2_u", k2_u, dk2_u);
+        n.param("velocity_smc/lambda_u", lambda_u, dlambda_u);
+        n.param("velocity_smc/k1_v", k1_v, dk1_v);
+        n.param("velocity_smc/k2_v", k2_v, dk2_v);
+        n.param("velocity_smc/lambda_v", lambda_v, dlambda_v);
+        n.param("velocity_smc/k1_psi", k1_psi, dk1_psi);
+        n.param("velocity_smc/k2_psi", k2_psi, dk2_psi);
+        n.param("velocity_smc/lambda_psi", lambda_psi, dlambda_psi);
+
         desired_yaw = 0.0;
         desired_angular_velocity = 0;
-        desired_x = 2.0;
-        desired_x_velocity = 0;
-        desired_y = 1.5;
-        desired_y_velocity = 0;
+        desired_u = 0.08;
+        desired_v = 0.08;
 
         state[0] = 0.0;
         state[1] = 0.0;
@@ -149,8 +147,8 @@ public:
         state[4] = 0.0;
         state[5] = 0.0;
 
-        ex_last = 0;
-        ey_last = 0;
+        eu_last = 0;
+        eu_last = 0;
         epsi_last = 0;
         
         force = Eigen::VectorXd::Zero(4);
@@ -174,29 +172,25 @@ public:
         ROS_WARN("miniboat state is %f, %f, %f, %f, %f, %f", state[0], state[1], state[2], state[3], state[4], state[5]);
     }
 
+    void referenceCallback(const geometry_msgs::Pose2D msg)
+    {
+        desired_u = msg.x;
+        desired_v = msg.y; 
+    }
+
     void control()
     {
         if (pid_flag)
         {
-            ex = desired_x - state[0];
-            x_dot = state[3]*cos(state[2]) - state[4]*sin(state[2]);
-            exd = desired_x_velocity - x_dot;
-            exi = (step)*(ex + ex_last)/2 + exi;
-            if (abs(ex) < 0.002)
-            {
-                exi = 0;
-            }
-            ex_last = ex;
+            eu = desired_u - state[3];
+            eui = (step)*(eu + eu_last)/2 + eui; //integral of the surge speed error
+            eu_last = eu;
+            su = eu + lambda_u*eui;
 
-            ey = desired_y - state[1];
-            y_dot = state[3]*sin(state[2]) + state[4]*cos(state[2]);
-            eyd = desired_y_velocity - y_dot;
-            if (abs(ey) < 0.002)
-            {
-                eyi = 0;
-            }
-            eyi = (step)*(ey + ey_last)/2 + eyi;
-            ey_last = ey;
+            ev = desired_v - state[4];
+            evi = (step)*(ev + ev_last)/2 + evi; //integral of the sway speed error
+            ev_last = ev;
+            sv = ev + lambda_v*evi;
 
             epsi = desired_yaw - state[2];
             if (abs(epsi) >= M_PI)
@@ -204,27 +198,36 @@ public:
                 epsi = (epsi/abs(epsi))*(abs(epsi)-2*M_PI);
             }
             epsid = desired_angular_velocity - state[5];
-            epsii = (step)*(epsi + epsi_last)/2 + epsii;
-            if (abs(epsi) < 0.005)
+            spsi = epsid + lambda_psi*epsi;
+
+            if (su == 0)
             {
-                epsii = 0;
+                sign_su = 0;
             }
-            epsi_last = epsi;
+            else {
+                sign_su = copysign(1,su);
+            }
 
-            Tx = (p_x * ex) + (i_x * exi) + (d_x * exd);
-            Ty = (p_y * ey) + (i_y * eyi) + (d_y * eyd);
-            Tr = (p_psi * epsi) + (i_psi * epsii) + (d_psi * epsid) - (pid_aux_1*state[3]*state[4]) - (pid_aux_2*sqrt(state[3]*state[3] + state[4]*state[4])*state[5]);
+            if (sv == 0)
+            {
+                sign_sv = 0;
+            }
+            else {
+                sign_sv = copysign(1,sv);
+            }
+
+            if (spsi == 0)
+            {
+                sign_spsi = 0;
+            }
+            else {
+                sign_spsi = copysign(1,spsi);
+            }
+
+            Tu = k1_u*pow(abs(su),0.5)*sign_su + k2_u*su;
+            Tv = k1_v*pow(abs(sv),0.5)*sign_sv + k2_v*sv;
+            Tr = k1_psi*pow(abs(spsi),0.5)*sign_spsi + k2_psi*spsi - (pid_aux_1*abs(state[3])*state[4]) - (pid_aux_2*sqrt(state[3]*state[3] + state[4]*state[4])*state[5]);
             
-            rotation << cos(state[2]), -sin(state[2]),
-                        sin(state[2]), cos(state[2]);
-            
-            T_inertial(0) = Tx;
-            T_inertial(1) = Ty;
-
-            T_body = rotation.transpose()*T_inertial;
-
-            Tu = T_body(0);
-            Tv = T_body(1);
             miniboat_tau << Tu, Tv, Tr;
 
             B << cs45, cs45, -cs45, -cs45,
@@ -312,9 +315,9 @@ public:
             if (force(3) < 0){
                 force(3) = 0;
             }
-            ROS_WARN("pid force:  %f,%f,%f,%f\n", force(0), force(1), force(2),force(3));
-            ROS_WARN("PID error is %f, %f, %f", ex, ey, epsi);
-            ROS_WARN("PID tau is %f, %f, %f, %f, %f", Tx, Ty, Tu, Tv, Tr);
+            ROS_WARN("SMC force:  %f,%f,%f,%f\n", force(0), force(1), force(2),force(3));
+            ROS_WARN("SMC error is %f, %f, %f", eu, ev, epsi);
+            ROS_WARN("SMC tau is %f, %f, %f", Tu, Tv, Tr);
 
             Eigen::VectorXd::Map(&forceMsg.data[0], force.size()) = force;
             force_pub.publish(forceMsg);
@@ -328,6 +331,7 @@ public:
         ros::Publisher force_pub;
 
         ros::Subscriber state_sub;
+        ros::Subscriber reference_sub;
 };
 
 int main(int argc, char *argv[])

@@ -16,5 +16,5 @@ Q5: 1
 max_force_limit: 1
 
 num_steps: 40
-step: 0.1
+step: 0.02
 yaw_tracking: true

@@ -12,8 +12,8 @@ base_link_frame: base_link
 world_frame: odom
 
 frequency: 50
-two_d_mode: false
-sensor_timeout: 0.1
+two_d_mode: true
+sensor_timeout: 0.01
 publish_acceleration: true
 smooth_lagged_data: true
 history_length: 4.0

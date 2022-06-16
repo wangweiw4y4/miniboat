@@ -23,11 +23,11 @@
             <arg name="sim_node"            value="false"/>
             <arg name="serial_node"         value="true"/>
             <arg name="csv_path_node"       value="false"/>
-            <arg name="mpc_node"            value="true"/>
-            <arg name="pf_node"             value="true"/>
+            <arg name="mpc_node"            value="false"/>
+            <arg name="pf_node"             value="false"/>
             <arg name="command_node"        value="true"/>
             <arg name="joy_node"            value="false"/>
-            <arg name="pid_node"            value="true"/>
+            <arg name="pid_node"            value="false"/>
             <arg name="swarm_node"          value="true"/>
             <arg name="bag_node"            value="false"/>
             <arg name="capacitive_node"     value="false"/>
@@ -55,19 +55,34 @@
     -->    
         
 
-        <include file="$(find pid)/launch/headingpid.launch">
-        </include>
+        <!--include file="$(find pid)/launch/headingpid.launch">
+        </include-->
 
         <include file="$(find roboat_localization)/launch/localization.launch" >
             <arg name="id"                  value="$(arg id)"/>
             <arg name="use_ekf"             value="$(arg use_ekf)"/>
         </include>
 
-        <include file="$(find roboat_core)/launch/position_pid.launch">
-        </include>
+        <!--include file="$(find roboat_core)/launch/position_pid.launch">
+        </include-->
 
         <!--include file="$(find roboat_core)/launch/velocity_pid.launch">
         </include-->
+
+        <include file="$(find roboat_core)/launch/velocity_smc.launch">
+        </include>
+
+        <!--include file="$(find roboat_core)/launch/velocity_asmc.launch">
+        </include-->
+
+        <!--include file="$(find roboat_core)/launch/velocity_cascade_pid.launch">
+        </include-->
+
+        <!--include file="$(find roboat_core)/launch/velocity_cascade_smc.launch">
+        </include-->
+
+        <node name="pf_vel_node" pkg="roboat_core" type="pf_vel_node" >
+        </node>
 
     </group>
      

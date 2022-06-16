@@ -195,6 +195,7 @@ add_executable(swarm_node               src/swarm_node.cxx                 src/s
 add_executable(capacitive_node          src/capacitive_node.cpp)
 add_executable(thruster_calibration_node                                   src/thruster_calibration_node.cpp)
 add_executable(thruster_multi_calibration_node                             src/thruster_multi_calibration_node.cpp)
+add_executable(pf_vel_node                  src/potential_field_vel_node.cxx       src/potential_field_vel.cpp   src/swarm.cpp)       
 
 
 ## Rename C++ executable without prefix
@@ -215,6 +216,7 @@ add_dependencies(swarm_node                  ${PROJECT_NAME}_generate_messages_c
 add_dependencies(capacitive_node             ${PROJECT_NAME}_generate_messages_cpp)
 add_dependencies(thruster_calibration_node   ${PROJECT_NAME}_generate_messages_cpp)
 add_dependencies(thruster_multi_calibration_node   ${PROJECT_NAME}_generate_messages_cpp)
+add_dependencies(pf_vel_node                     ${PROJECT_NAME}_generate_messages_cpp)
 
 
 ## Specify libraries to link a library or executable target against
@@ -230,6 +232,7 @@ target_link_libraries(swarm_node                 ${catkin_LIBRARIES})
 target_link_libraries(capacitive_node            ${catkin_LIBRARIES})
 target_link_libraries(thruster_calibration_node  ${catkin_LIBRARIES})
 target_link_libraries(thruster_multi_calibration_node  ${catkin_LIBRARIES})
+target_link_libraries(pf_vel_node                    ${catkin_LIBRARIES} lib_VFF)
 
 #############
 ## Install ##
@@ -255,6 +258,7 @@ install(
   csv_path_node
   mpc_node
   pf_node
+  pf_vel_node  
   serial_node
   sim_node
   swarm_node
@@ -299,3 +303,15 @@ target_link_libraries(position_pid ${catkin_LIBRARIES})
 
 add_executable(velocity_pid src/velocity_pid.cpp)
 target_link_libraries(velocity_pid ${catkin_LIBRARIES})
+
+add_executable(velocity_smc src/velocity_smc.cpp)
+target_link_libraries(velocity_smc ${catkin_LIBRARIES})
+
+add_executable(velocity_asmc src/velocity_asmc.cpp)
+target_link_libraries(velocity_asmc ${catkin_LIBRARIES})
+
+add_executable(velocity_cascade_pid src/velocity_cascade_pid.cpp)
+target_link_libraries(velocity_cascade_pid ${catkin_LIBRARIES})
+
+add_executable(velocity_cascade_smc src/velocity_cascade_smc.cpp)
+target_link_libraries(velocity_cascade_smc ${catkin_LIBRARIES})
