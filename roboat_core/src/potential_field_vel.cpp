@@ -47,7 +47,7 @@ PotentialField::PotentialField(ros::NodeHandle nh) : nh_(nh)
     static const float d_target_stf = 0.004;  // target lattice force coefficient
     static const float d_target_srf = 0.008;  // target repulsive force coefficient
     static const float d_multi_region = 2.0;
-    static const float d_multi_r0 = 10.0;
+    static const float d_multi_r0 = 2.0;
     static const float d_multi_stf = 0.001;
     static const float d_multi_srf = 0.005;
     static const int d_shrink_time = 120;
@@ -111,7 +111,7 @@ std::vector<point_t> PotentialField::updateShape(float shape_number_code)
     if (shape_number_code == 1)
     {
         // rectangle
-        shape_vert = {{-region / 2 + x_center, -5 * region / 2 + y_center}, {region / 2 + x_center, -5 * region / 2 + y_center}, {region / 2 + x_center, 5 * region / 2 + y_center}, {-region / 2 + x_center, 5 * region / 2 + y_center}};
+        shape_vert = {{-region / 2 + x_center, -2 * region / 2 + y_center}, {region / 2 + x_center, -2 * region / 2 + y_center}, {region / 2 + x_center, 2 * region / 2 + y_center}, {-region / 2 + x_center, 2 * region / 2 + y_center}};
     }
     else if (shape_number_code == 2)
     {
