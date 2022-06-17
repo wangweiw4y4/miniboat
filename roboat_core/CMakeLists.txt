@@ -315,3 +315,6 @@ target_link_libraries(velocity_cascade_pid ${catkin_LIBRARIES})
 
 add_executable(velocity_cascade_smc src/velocity_cascade_smc.cpp)
 target_link_libraries(velocity_cascade_smc ${catkin_LIBRARIES})
+
+add_executable(velocity_cascade_asmc src/velocity_cascade_asmc.cpp)
+target_link_libraries(velocity_cascade_asmc ${catkin_LIBRARIES})

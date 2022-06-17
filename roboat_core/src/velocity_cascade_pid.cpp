@@ -147,8 +147,8 @@ public:
 
         desired_yaw = 0.0;
         desired_angular_velocity = 0;
-        desired_u = 0.08;
-        desired_v = 0.08;
+        desired_u = 0.0;
+        desired_v = 0.0;
         desired_r = 0.0;
 
         state[0] = 0.0;
@@ -162,6 +162,10 @@ public:
         ev_last = 0;
         er_last = 0;
         epsi_last = 0;
+        eui = 0;
+        evi = 0;
+        eri = 0;
+        epsii = 0;
         
         force = Eigen::VectorXd::Zero(4);
         cs45 = sqrt(2)/2;

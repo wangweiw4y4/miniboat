@@ -131,8 +131,8 @@ public:
 
         desired_yaw = 0.0;
         desired_angular_velocity = 0;
-        desired_u = 0.08;
-        desired_v = 0.08;
+        desired_u = 0.0;
+        desired_v = 0.0;
 
         state[0] = 0.0;
         state[1] = 0.0;
@@ -177,7 +177,7 @@ public:
         if (pid_flag)
         {
             eu = desired_u - state[3];
-            eui = (step)*(eu + eu_last)/2 + eui; //integral of the surge speed error
+            eui = (step)*(eu + eu_last)/2.0 + eui; //integral of the surge speed error
             if (abs(eu) < 0.005)
             {
                 eui = 0;
@@ -186,7 +186,7 @@ public:
             eu_last = eu;
 
             ev = desired_v - state[4];
-            evi = (step)*(ev + ev_last)/2 + evi; //integral of the sway speed error
+            evi = (step)*(ev + ev_last)/2.0 + evi; //integral of the sway speed error
             if (abs(ev) < 0.005)
             {
                 evi = 0;
@@ -197,10 +197,10 @@ public:
             epsi = desired_yaw - state[2];
             if (abs(epsi) >= M_PI)
             {
-                epsi = (epsi/abs(epsi))*(abs(epsi)-2*M_PI);
+                epsi = (epsi/abs(epsi))*(abs(epsi)-2.0*M_PI);
             }
             epsid = desired_angular_velocity - state[5];
-            epsii = (step)*(epsi + epsi_last)/2 + epsii;
+            epsii = (step)*(epsi + epsi_last)/2.0 + epsii;
             if (abs(epsi) < 0.005)
             {
                 epsii = 0;

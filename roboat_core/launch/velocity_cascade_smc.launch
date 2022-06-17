@@ -1,18 +1,18 @@
 <launch>
 
     <node name="velocity_cascade_smc" pkg="roboat_core" type="velocity_cascade_smc" >
-	<param name = "k1_u" value = "0.1" />
+	<param name = "k1_u" value = "0.4" />
 	<param name = "k2_u" value = "0.1" />
 	<param name = "lambda_u" value = "0.001" />
-	<param name = "k1_v" value = "0.1" />
+	<param name = "k1_v" value = "0.4" />
 	<param name = "k2_v" value = "0.1" />
 	<param name = "lambda_v" value = "0.001" />
 	<param name = "k1_r" value = "0.01" />
-	<param name = "k2_r" value = "0.005" />
+	<param name = "k2_r" value = "0.001" />
 	<param name = "lambda_r" value = "0.001" />
-	<param name = "k1_psi" value = "0.02" />
-	<param name = "k2_psi" value = "0.001" />
-	<param name = "lambda_psi" value = "1.0" />
+	<param name = "p_psi" value = "0.2" />
+	<param name = "i_psi" value = "0.00" />
+	<param name = "d_psi" value = "0.05" />
     </node>
 
 </launch>

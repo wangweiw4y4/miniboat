@@ -81,6 +81,9 @@
         <!--include file="$(find roboat_core)/launch/velocity_cascade_smc.launch">
         </include-->
 
+        <!--include file="$(find roboat_core)/launch/velocity_cascade_asmc.launch">
+        </include-->
+
         <node name="pf_vel_node" pkg="roboat_core" type="pf_vel_node" >
         </node>
 

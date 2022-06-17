@@ -26,7 +26,7 @@
 
 #include <roboat_core/Force.h>
 
-#define ROS_NODE_NAME "velocity_cascade_smc"
+#define ROS_NODE_NAME "velocity_cascade_asmc"
 
 
 Eigen::VectorXd force(4);
@@ -46,7 +46,7 @@ public:
     double orientation_qw;
 
     double pid_maxforce = 0.4;
-    double max_r = 0.5;
+    double max_r = 0.25;
     double base_force = 0.1;
     double a = 0.12;
     double d = 0.078; //distance between thruster and boat center
@@ -67,6 +67,11 @@ public:
     double k1_r;
     double k2_r;
     double lambda_r;
+    double ka_r;
+    double mu_r;
+    double km_r;
+    double k1d_r;
+    double k1last_r;
 
     double p_psi;
     double i_psi;
@@ -123,9 +128,9 @@ public:
     ProportionalIntegralDerivative()
     {
 
-        force_pub = n.advertise<roboat_core::Force>("pid_force", 1);
-        state_sub = n.subscribe("odometry/filtered", 1, &ProportionalIntegralDerivative::stateCallback, this);
-        reference_sub = n.subscribe("velocity_reference", 1, &ProportionalIntegralDerivative::referenceCallback, this);
+        force_pub = n.advertise<roboat_core::Force>("pid_force", 10);
+        state_sub = n.subscribe("odometry/filtered", 10, &ProportionalIntegralDerivative::stateCallback, this);
+        reference_sub = n.subscribe("velocity_reference", 10, &ProportionalIntegralDerivative::referenceCallback, this);
 
         static const double dk1_u = 0.1;
         static const double dk2_u = 0.001;
@@ -133,29 +138,33 @@ public:
         static const double dk1_v = 0.1;
         static const double dk2_v = 0.001;
         static const double dlambda_v = 0.001;
-        static const double dk1_r = 0.1;
+        static const double dka_r = 0.01;
         static const double dk2_r = 0.001;
         static const double dlambda_r = 0.001;
+        static const double dmu_r = 0.05;
+        static const double dkm_r = 0.001;
         static const double dp_psi = 0.004;
         static const double di_psi = 0.0;
         static const double dd_psi = 0.006;
 
-        n.param("velocity_cascade_smc/k1_u", k1_u, dk1_u);
-        n.param("velocity_cascade_smc/k2_u", k2_u, dk2_u);
-        n.param("velocity_cascade_smc/lambda_u", lambda_u, dlambda_u);
-        n.param("velocity_cascade_smc/k1_v", k1_v, dk1_v);
-        n.param("velocity_cascade_smc/k2_v", k2_v, dk2_v);
-        n.param("velocity_cascade_smc/lambda_v", lambda_v, dlambda_v);
-        n.param("velocity_cascade_smc/k1_r", k1_r, dk1_r);
-        n.param("velocity_cascade_smc/k2_r", k2_r, dk2_r);
-        n.param("velocity_cascade_smc/lambda_r", lambda_r, dlambda_r);
-        n.param("velocity_cascade_smc/p_psi", p_psi, dp_psi);
-        n.param("velocity_cascade_smc/i_psi", i_psi, di_psi);
-        n.param("velocity_cascade_smc/d_psi", d_psi, dd_psi);
+        n.param("velocity_cascade_asmc/k1_u", k1_u, dk1_u);
+        n.param("velocity_cascade_asmc/k2_u", k2_u, dk2_u);
+        n.param("velocity_cascade_asmc/lambda_u", lambda_u, dlambda_u);
+        n.param("velocity_cascade_asmc/k1_v", k1_v, dk1_v);
+        n.param("velocity_cascade_asmc/k2_v", k2_v, dk2_v);
+        n.param("velocity_cascade_asmc/lambda_v", lambda_v, dlambda_v);
+        n.param("velocity_cascade_asmc/ka_r", ka_r, dka_r);
+        n.param("velocity_cascade_asmc/k2_r", k2_r, dk2_r);
+        n.param("velocity_cascade_asmc/lambda_r", lambda_r, dlambda_r);
+        n.param("velocity_cascade_asmc/mu_r", mu_r, dmu_r);
+        n.param("velocity_cascade_asmc/km_r", km_r, dkm_r);
+        n.param("velocity_cascade_asmc/p_psi", p_psi, dp_psi);
+        n.param("velocity_cascade_asmc/i_psi", i_psi, di_psi);
+        n.param("velocity_cascade_asmc/d_psi", d_psi, dd_psi);
 
         desired_yaw = 0.0;
         desired_angular_velocity = 0;
-        desired_r = 0;
+        desired_r = 0.0;
         desired_u = 0.0;
         desired_v = 0.0;
 
@@ -174,6 +183,9 @@ public:
         evi = 0.0;
         eri = 0.0;
         epsii = 0.0;
+
+        k1last_r = 0.0;
+        k1_r = km_r;
 
         force = Eigen::VectorXd::Zero(4);
         cs45 = sqrt(2)/2;
@@ -211,19 +223,24 @@ public:
             {
                 epsi = (epsi/abs(epsi))*(abs(epsi)-2.0*M_PI);
             }
-            epsid = desired_angular_velocity - state[5];
+            //epsid = desired_angular_velocity - state[5];
+            epsid = (epsi-epsi_last)/step;
+            if (abs(epsi-epsi_last) >= M_PI)
+            {
+                epsid = (epsi/abs(epsi))*(abs(epsi)-2.0*M_PI)/step;
+            }
             epsii = (step)*(epsi + epsi_last)/2.0 + epsii;
             if (abs(epsi) <= 0.005)
             {
                 epsii = 0.0;
             }
             epsi_last = epsi;
-            
+
             desired_r = (p_psi * epsi) + (i_psi * copysign(epsii,epsi)) + (d_psi * epsid);
 
             if (abs(epsi) <= 0.1)
             {
-            desired_r = (0.1* p_psi * epsi) + (i_psi * copysign(epsii,epsi)) + (d_psi * epsid);
+                desired_r = (0.1 * p_psi * epsi) + (i_psi * copysign(epsii,epsi)) + (d_psi * epsid);
             }
 
             if (abs(epsi) >= 1.5)
@@ -236,20 +253,41 @@ public:
             }
             
             eu = desired_u - state[3];
-            eui = (step)*(eu + eu_last)/2 + eui; //integral of the surge speed error
+            eui = (step)*(eu + eu_last)/2.0 + eui; //integral of the surge speed error
             eu_last = eu;
             su = eu + lambda_u*eui;
 
             ev = desired_v - state[4];
-            evi = (step)*(ev + ev_last)/2 + evi; //integral of the sway speed error
+            evi = (step)*(ev + ev_last)/2.0 + evi; //integral of the sway speed error
             ev_last = ev;
             sv = ev + lambda_v*evi;
 
             er = desired_r - state[5];
-            eri = (step)*(er + er_last)/2 + eri; //integral of the yaw speed error
+            eri = (step)*(er + er_last)/2.0 + eri; //integral of the yaw speed error
             er_last = er;
             sr = er + lambda_r*eri;
             
+            if (k1_r > km_r)
+            {
+                double signvar = abs(sr) - mu_r;
+                double sign_r_sm;
+                if (signvar == 0)
+                {
+                    sign_r_sm = 0;
+                }
+                else 
+                {
+                    sign_r_sm = copysign(1,signvar);
+                }
+                k1d_r = ka_r * sign_r_sm;
+            }
+            else
+            {
+                k1d_r = km_r;
+            }
+            k1_r = (step)*(k1d_r + k1last_r)/2.0 + k1_r; //integral to get the speed adaptative gain
+            k1last_r = k1d_r;
+
             if (su == 0)
             {
                 sign_su = 0;
@@ -365,9 +403,10 @@ public:
             if (force(3) < 0){
                 force(3) = 0;
             }
-            ROS_WARN("SMC desired r and psi error is %f, %f", desired_r, epsi);
+            ROS_WARN("SMC desired r and psi error is %f, %f, %f", desired_r, p_psi, epsi);
             ROS_WARN("SMC force:  %f,%f,%f,%f\n", force(0), force(1), force(2),force(3));
             ROS_WARN("SMC error is %f, %f, %f", eu, ev, er);
+            ROS_WARN("ASMC sigma and gain is %f, %f", sr, k1_r);
             ROS_WARN("SMC tau is %f, %f, %f", Tu, Tv, Tr);
 
             Eigen::VectorXd::Map(&forceMsg.data[0], force.size()) = force;

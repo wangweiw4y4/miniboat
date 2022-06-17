@@ -97,19 +97,19 @@ public:
     double su;
     double sign_su;
     double eu;
-    double eu_last = 0;
+    double eu_last = 0.0;
     double eui;
     double eud;
     double sv;
     double sign_sv;
     double ev;
-    double ev_last = 0;
+    double ev_last = 0.0;
     double evi;
     double evd;
     double spsi;
     double sign_spsi;
     double epsi;
-    double epsi_last = 0;
+    double epsi_last = 0.0;
     double epsii;
     double epsid;
 
@@ -163,9 +163,9 @@ public:
         n.param("velocity_asmc/km_psi", km_psi, dkm_psi);
  
         desired_yaw = 0.0;
-        desired_angular_velocity = 0;
-        desired_u = 0.08;
-        desired_v = 0.08;
+        desired_angular_velocity = 0.0;
+        desired_u = 0.0;
+        desired_v = 0.0;
 
         state[0] = 0.0;
         state[1] = 0.0;
@@ -174,12 +174,12 @@ public:
         state[4] = 0.0;
         state[5] = 0.0;
 
-        eu_last = 0;
-        eu_last = 0;
-        epsi_last = 0;
-        k1last_u = 0;
-        k1last_v = 0;
-        k1last_psi = 0;
+        eu_last = 0.0;
+        eu_last = 0.0;
+        epsi_last = 0.0;
+        k1last_u = 0.0;
+        k1last_v = 0.0;
+        k1last_psi = 0.0;
         k1_u = km_u;
         k1_v = km_v;
         k1_psi = km_psi;
@@ -216,19 +216,19 @@ public:
         if (pid_flag)
         {
             eu = desired_u - state[3];
-            eui = (step)*(eu + eu_last)/2 + eui; //integral of the surge speed error
+            eui = (step)*(eu + eu_last)/2.0 + eui; //integral of the surge speed error
             eu_last = eu;
             su = eu + lambda_u*eui;
 
             ev = desired_v - state[4];
-            evi = (step)*(ev + ev_last)/2 + evi; //integral of the sway speed error
+            evi = (step)*(ev + ev_last)/2.0 + evi; //integral of the sway speed error
             ev_last = ev;
             sv = ev + lambda_v*evi;
 
             epsi = desired_yaw - state[2];
             if (abs(epsi) >= M_PI)
             {
-                epsi = (epsi/abs(epsi))*(abs(epsi)-2*M_PI);
+                epsi = (epsi/abs(epsi))*(abs(epsi)-2.0*M_PI);
             }
             epsid = desired_angular_velocity - state[5];
             spsi = epsid + lambda_psi*epsi;
@@ -275,7 +275,7 @@ public:
             {
                 k1d_u = km_u;
             }
-            k1_u = (step)*(k1d_u + k1last_u)/2 + k1_u; //integral to get the speed adaptative gain
+            k1_u = (step)*(k1d_u + k1last_u)/2.0 + k1_u; //integral to get the speed adaptative gain
             k1last_u = k1d_u;
 
             if (k1_v > km_v)
@@ -296,7 +296,7 @@ public:
             {
                 k1d_v = km_v;
             }
-            k1_v = (step)*(k1d_v + k1last_v)/2 + k1_v; //integral to get the speed adaptative gain
+            k1_v = (step)*(k1d_v + k1last_v)/2.0 + k1_v; //integral to get the speed adaptative gain
             k1last_v = k1d_v;
 
             if (k1_psi > km_psi)
@@ -317,7 +317,7 @@ public:
             {
                 k1d_psi = km_psi;
             }
-            k1_psi = (step)*(k1d_psi + k1last_psi)/2 + k1_psi; //integral to get the speed adaptative gain
+            k1_psi = (step)*(k1d_psi + k1last_psi)/2.0 + k1_psi; //integral to get the speed adaptative gain
             k1last_psi = k1d_psi;
 
             Tu = k1_u*pow(abs(su),0.5)*sign_su + k2_u*su;
