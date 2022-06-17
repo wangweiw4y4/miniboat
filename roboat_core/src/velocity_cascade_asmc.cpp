@@ -223,8 +223,8 @@ public:
             {
                 epsi = (epsi/abs(epsi))*(abs(epsi)-2.0*M_PI);
             }
-            //epsid = desired_angular_velocity - state[5];
-            epsid = (epsi-epsi_last)/step;
+            epsid = desired_angular_velocity - state[5];
+            //epsid = (epsi-epsi_last)/step;
             if (abs(epsi-epsi_last) >= M_PI)
             {
                 epsid = (epsi/abs(epsi))*(abs(epsi)-2.0*M_PI)/step;

@@ -7,14 +7,14 @@
 	<param name = "k1_v" value = "0.2" />
 	<param name = "k2_v" value = "0.2" />
 	<param name = "lambda_v" value = "0.001" />
-	<param name = "ka_r" value = "0.0005" />
-	<param name = "k2_r" value = "0.0005" />
-	<param name = "lambda_r" value = "0.001" />
+	<param name = "ka_r" value = "0.0001" />
+	<param name = "k2_r" value = "0.0001" />
+	<param name = "lambda_r" value = "0.0001" />
 	<param name = "mu_r" value = "0.05" />
 	<param name = "km_r" value = "0.001" />
 	<param name = "p_psi" value = "0.4" />
 	<param name = "i_psi" value = "0.0" />
-	<param name = "d_psi" value = "0.0" />
+	<param name = "d_psi" value = "0.1" />
     </node>
 
 </launch>

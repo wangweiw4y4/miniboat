@@ -45,16 +45,17 @@ public:
     double orientation_qz;
     double orientation_qw;
 
-    double pid_maxforce = 0.4;
-    double max_r = 0.2;
+    double pid_maxforce = 0.5;
+    double max_r = 0.25;
     double base_force = 0.1;
     double a = 0.12;
     double d = 0.078; //distance between thruster and boat center
     double cs45;
     double minf;
     double maxf;
-    double pid_aux_1 = -3.5;
+    double pid_aux_1 = -2.5;
     double pid_aux_2 = -0.1;
+    double pid_aux_3 = -0.0;
 
     double k1_u;
     double k2_u;
@@ -221,7 +222,7 @@ public:
             
             desired_r = (p_psi * epsi) + (i_psi * copysign(epsii,epsi)) + (d_psi * epsid);
 
-            if (abs(epsi) <= 0.1)
+            if ((abs(epsi) <= 0.1) && (sqrt(state[3]*state[3] + state[4]*state[4]) <= 0.02) )
             {
             desired_r = (0.1* p_psi * epsi) + (i_psi * copysign(epsii,epsi)) + (d_psi * epsid);
             }
@@ -276,8 +277,8 @@ public:
 
             Tu = k1_u*pow(abs(su),0.5)*sign_su + k2_u*su;
             Tv = k1_v*pow(abs(sv),0.5)*sign_sv + k2_v*sv;
-            Tr = k1_r*pow(abs(sr),0.5)*sign_sr + k2_r*sr - (pid_aux_1*abs(state[3])*state[4]) - (pid_aux_2*sqrt(state[3]*state[3] + state[4]*state[4])*state[5]);
-            
+            Tr = k1_r*pow(abs(sr),0.5)*sign_sr + k2_r*sr - (pid_aux_1*state[3]*state[4]) - (pid_aux_2*sqrt(state[3]*state[3] + state[4]*state[4])*state[5]) - (pid_aux_2*abs(state[5])*state[5]);
+
             miniboat_tau << Tu, Tv, Tr;
 
             B << cs45, cs45, -cs45, -cs45,
