@@ -46,7 +46,7 @@ public:
     double orientation_qw;
 
     double pid_maxforce = 0.4;
-    double max_r = 0.5;
+    double max_r = 0.2;
     double base_force = 0.1;
     double a = 0.12;
     double d = 0.078; //distance between thruster and boat center
