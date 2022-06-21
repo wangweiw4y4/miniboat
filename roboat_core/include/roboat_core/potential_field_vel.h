@@ -43,6 +43,10 @@ public:
     float srf_rate; //rate to increase repulsive coefficient
     float stf_rate; //rate to increase lattice coefficient
     float des_shape; //0 for square, 1 for rectangle, 2 for triangle
+    float k;
+    float scale;
+    float distance;
+
 
     //user parameters
     float x_center; //region center in x
@@ -70,6 +74,7 @@ public:
     Vector2f det_robot_pose; //pose of current detected neighbor to create the array
     Vector2f body_force; //control input force in body frame
     Matrix2f rotation; //rotation matrix
+    Vector2f reference; //miniboat desired pose
     
     Vector2f current_det_pose; //pose of current detected neighbor to compute repulsive force
     Vector2f pose_difference; //pose difference between the miniboat and a neighbor

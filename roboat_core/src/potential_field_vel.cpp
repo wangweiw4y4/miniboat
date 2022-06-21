@@ -73,10 +73,13 @@ PotentialField::PotentialField(ros::NodeHandle nh) : nh_(nh)
     nh_.param("pf/attractive_par_2", attractive_par_2, d_attractive_par_2);
 
     pose << 0.0, 0.0;
+    reference << 3.2, 1.2;
     number_of_robots = 0;
     counter = 0;
     des_shape = -1; // starts with no active shape being tracked
     // des_shape = 0;
+    k = 0.5;
+    scale = 1;
 }
 
 void PotentialField::shapeCallback(const roboat_msgs::Shape &msg)
@@ -193,7 +196,10 @@ void PotentialField::timeStep(polygon_t _shape)
     _shape.AddPolygon(shape_vertexes);
     position = {pose(0), pose(1)};
     regf = _shape.RegionForce(position); // compute regional force
-    attractive_force << regf.x, regf.y;
+    //attractive_force << regf.x, regf.y;
+
+    distance = pow((pow(pose(0)-reference(0),2) + pow(pose(1)-reference(1),2)),0.5);
+    attractive_force = k * exp(distance / scale) * (reference - pose);
 
     // publishes the message with the shape info, so it can be plotted in rviz
     shape_msg_.header.stamp = ros::Time::now();
