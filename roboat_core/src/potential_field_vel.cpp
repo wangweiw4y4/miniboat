@@ -50,8 +50,8 @@ PotentialField::PotentialField(ros::NodeHandle nh) : nh_(nh)
     static const float d_multi_r0 = 3.0;
     static const float d_multi_stf = 0.00000001;
     static const float d_multi_srf = 0.00001;
-    static const int d_shrink_time = 20;
-    static const int d_inside_time = 45;
+    static const int d_shrink_time = 30;
+    static const int d_inside_time = 60;
     static const float d_x_center = 3.0;
     static const float d_y_center = 1.0;
     static const float d_attractive_par_1 = 0.1;
