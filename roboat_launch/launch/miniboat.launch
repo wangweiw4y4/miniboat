@@ -69,8 +69,8 @@
         <!--include file="$(find roboat_core)/launch/velocity_pid.launch">
         </include-->
 
-        <!--include file="$(find roboat_core)/launch/velocity_smc.launch">
-        </include-->
+        <include file="$(find roboat_core)/launch/velocity_smc.launch">
+        </include>
 
         <!--include file="$(find roboat_core)/launch/velocity_asmc.launch">
         </include-->
@@ -78,8 +78,8 @@
         <!--include file="$(find roboat_core)/launch/velocity_cascade_pid.launch">
         </include-->
 
-        <include file="$(find roboat_core)/launch/velocity_cascade_smc.launch">
-        </include>
+        <!--include file="$(find roboat_core)/launch/velocity_cascade_smc.launch">
+        </include-->
 
         <!--include file="$(find roboat_core)/launch/velocity_cascade_asmc.launch">
         </include-->

@@ -222,7 +222,7 @@ public:
             
             desired_r = (p_psi * epsi) + (i_psi * copysign(epsii,epsi)) + (d_psi * epsid);
 
-            if ((abs(epsi) <= 0.1) && (sqrt(state[3]*state[3] + state[4]*state[4]) <= 0.02) )
+            if (abs(epsi) <= 0.1 )
             {
             desired_r = (0.1* p_psi * epsi) + (i_psi * copysign(epsii,epsi)) + (d_psi * epsid);
             }
@@ -277,7 +277,7 @@ public:
 
             Tu = k1_u*pow(abs(su),0.5)*sign_su + k2_u*su;
             Tv = k1_v*pow(abs(sv),0.5)*sign_sv + k2_v*sv;
-            Tr = k1_r*pow(abs(sr),0.5)*sign_sr + k2_r*sr - (pid_aux_1*state[3]*state[4]) - (pid_aux_2*sqrt(state[3]*state[3] + state[4]*state[4])*state[5]) - (pid_aux_2*abs(state[5])*state[5]);
+            Tr = k1_r*pow(abs(sr),0.5)*sign_sr + k2_r*sr - (pid_aux_1*state[3]*state[4]) - (pid_aux_2*sqrt(state[3]*state[3] + state[4]*state[4])*state[5]);// - (pid_aux_2*abs(state[5])*state[5]);
 
             miniboat_tau << Tu, Tv, Tr;
 
