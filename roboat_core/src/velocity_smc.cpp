@@ -315,9 +315,9 @@ public:
             if (force(3) < 0){
                 force(3) = 0;
             }
-            ROS_WARN("SMC force:  %f,%f,%f,%f\n", force(0), force(1), force(2),force(3));
-            ROS_WARN("SMC error is %f, %f, %f", eu, ev, epsi);
-            ROS_WARN("SMC tau is %f, %f, %f", Tu, Tv, Tr);
+            //ROS_WARN("SMC force:  %f,%f,%f,%f\n", force(0), force(1), force(2),force(3));
+            //ROS_WARN("SMC error is %f, %f, %f", eu, ev, epsi);
+            //ROS_WARN("SMC tau is %f, %f, %f", Tu, Tv, Tr);
 
             Eigen::VectorXd::Map(&forceMsg.data[0], force.size()) = force;
             force_pub.publish(forceMsg);

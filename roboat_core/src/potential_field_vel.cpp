@@ -43,9 +43,9 @@ PotentialField::PotentialField(ros::NodeHandle nh) : nh_(nh)
     shape_pub_ = nh_.advertise<nav_msgs::Path>("visual/shape", 1);
 
     static const float d_target_region = 0.2; // half of the target square side
-    static const float d_target_r0 = 1.0;     // target r0
+    static const float d_target_r0 = 0.4;     // target r0
     static const float d_target_stf = 0.00001;  // target lattice force coefficient
-    static const float d_target_srf = 1000.0;  // target repulsive force coefficient
+    static const float d_target_srf = 0.5;  // target repulsive force coefficient
     static const float d_multi_region = 3.0;
     static const float d_multi_r0 = 3.0;
     static const float d_multi_stf = 0.00000001;
@@ -73,7 +73,6 @@ PotentialField::PotentialField(ros::NodeHandle nh) : nh_(nh)
     nh_.param("pf/attractive_par_2", attractive_par_2, d_attractive_par_2);
 
     pose << 0.0, 0.0;
-    reference << 3.2, 1.2;
     number_of_robots = 0;
     counter = 0;
     des_shape = -1; // starts with no active shape being tracked
@@ -198,6 +197,7 @@ void PotentialField::timeStep(polygon_t _shape)
     regf = _shape.RegionForce(position); // compute regional force
     //attractive_force << regf.x, regf.y;
 
+    reference << x_center-region, y_center+region;
     distance = pow((pow(pose(0)-reference(0),2) + pow(pose(1)-reference(1),2)),0.5);
     attractive_force = k * exp(distance / scale) * (reference - pose);
 
