@@ -72,6 +72,9 @@
         <!--include file="$(find roboat_core)/launch/velocity_smc.launch">
         </include-->
 
+        <include file="$(find roboat_core)/launch/velocity_st.launch">
+        </include>
+
         <!--include file="$(find roboat_core)/launch/velocity_asmc.launch">
         </include-->
 
@@ -84,8 +87,8 @@
         <!--include file="$(find roboat_core)/launch/velocity_cascade_asmc.launch">
         </include-->
 
-        <!--node name="pf_vel_node" pkg="roboat_core" type="pf_vel_node" >
-        </node-->
+        <node name="pf_vel_node" pkg="roboat_core" type="pf_vel_node" >
+        </node>
         
         <!--node name="zigzag_test_r" pkg="roboat_core" type="zigzag_test_r.py" >
         </node-->
