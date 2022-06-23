@@ -52,8 +52,14 @@ public:
     double cs45;
     double minf;
     double maxf;
-    double pid_aux_1 = -3.5;
-    double pid_aux_2 = -0.1;
+    double Nr = -0.1571;
+    double Nrr = -0.01356;
+    double Iz = 0.02;
+    double Nr_dot = -0.015;
+    double Yv_dot = -1.57;
+    double Xu_dot = -1.57;
+    double g_r;
+    double f_r;
 
     double k1_u;
     double k2_u;
@@ -148,8 +154,11 @@ public:
         state[5] = 0.0;
 
         eu_last = 0;
-        eu_last = 0;
+        ev_last = 0;
         epsi_last = 0;
+        eui = 0;
+        evi = 0;
+        epsii = 0;
         
         force = Eigen::VectorXd::Zero(4);
         cs45 = sqrt(2)/2;
@@ -224,9 +233,13 @@ public:
                 sign_spsi = copysign(1,spsi);
             }
 
+            g_r = 1 / (Iz - Nr_dot);
+            f_r = g_r*(((-Xu_dot + Yv_dot)*state[3]*state[4]) + (Nrr*state[5]*abs(state[5])) + (Nr*sqrt(state[3]*state[3] + state[4]*state[4])*state[5]));
+
             Tu = k1_u*pow(abs(su),0.5)*sign_su + k2_u*su;
             Tv = k1_v*pow(abs(sv),0.5)*sign_sv + k2_v*sv;
-            Tr = k1_psi*pow(abs(spsi),0.5)*sign_spsi + k2_psi*spsi - (pid_aux_1*abs(state[3])*state[4]) - (pid_aux_2*sqrt(state[3]*state[3] + state[4]*state[4])*state[5]);
+            Tr = (-f_r + (k1_psi*pow(abs(spsi),0.5)*sign_spsi + k2_psi*spsi))/g_r;
+            //Tr = k1_psi*pow(abs(spsi),0.5)*sign_spsi + k2_psi*spsi;
             
             miniboat_tau << Tu, Tv, Tr;
 

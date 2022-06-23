@@ -194,12 +194,13 @@ void PotentialField::timeStep(polygon_t _shape)
     _shape.segs = {};
     _shape.AddPolygon(shape_vertexes);
     position = {pose(0), pose(1)};
-    regf = _shape.RegionForce(position); // compute regional force
-    //attractive_force << regf.x, regf.y;
+    regf = _shape.RegionForce(position); // compute regional force based on a descentralized shape
+    attractive_force << regf.x, regf.y;
 
-    reference << x_center-region, y_center+region;
+    // fixed reference attractive force
+    /*reference << x_center-region, y_center+region;
     distance = pow((pow(pose(0)-reference(0),2) + pow(pose(1)-reference(1),2)),0.5);
-    attractive_force = k * exp(distance / scale) * (reference - pose);
+    attractive_force = k * exp(distance / scale) * (reference - pose);*/
 
     // publishes the message with the shape info, so it can be plotted in rviz
     shape_msg_.header.stamp = ros::Time::now();
@@ -243,10 +244,10 @@ void PotentialField::timeStep(polygon_t _shape)
 
     max_vel = std::max(abs(body_force(0)),abs(body_force(1)));
     
-    if (max_vel > 0.2)
+    if (max_vel > 0.07)
     {
-        body_force(0) = body_force(0)*0.2/max_vel;
-        body_force(1) = body_force(1)*0.2/max_vel;
+        body_force(0) = body_force(0)*0.07/max_vel;
+        body_force(1) = body_force(1)*0.07/max_vel;
     }
 
     vel_ref.x = body_force(0);

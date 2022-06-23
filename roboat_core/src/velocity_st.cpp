@@ -52,8 +52,15 @@ public:
     double cs45;
     double minf;
     double maxf;
-    /*double pid_aux_1 = -3.5;
-    double pid_aux_2 = -0.1;*/
+    double Nr = -0.1571;
+    double Nrr = -0.01356;
+    double Iz = -0.02;
+    double Nr_dot = -0.015;
+    double Yv_dot = -1.57;
+    double Xu_dot = -1.57;
+    double g_r;
+    double f_r;
+
 
     double k1_u;
     double k2_u;
@@ -248,9 +255,12 @@ public:
             stpsi_var = (step)*(sign_spsi + sign_spsi_last)/2.0 + stpsi_var;
             sign_spsi_last = sign_spsi;
 
+            g_r = 1 / (Iz - Nr_dot);
+            f_r = g_r*((-Xu_dot + Yv_dot)*state[3]*state[4] + Nrr*state[5]*abs(state[5]) + Nr*sqrt(state[3]*state[3] + state[4]*state[4])*state[5]);
+
             Tu = k1_u*pow(abs(su),0.5)*sign_su + k2_u*stu_var;
             Tv = k1_v*pow(abs(sv),0.5)*sign_sv + k2_v*stv_var;
-            Tr = k1_psi*pow(abs(spsi),0.5)*sign_spsi + k2_psi*stpsi_var;// - (pid_aux_1*abs(state[3])*state[4]) - (pid_aux_2*sqrt(state[3]*state[3] + state[4]*state[4])*state[5]);
+            Tr = (-f_r + (k1_psi*pow(abs(spsi),0.5)*sign_spsi + k2_psi*stpsi_var))/g_r;
             
             miniboat_tau << Tu, Tv, Tr;
 
