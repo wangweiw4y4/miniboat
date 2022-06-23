@@ -38,8 +38,8 @@ def main():
     rate = rospy.Rate(50)
     t = Test()
     dir_name = os.path.dirname(__file__)
-    bag = rosbag.Bag(dir_name + '/accel_test_v/100.bag','w')
-    p = 100.0
+    bag = rosbag.Bag(dir_name + '/accel_test_v/10.bag','w')
+    p = 10.0
     f = Force()
     f1 = 0
     f2 = 0

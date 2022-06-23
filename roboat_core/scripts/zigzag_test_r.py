@@ -38,8 +38,8 @@ def main():
     rate = rospy.Rate(50)
     t = Test()
     dir_name = os.path.dirname(__file__)
-    bag = rosbag.Bag(dir_name + '/zigzag_test_r/90.bag','w')
-    p = 90.0
+    bag = rosbag.Bag(dir_name + '/zigzag_test_r/100.bag','w')
+    p = 100.0
     f = Force()
     f1 = 0
     f2 = 0
@@ -53,10 +53,10 @@ def main():
             rospy.logwarn("Right")
             bag.write('r', t.velocity)
             bag.write('odom', t.odom)
-            f1 = (p/100.0)*t.max_thrust
-            f2 = 0
-            f3 = 0
-            f4 = (p/100.0)*t.max_thrust
+            f2 = (p/100.0)*t.max_thrust
+            f1 = 0
+            f4 = 0
+            f3 = (p/100.0)*t.max_thrust
             f.data[0] = f1
             f.data[1] = f2
             f.data[2] = f3
@@ -67,10 +67,10 @@ def main():
             rospy.logwarn("Left")
             bag.write('r', t.velocity)
             bag.write('odom', t.odom)
-            f1 = 0
-            f2 = (p/100.0)*t.max_thrust
-            f3 = (p/100.0)*t.max_thrust
-            f4 = 0
+            f2 = 0
+            f1 = (p/100.0)*t.max_thrust
+            f4 = (p/100.0)*t.max_thrust
+            f3 = 0
             f.data[0] = f1
             f.data[1] = f2
             f.data[2] = f3
@@ -81,10 +81,10 @@ def main():
             rospy.logwarn("Right")
             bag.write('r', t.velocity)
             bag.write('odom', t.odom)
-            f1 = (p/100.0)*t.max_thrust
-            f2 = 0
-            f3 = 0
-            f4 = (p/100.0)*t.max_thrust
+            f2 = (p/100.0)*t.max_thrust
+            f1 = 0
+            f4 = 0
+            f3 = (p/100.0)*t.max_thrust
             f.data[0] = f1
             f.data[1] = f2
             f.data[2] = f3
@@ -95,10 +95,10 @@ def main():
             rospy.logwarn("Left")
             bag.write('r', t.velocity)
             bag.write('odom', t.odom)
-            f1 = 0
-            f2 = (p/100.0)*t.max_thrust
-            f3 = (p/100.0)*t.max_thrust
-            f4 = 0
+            f2 = 0
+            f1 = (p/100.0)*t.max_thrust
+            f4 = (p/100.0)*t.max_thrust
+            f3 = 0
             f.data[0] = f1
             f.data[1] = f2
             f.data[2] = f3
