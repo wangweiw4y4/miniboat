@@ -103,6 +103,7 @@ public:
     double epsi_last = 0;
     double epsii;
     double epsid;
+    double epsi_dif;
 
     double Tu;
     double Tv;
@@ -206,7 +207,15 @@ public:
             {
                 epsi = (epsi/abs(epsi))*(abs(epsi)-2.0*M_PI);
             }
-            epsid = desired_angular_velocity - state[5];
+            //epsid = desired_angular_velocity - state[5];
+            epsi_dif = epsi - epsi_last;
+            if (abs(epsi_dif) >= M_PI)
+            {
+                epsi_dif = (epsi_dif/abs(epsi_dif))*(abs(epsi_dif)-2.0*M_PI);
+            }
+            epsid = epsi_dif / step;
+            epsi_last = epsi;
+            
             spsi = epsid + lambda_psi*epsi;
 
             if (su == 0)
@@ -240,7 +249,12 @@ public:
             Tv = k1_v*pow(abs(sv),0.5)*sign_sv + k2_v*sv;
             Tr = (-f_r + (k1_psi*pow(abs(spsi),0.5)*sign_spsi + k2_psi*spsi))/g_r;
             //Tr = k1_psi*pow(abs(spsi),0.5)*sign_spsi + k2_psi*spsi;
-            
+
+            if (abs(Tr) >= 0.03)
+            {
+                Tr = copysign(0.03,Tr);
+            }
+
             miniboat_tau << Tu, Tv, Tr;
 
             B << cs45, cs45, -cs45, -cs45,

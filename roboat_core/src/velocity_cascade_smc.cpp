@@ -46,16 +46,21 @@ public:
     double orientation_qw;
 
     double pid_maxforce = 0.5;
-    double max_r = 0.25;
+    double max_r = 0.2;
     double base_force = 0.1;
     double a = 0.12;
     double d = 0.078; //distance between thruster and boat center
     double cs45;
     double minf;
     double maxf;
-    double pid_aux_1 = -2.5;
-    double pid_aux_2 = -0.1;
-    double pid_aux_3 = -0.0;
+    double Nr = -0.5;//-0.1571;
+    double Nrr = -0.01356;
+    double Iz = 0.02;
+    double Nr_dot = -0.015;
+    double Yv_dot = -1.57;
+    double Xu_dot = -1.57;
+    double g_r;
+    double f_r;
 
     double k1_u;
     double k2_u;
@@ -104,12 +109,15 @@ public:
     double epsi_last = 0.0;
     double epsii;
     double epsid;
+    double epsi_dif;
     double sr;
     double sign_sr;
     double er;
     double er_last = 0.0;
     double eri;
     double erd;
+    double sign_sr_last;
+    double str_var;
 
     double Tu;
     double Tv;
@@ -175,6 +183,9 @@ public:
         evi = 0.0;
         eri = 0.0;
         epsii = 0.0;
+        sign_sr_last = 0.0;
+        str_var = 0.0;
+
 
         force = Eigen::VectorXd::Zero(4);
         cs45 = sqrt(2)/2;
@@ -212,25 +223,17 @@ public:
             {
                 epsi = (epsi/abs(epsi))*(abs(epsi)-2.0*M_PI);
             }
-            epsid = desired_angular_velocity - state[5];
-            epsii = (step)*(epsi + epsi_last)/2.0 + epsii;
-            if (abs(epsi) <= 0.005)
+            //epsid = desired_angular_velocity - state[5];
+            epsi_dif = epsi - epsi_last;
+            if (abs(epsi_dif) >= M_PI)
             {
-                epsii = 0.0;
+                epsi_dif = (epsi_dif/abs(epsi_dif))*(abs(epsi_dif)-2.0*M_PI);
             }
+            epsid = epsi_dif / step;
+            epsii = (step)*(epsi + epsi_last)/2.0 + epsii;
             epsi_last = epsi;
             
             desired_r = (p_psi * epsi) + (i_psi * copysign(epsii,epsi)) + (d_psi * epsid);
-
-            if (abs(epsi) <= 0.1 )
-            {
-            desired_r = (0.1* p_psi * epsi) + (i_psi * copysign(epsii,epsi)) + (d_psi * epsid);
-            }
-
-            if (abs(epsi) >= 1.5)
-            {
-            desired_r = (1.5* p_psi * epsi) + (i_psi * copysign(epsii,epsi)) + (d_psi * epsid);
-            }
 
             if (abs(desired_r) >= max_r){
                 desired_r = copysign(max_r,desired_r);
@@ -275,9 +278,21 @@ public:
                 sign_sr = copysign(1,sr);
             }
 
+            str_var = (step)*(sign_sr + sign_sr_last)/2.0 + str_var;
+            sign_sr_last = sign_sr;
+
+            g_r = 1 / (Iz - Nr_dot);
+            f_r = g_r*(((-Xu_dot + Yv_dot)*state[3]*state[4]) + (Nrr*state[5]*abs(state[5])) + (Nr*sqrt(state[3]*state[3] + state[4]*state[4])*state[5]));
+
             Tu = k1_u*pow(abs(su),0.5)*sign_su + k2_u*su;
             Tv = k1_v*pow(abs(sv),0.5)*sign_sv + k2_v*sv;
-            Tr = k1_r*pow(abs(sr),0.5)*sign_sr + k2_r*sr - (pid_aux_1*state[3]*state[4]) - (pid_aux_2*sqrt(state[3]*state[3] + state[4]*state[4])*state[5]);// - (pid_aux_2*abs(state[5])*state[5]);
+            //Tr = (-f_r + (k1_r*pow(abs(sr),0.5)*sign_sr + k2_r*sr))/g_r; //Sliding Mode
+            Tr = (-f_r + (k1_r*pow(abs(sr),0.5)*sign_sr + k2_r*str_var))/g_r; //Super Twisting
+
+            if (abs(Tr) >= 0.05)
+            {
+                Tr = copysign(0.05,Tr);
+            }
 
             miniboat_tau << Tu, Tv, Tr;
 
