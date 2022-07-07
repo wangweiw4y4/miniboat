@@ -56,7 +56,7 @@ sudo dd if=/dev/sdX of=path/to/your-backup.img bs=4K
 ```
 
 ```dd``` is the command, ```if``` is the input, as in the location you want to copy. ```of``` is the output, or the location you're replacing with your copy. ```bs``` is the block size for copy (the default is 512 bytes but doesn’t work well for larger drives).
-sdX refers to the drive you are interacting with. Drives are often given a name such as /dev/sda, /dev/sdb, or /dev/sdc. 
+sdX refers to the drive you are interacting with. Drives are often given a name such as /dev/sda, /dev/sdb, or /dev/sdc. For Pi, sdX is /dev/mmcblk0. 
 
 **1.2 Resize the image to adapt to smaller size SD card** 
 
@@ -68,7 +68,7 @@ PiShrink can be found here: https://github.com/Drewsif/PiShrink
 
 When restoring from an image file, the same concept applies:
 ```
-dd if=path/to/your-backup.img of=/dev/sdX
+dd if=path/to/your-backup.img of=/dev/mmcblk0
 ```
 **1.4 Resize your SD card to full size**
 
