@@ -46,7 +46,7 @@ public:
     float k;
     float scale;
     float distance;
-
+    float attractive_flag;
 
     //user parameters
     float x_center; //region center in x
@@ -88,6 +88,7 @@ public:
     //float heading_setpoint;
 
     geometry_msgs::Pose2D vel_ref;      //desired velocity for publisher
+    std_msgs::Float64 shrink_flag;
 
     //position
     point_t position = { 0.0, 0.0 };
@@ -106,7 +107,9 @@ private:
     ros::NodeHandle nh_;
     ros::Publisher vel_ref_pub_;
     ros::Publisher shape_pub_;
+    ros::Publisher centralized_pub_;
     ros::Subscriber shape_sub_;
+    ros::Subscriber reference_pose_sub_;
 
     nav_msgs::Path shape_msg_;
     
@@ -115,5 +118,6 @@ private:
     double detection_max_lapse_;
 
     void shapeCallback(const roboat_msgs::Shape &msg);
+    void referenceCallback(const geometry_msgs::Pose2D &ref);
 
 };

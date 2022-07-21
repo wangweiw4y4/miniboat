@@ -16,7 +16,9 @@ PotentialField::PotentialField(ros::NodeHandle nh) : nh_(nh)
 {
     // ROS Publishers and Subscribers
     shape_sub_ = nh_.subscribe("/shape", 10, &PotentialField::shapeCallback, this);
+    reference_pose_sub_ = nh_.subscribe("assignment/reference_pose", 10, &PotentialField::referenceCallback, this);
     vel_ref_pub_ = nh_.advertise<geometry_msgs::Pose2D>("velocity_reference", 1);
+    centralized_pub_ = nh_.advertise<std_msgs::Float64>("shrink_flag", 1);
 
     swarm_.initialize(nh_);
     swarm_size_ = swarm_.getBoatN();
@@ -79,6 +81,8 @@ PotentialField::PotentialField(ros::NodeHandle nh) : nh_(nh)
     // des_shape = 0;
     k = 0.5;
     scale = 1;
+    attractive_flag = 1;
+    reference << 0.0, 0.0;
 }
 
 void PotentialField::shapeCallback(const roboat_msgs::Shape &msg)
@@ -98,6 +102,13 @@ void PotentialField::shapeCallback(const roboat_msgs::Shape &msg)
         shape_msg_.poses.clear();
         shape_pub_.publish(shape_msg_);
     }
+    return;
+}
+
+void PotentialField::referenceCallback(const geometry_msgs::Pose2D &ref)
+{
+    reference(0) = ref->x; //ref in x
+    reference(1) = ref->y; //ref in y
     return;
 }
 
@@ -147,24 +158,31 @@ void PotentialField::timeStep(polygon_t _shape)
     }
 
     // stop shrinking if target shape is reached
-    if (region <= target_region)
-    {
-        region = target_region;
-    }
+    if (attractive_flag == 1){
+        if (region <= target_region)
+        {
+            region = target_region;
+            attractive_flag = 2;
+            reference(0) = pose(0);
+            reference(1) = pose(1);
+            shrink_flag.data = 1;
+            centralized_pub_.publish(shrink_flag);
+        }
 
-    if (r0 <= target_r0)
-    {
-        r0 = target_r0;
-    }
+        if (r0 <= target_r0)
+        {
+            r0 = target_r0;
+        }
 
-    if (srf >= target_srf)
-    {
-        srf = target_srf;
-    }
+        if (srf >= target_srf)
+        {
+            srf = target_srf;
+        }
 
-    if (stf >= target_stf)
-    {
-        stf = target_stf;
+        if (stf >= target_stf)
+        {
+            stf = target_stf;
+        }
     }
 
     /* Since the swarm information is used to identify the neighbors rather than a local sensor,
@@ -195,12 +213,15 @@ void PotentialField::timeStep(polygon_t _shape)
     _shape.AddPolygon(shape_vertexes);
     position = {pose(0), pose(1)};
     regf = _shape.RegionForce(position); // compute regional force based on a descentralized shape
-    attractive_force << regf.x, regf.y;
+    if (attractive_flag == 1){
+        attractive_force << regf.x, regf.y;
+    }
 
     // fixed reference attractive force
-    /*reference << x_center-region, y_center+region;
     distance = pow((pow(pose(0)-reference(0),2) + pow(pose(1)-reference(1),2)),0.5);
-    attractive_force = k * exp(distance / scale) * (reference - pose);*/
+    if (attractive_flag == 2){
+        attractive_force = k * exp(distance / scale) * (reference - pose);
+    }
 
     // publishes the message with the shape info, so it can be plotted in rviz
     shape_msg_.header.stamp = ros::Time::now();
@@ -222,17 +243,19 @@ void PotentialField::timeStep(polygon_t _shape)
     repulsive_force << 0.0, 0.0;
     Fr << 0.0, 0.0;
     Ftheta << 0.0, 0.0;
-    for (int i = 0; i < number_of_robots; i++)
-    {
-        current_det_pose << robots_detected[i][0], robots_detected[i][1];
-        r = pow((pow(pose(0) - current_det_pose(0), 2) + pow(pose(1) - current_det_pose(1), 2)), 0.5);
-        pose_difference = current_det_pose - pose;
-        Fr = ((pose_difference) / (r)) * (r0 / r * (1 - (r0 / r))) + Fr;
-        theta_dir = atan2(pose_difference(1), pose_difference(0));
-        inverted_pose << -pose_difference(1), pose_difference(0);
-        Ftheta = sin(4 * theta_dir) * (inverted_pose / r) / r + Ftheta;
+    if (attractive_flag == 1){
+        for (int i = 0; i < number_of_robots; i++)
+        {
+            current_det_pose << robots_detected[i][0], robots_detected[i][1];
+            r = pow((pow(pose(0) - current_det_pose(0), 2) + pow(pose(1) - current_det_pose(1), 2)), 0.5);
+            pose_difference = current_det_pose - pose;
+            Fr = ((pose_difference) / (r)) * (r0 / r * (1 - (r0 / r))) + Fr;
+            theta_dir = atan2(pose_difference(1), pose_difference(0));
+            inverted_pose << -pose_difference(1), pose_difference(0);
+            Ftheta = sin(4 * theta_dir) * (inverted_pose / r) / r + Ftheta;
+        }
+        repulsive_force = srf * Fr + stf * Ftheta;
     }
-    repulsive_force = srf * Fr + stf * Ftheta;
     // ROS_FATAL_STREAM("rep_f = " << repulsive_force);
     linear_force = attractive_force + repulsive_force; // add attractive and repulsive forces
 
