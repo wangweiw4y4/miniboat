@@ -48,20 +48,20 @@ class Test:
         self.flag = _flag.data
 
     def mb1_callback(self, _mb1):
-        self.pose_mb1.x = _mb1.position.position.linear.x
-        self.pose_mb1.y = -_mb1.position.position.linear.y
+        self.pose_mb1.x = _mb1.pose.pose.position.x
+        self.pose_mb1.y = -_mb1.pose.pose.position.y
 
     def mb2_callback(self, _mb2):
-        self.pose_mb2.x = _mb2.position.position.linear.x
-        self.pose_mb2.y = -_mb2.position.position.linear.y
+        self.pose_mb2.x = _mb2.pose.pose.position.x
+        self.pose_mb2.y = -_mb2.pose.pose.position.y
 
     def mb3_callback(self, _mb3):
-        self.pose_mb3.x = _mb3.position.position.linear.x
-        self.pose_mb3.y = -_mb3.position.position.linear.y
+        self.pose_mb3.x = _mb3.pose.pose.position.x
+        self.pose_mb3.y = -_mb3.pose.pose.position.y
 
     def mb4_callback(self, _mb4):
-        self.pose_mb4.x = _mb4.position.position.linear.x
-        self.pose_mb4.y = -_mb4.position.position.linear.y
+        self.pose_mb4.x = _mb4.pose.pose.position.x
+        self.pose_mb4.y = -_mb4.pose.pose.position.y
 
     def desired(self, _assigned):
         self.ref_mb1.x = _assigned[0,0]

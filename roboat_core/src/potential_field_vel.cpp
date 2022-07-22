@@ -107,8 +107,8 @@ void PotentialField::shapeCallback(const roboat_msgs::Shape &msg)
 
 void PotentialField::referenceCallback(const geometry_msgs::Pose2D &ref)
 {
-    reference(0) = ref->x; //ref in x
-    reference(1) = ref->y; //ref in y
+    reference(0) = ref.x; //ref in x
+    reference(1) = ref.y; //ref in y
     return;
 }
 
