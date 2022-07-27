@@ -192,7 +192,7 @@ public:
         state[4] = -msg.twist.twist.linear.y;
         state[5] = -msg.twist.twist.angular.z;
 
-        ROS_WARN("miniboat state is %f, %f, %f, %f, %f, %f", state[0], state[1], state[2], state[3], state[4], state[5]);
+        //ROS_WARN("miniboat state is %f, %f, %f, %f, %f, %f", state[0], state[1], state[2], state[3], state[4], state[5]);
     }
 
     void referenceCallback(const geometry_msgs::Pose2D msg)
@@ -340,10 +340,10 @@ public:
             if (force(3) < 0){
                 force(3) = 0;
             }
-            ROS_WARN("pid desired r and psi error is %f, %f", desired_r, epsi);
-            ROS_WARN("pid force:  %f,%f,%f,%f\n", force(0), force(1), force(2),force(3));
-            ROS_WARN("PID error is %f, %f, %f", eu, ev, er);
-            ROS_WARN("PID tau is %f, %f, %f", Tu, Tv, Tr);
+            //ROS_WARN("pid desired r and psi error is %f, %f", desired_r, epsi);
+            //ROS_WARN("pid force:  %f,%f,%f,%f\n", force(0), force(1), force(2),force(3));
+            //ROS_WARN("PID error is %f, %f, %f", eu, ev, er);
+            //ROS_WARN("PID tau is %f, %f, %f", Tu, Tv, Tr);
 
             Eigen::VectorXd::Map(&forceMsg.data[0], force.size()) = force;
             force_pub.publish(forceMsg);
