@@ -158,7 +158,8 @@ void PotentialField::timeStep(polygon_t _shape)
     }
 
     // stop shrinking if target shape is reached
-    if (attractive_flag == 1){
+    if (attractive_flag == 1)
+    {
         if (region <= target_region)
         {
             region = target_region;
@@ -167,6 +168,7 @@ void PotentialField::timeStep(polygon_t _shape)
             reference(1) = pose(1);
             shrink_flag.data = 1;
             centralized_pub_.publish(shrink_flag);
+            ROS_WARN("flag state is %f", attractive_flag);
         }
 
         if (r0 <= target_r0)
