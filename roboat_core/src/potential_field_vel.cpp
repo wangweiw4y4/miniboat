@@ -149,7 +149,7 @@ void PotentialField::timeStep(polygon_t _shape)
     }
 
     // update region and force parameters as the shape shrinks
-    if (counter >= counter_thresh)
+    if ((counter >= counter_thresh) && (attractive_flag == 1))
     {
         region = region - (region_rate);
         r0 = r0 - (r0_rate);
