@@ -1,0 +1,42 @@
+<launch>
+ 
+    <!-- boat id
+         - remember to add 'export HOSTNAME' to the .bashrc file or script launching the program 
+         - namespaces with '-' character are not valid, need to be changed
+    -->
+    <arg    name="id"                   default="$(env HOSTNAME)"/>
+    <arg    name="use_multimaster"      default="true"/>
+    <arg    name="use_ekf"              default="false"/>
+
+    <!-- Multimaster synchronization -->
+    <node if="$(arg use_multimaster)" name="master_discovery"  pkg="fkie_master_discovery"   type="master_discovery"    output="screen">
+        <param name="mcast_group" type="str" value="224.0.0.1" />
+    </node>
+    <node if="$(arg use_multimaster)" name="master_sync"  pkg="fkie_master_sync"   type="master_sync"    output="screen"/>
+    
+    <!-- package namespace -->
+    <group ns="$(arg id)">
+
+        <param  name="roboat_id"    type="string"   value="$(arg id)" />
+
+        <include file="$(find roboat_core)/launch/master.launch">
+            <arg name="sim_node"            value="false"/>
+            <arg name="serial_node"         value="true"/>
+            <arg name="csv_path_node"       value="false"/>
+            <arg name="mpc_node"            value="false"/>
+            <arg name="pf_node"             value="false"/>
+            <arg name="command_node"        value="true"/>
+            <arg name="joy_node"            value="false"/>
+            <arg name="pid_node"            value="false"/>
+            <arg name="swarm_node"          value="true"/>
+            <arg name="bag_node"            value="false"/>
+            <arg name="capacitive_node"     value="false"/>
+        </include>
+                        
+        <node name="flushing" pkg="roboat_core" type="flushing.py" >
+        </node>
+        
+
+    </group>
+     
+</launch>
