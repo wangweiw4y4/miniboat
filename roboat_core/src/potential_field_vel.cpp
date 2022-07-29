@@ -59,20 +59,20 @@ PotentialField::PotentialField(ros::NodeHandle nh) : nh_(nh)
     static const float d_attractive_par_1 = 0.1;
     static const float d_attractive_par_2 = 0.5;
 
-    nh_.param("pf/target_region", target_region, d_target_region);
-    nh_.param("pf/target_r0", target_r0, d_target_r0);
-    nh_.param("pf/target_stf", target_stf, d_target_stf);
-    nh_.param("pf/target_srf", target_srf, d_target_srf);
-    nh_.param("pf/multi_region", multi_region, d_multi_region);
-    nh_.param("pf/multi_r0", multi_r0, d_multi_r0);
-    nh_.param("pf/multi_stf", multi_stf, d_multi_stf);
-    nh_.param("pf/multi_srf", multi_srf, d_multi_srf);
-    nh_.param("pf/shrink_time", shrink_time, d_shrink_time);
-    nh_.param("pf/inside_time", inside_time, d_inside_time);
-    nh_.param("pf/x_center", x_center, d_x_center);
-    nh_.param("pf/y_center", y_center, d_y_center);
-    nh_.param("pf/attractive_par_1", attractive_par_1, d_attractive_par_1);
-    nh_.param("pf/attractive_par_2", attractive_par_2, d_attractive_par_2);
+    nh_.param("pf_vel_node/target_region", target_region, d_target_region);
+    nh_.param("pf_vel_node/target_r0", target_r0, d_target_r0);
+    nh_.param("pf_vel_node/target_stf", target_stf, d_target_stf);
+    nh_.param("pf_vel_node/target_srf", target_srf, d_target_srf);
+    nh_.param("pf_vel_node/multi_region", multi_region, d_multi_region);
+    nh_.param("pf_vel_node/multi_r0", multi_r0, d_multi_r0);
+    nh_.param("pf_vel_node/multi_stf", multi_stf, d_multi_stf);
+    nh_.param("pf_vel_node/multi_srf", multi_srf, d_multi_srf);
+    nh_.param("pf_vel_node/shrink_time", shrink_time, d_shrink_time);
+    nh_.param("pf_vel_node/inside_time", inside_time, d_inside_time);
+    nh_.param("pf_vel_node/x_center", x_center, d_x_center);
+    nh_.param("pf_vel_node/y_center", y_center, d_y_center);
+    nh_.param("pf_vel_node/attractive_par_1", attractive_par_1, d_attractive_par_1);
+    nh_.param("pf_vel_node/attractive_par_2", attractive_par_2, d_attractive_par_2);
 
     pose << 0.0, 0.0;
     number_of_robots = 0;
