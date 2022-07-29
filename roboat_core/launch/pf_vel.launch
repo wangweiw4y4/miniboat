@@ -4,9 +4,9 @@
 	<param name = "target_region" value = "0.8" />
 	<param name = "target_r0" value = "1.0" />
 	<param name = "target_stf" value = "0.00001" />
-	<param name = "target_srf" value = "0.5" />
+	<param name = "target_srf" value = "1.0" />
 	<param name = "multi_region" value = "2.0" />
-	<param name = "multi_r0" value = "10.0" />
+	<param name = "multi_r0" value = "5.0" />
 	<param name = "multi_stf" value = "0.00001" />
 	<param name = "multi_srf" value = "0.01" />
 	<param name = "shrink_time" value = "30" />
