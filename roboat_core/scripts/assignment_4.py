@@ -81,7 +81,7 @@ def main():
     rospy.init_node('assignment_4', anonymous=False)
     rate = rospy.Rate(50)
     t = Test()
-    goals = np.array([[2.9,1.1],[3.1,1.1],[2.9,0.9],[3.1,0.9]])
+    goals = np.array([[2.88,1.12],[3.12,1.12],[2.88,0.88],[3.12,0.88]])
     number_of_robots = len(goals)
     distance_squared_matrix = np.zeros([number_of_robots,number_of_robots])
     assigned_goals = np.zeros([number_of_robots,2])

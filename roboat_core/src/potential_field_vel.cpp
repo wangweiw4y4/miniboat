@@ -245,7 +245,7 @@ void PotentialField::timeStep(polygon_t _shape)
     repulsive_force << 0.0, 0.0;
     Fr << 0.0, 0.0;
     Ftheta << 0.0, 0.0;
-    if (attractive_flag == 1){
+    //if (attractive_flag == 1){
         for (int i = 0; i < number_of_robots; i++)
         {
             current_det_pose << robots_detected[i][0], robots_detected[i][1];
@@ -256,8 +256,13 @@ void PotentialField::timeStep(polygon_t _shape)
             inverted_pose << -pose_difference(1), pose_difference(0);
             Ftheta = sin(4 * theta_dir) * (inverted_pose / r) / r + Ftheta;
         }
-        repulsive_force = srf * Fr + stf * Ftheta;
-    }
+        if (attractive_flag == 1){
+            repulsive_force = srf * Fr + stf * Ftheta;
+        }
+        else if ((attractive_flag == 2) && (distance >= 0.2)){
+            repulsive_force = srf * Fr + stf * Ftheta;
+        }
+    //}
     // ROS_FATAL_STREAM("rep_f = " << repulsive_force);
     linear_force = attractive_force + repulsive_force; // add attractive and repulsive forces
 
