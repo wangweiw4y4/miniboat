@@ -49,9 +49,9 @@ PotentialField::PotentialField(ros::NodeHandle nh) : nh_(nh)
     static const float d_target_stf = 0.00001;  // target lattice force coefficient
     static const float d_target_srf = 0.5;  // target repulsive force coefficient
     static const float d_multi_region = 2.0;
-    static const float d_multi_r0 = 3.0;
+    static const float d_multi_r0 = 5.0;
     static const float d_multi_stf = 0.00000001;
-    static const float d_multi_srf = 0.0001;
+    static const float d_multi_srf = 0.001;
     static const int d_shrink_time = 30;
     static const int d_inside_time = 60;
     static const float d_x_center = 3.0;
