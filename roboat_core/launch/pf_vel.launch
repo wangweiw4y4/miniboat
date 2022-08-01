@@ -4,7 +4,7 @@
 	<param name = "target_region" value = "0.8" />
 	<param name = "target_r0" value = "0.2" />
 	<param name = "target_stf" value = "0.00001" />
-	<param name = "target_srf" value = "100.0" />
+	<param name = "target_srf" value = "1000.0" />
 	<param name = "multi_region" value = "2.0" />
 	<param name = "multi_r0" value = "3.0" />
 	<param name = "multi_stf" value = "0.00001" />
