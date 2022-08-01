@@ -259,7 +259,7 @@ void PotentialField::timeStep(polygon_t _shape)
         if (attractive_flag == 1){
             repulsive_force = srf * Fr + stf * Ftheta;
         }
-        else if ((attractive_flag == 2) && (distance >= 0.2)){
+        else if ((attractive_flag == 2) && (distance >= 0.25)){
             repulsive_force = srf * Fr + stf * Ftheta;
         }
     //}
