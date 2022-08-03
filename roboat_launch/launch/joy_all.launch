@@ -3,7 +3,19 @@
     <!-- Make sure you provide the correct target boat and serial_port input -->
     <arg name="serial_port" default="/dev/input/js0"/>
     <!-- joy node only run to control a particular boat, specified by its node space -->
+    <node name="joy_node" pkg="joy" type="joy_node" respawn="true" ns="miniboat1">
+        <param name="dev" type="string" value="$(arg serial_port)" />
+    </node>
+    <node name="joy_node" pkg="joy" type="joy_node" respawn="true" ns="miniboat2">
+        <param name="dev" type="string" value="$(arg serial_port)" />
+    </node>
+    <node name="joy_node" pkg="joy" type="joy_node" respawn="true" ns="miniboat3">
+        <param name="dev" type="string" value="$(arg serial_port)" />
+    </node>
     <node name="joy_node" pkg="joy" type="joy_node" respawn="true" ns="miniboat4">
+        <param name="dev" type="string" value="$(arg serial_port)" />
+    </node>
+    <node name="joy_node" pkg="joy" type="joy_node" respawn="true" ns="miniboat5">
         <param name="dev" type="string" value="$(arg serial_port)" />
     </node>
     <node name="joy_node" pkg="joy" type="joy_node" respawn="true" ns="miniboat6">
