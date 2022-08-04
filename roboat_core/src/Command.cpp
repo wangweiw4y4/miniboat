@@ -98,6 +98,9 @@ void Command::joyCallback(sensor_msgs::Joy msg)
 void Command::latchCallback(std_msgs::UInt16 msg)
 {
   latchingaction[0] = msg.data;
+  if (latchingaction[0] == prev_latchingaction[0]){
+    latchingaction[0] = 0;
+  }
 }
 
 Command::Command(ros::NodeHandle n)
@@ -133,9 +136,9 @@ Command::Command(ros::NodeHandle n)
     roboat_core::Force command_force_msg;
     std::copy(std::begin(force), std::end(force), std::begin(command_force_msg.data));
     command_force_pub.publish(command_force_msg);
-    if (latchingaction[0] == prev_latchingaction[0]){
+    /*if (latchingaction[0] == prev_latchingaction[0]){
       latchingaction[0] = 0;
-    }
+    }*/
     command_pub.publish(commandMsg(force, latchingaction));
     prev_latchingaction[0] = latchingaction[0];
 
