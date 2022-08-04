@@ -101,6 +101,7 @@ void Command::latchCallback(std_msgs::UInt16 msg)
   if (latchingaction[0] == prev_latchingaction[0]){
     latchingaction[0] = 0;
   }
+  prev_latchingaction[0] = msg.data;
 }
 
 Command::Command(ros::NodeHandle n)
