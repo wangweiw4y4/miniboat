@@ -137,11 +137,7 @@ Command::Command(ros::NodeHandle n)
     roboat_core::Force command_force_msg;
     std::copy(std::begin(force), std::end(force), std::begin(command_force_msg.data));
     command_force_pub.publish(command_force_msg);
-    /*if (latchingaction[0] == prev_latchingaction[0]){
-      latchingaction[0] = 0;
-    }*/
     command_pub.publish(commandMsg(force, latchingaction));
-    prev_latchingaction[0] = latchingaction[0];
 
     // reset command to stop as default if joypad is not in use
     if (command_priority != 0)
