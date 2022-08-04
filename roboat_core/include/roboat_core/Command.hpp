@@ -3,6 +3,7 @@
 
 #include "ros/ros.h"
 #include <std_msgs/Float64MultiArray.h>
+#include <std_msgs/UInt16.h>
 #include <sensor_msgs/Joy.h>
 
 #include <roboat_core/CommandToMicroController.h>
@@ -26,9 +27,11 @@ private:
   const int pid_priority = 2;
   const int mpc_priority = 3;
   double stop_force[4] = {0, 0, 0, 0};
+  double latch;
 
   void forceCallback(const roboat_core::Force::ConstPtr& msg, int priority);
   void joyCallback(const sensor_msgs::Joy msg);
+  void latchCallback(const std_msgs::UInt16 msg);
 
 public:
   Command(ros::NodeHandle n);
