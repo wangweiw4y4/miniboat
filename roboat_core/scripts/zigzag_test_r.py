@@ -38,8 +38,8 @@ def main():
     rate = rospy.Rate(50)
     t = Test()
     dir_name = os.path.dirname(__file__)
-    bag = rosbag.Bag(dir_name + '/zigzag_test_r/100.bag','w')
-    p = 100.0
+    bag = rosbag.Bag(dir_name + '/zigzag_test_r/20,0_bigfin.bag','w')
+    p = 20.0
     f = Force()
     f1 = 0
     f2 = 0
@@ -49,35 +49,7 @@ def main():
     rospy.logwarn("Starting")
     if t.testing:
         start_time = rospy.Time.now().secs
-        while (rospy.Time.now().secs - start_time) <= 5 and not rospy.is_shutdown():
-            rospy.logwarn("Right")
-            bag.write('r', t.velocity)
-            bag.write('odom', t.odom)
-            f2 = (p/100.0)*t.max_thrust
-            f1 = 0
-            f4 = 0
-            f3 = (p/100.0)*t.max_thrust
-            f.data[0] = f1
-            f.data[1] = f2
-            f.data[2] = f3
-            f.data[3] = f4
-            t.desired(f)
-            rate.sleep()
         while (rospy.Time.now().secs - start_time) <= 10 and not rospy.is_shutdown():
-            rospy.logwarn("Left")
-            bag.write('r', t.velocity)
-            bag.write('odom', t.odom)
-            f2 = 0
-            f1 = (p/100.0)*t.max_thrust
-            f4 = (p/100.0)*t.max_thrust
-            f3 = 0
-            f.data[0] = f1
-            f.data[1] = f2
-            f.data[2] = f3
-            f.data[3] = f4
-            t.desired(f)
-            rate.sleep()
-        while (rospy.Time.now().secs - start_time) <= 15 and not rospy.is_shutdown():
             rospy.logwarn("Right")
             bag.write('r', t.velocity)
             bag.write('odom', t.odom)
@@ -92,6 +64,34 @@ def main():
             t.desired(f)
             rate.sleep()
         while (rospy.Time.now().secs - start_time) <= 20 and not rospy.is_shutdown():
+            rospy.logwarn("Left")
+            bag.write('r', t.velocity)
+            bag.write('odom', t.odom)
+            f2 = 0
+            f1 = (p/100.0)*t.max_thrust
+            f4 = (p/100.0)*t.max_thrust
+            f3 = 0
+            f.data[0] = f1
+            f.data[1] = f2
+            f.data[2] = f3
+            f.data[3] = f4
+            t.desired(f)
+            rate.sleep()
+        while (rospy.Time.now().secs - start_time) <= 30 and not rospy.is_shutdown():
+            rospy.logwarn("Right")
+            bag.write('r', t.velocity)
+            bag.write('odom', t.odom)
+            f2 = (p/100.0)*t.max_thrust
+            f1 = 0
+            f4 = 0
+            f3 = (p/100.0)*t.max_thrust
+            f.data[0] = f1
+            f.data[1] = f2
+            f.data[2] = f3
+            f.data[3] = f4
+            t.desired(f)
+            rate.sleep()
+        while (rospy.Time.now().secs - start_time) <= 40 and not rospy.is_shutdown():
             rospy.logwarn("Left")
             bag.write('r', t.velocity)
             bag.write('odom', t.odom)
