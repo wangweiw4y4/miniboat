@@ -95,6 +95,15 @@ void Command::joyCallback(sensor_msgs::Joy msg)
   }
 }
 
+void Command::latchCallback(std_msgs::UInt16 msg)
+{
+  latchingaction[0] = msg.data;
+  if (latchingaction[0] == prev_latchingaction[0]){
+    latchingaction[0] = 0;
+  }
+  prev_latchingaction[0] = msg.data;
+}
+
 Command::Command(ros::NodeHandle n)
 {
   Command::joy_max_force = 1.0;
@@ -112,6 +121,7 @@ Command::Command(ros::NodeHandle n)
   ros::Subscriber pid_sub = n.subscribe<roboat_core::Force>("pid_force", 1, boost::bind(&Command::forceCallback, this, _1, pid_priority));
   ros::Subscriber mpc_sub = n.subscribe<roboat_core::Force>("mpc_force", 1, boost::bind(&Command::forceCallback, this, _1, mpc_priority));
   ros::Subscriber pf_sub = n.subscribe<roboat_core::Force>("pf_force", 1, boost::bind(&Command::forceCallback, this, _1, pf_priority));
+  ros::Subscriber latching_sub = n.subscribe("latching", 10, &Command::latchCallback, this);
   ros::Rate loopRate(50);
 
   if (n.hasParam("joypad/max_force"))

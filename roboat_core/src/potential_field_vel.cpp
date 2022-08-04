@@ -45,13 +45,13 @@ PotentialField::PotentialField(ros::NodeHandle nh) : nh_(nh)
     shape_pub_ = nh_.advertise<nav_msgs::Path>("visual/shape", 1);
 
     static const float d_target_region = 0.8; // half of the target square side
-    static const float d_target_r0 = 0.5;     // target r0
+    static const float d_target_r0 = 1.0;     // target r0
     static const float d_target_stf = 0.00001;  // target lattice force coefficient
     static const float d_target_srf = 0.5;  // target repulsive force coefficient
-    static const float d_multi_region = 3.0;
-    static const float d_multi_r0 = 2.0;
-    static const float d_multi_stf = 0.00000001;
-    static const float d_multi_srf = 0.00001;
+    static const float d_multi_region = 2.0;
+    static const float d_multi_r0 = 10.0;
+    static const float d_multi_stf = 0.00001;
+    static const float d_multi_srf = 0.01;
     static const int d_shrink_time = 30;
     static const int d_inside_time = 60;
     static const float d_x_center = 3.0;
@@ -59,20 +59,20 @@ PotentialField::PotentialField(ros::NodeHandle nh) : nh_(nh)
     static const float d_attractive_par_1 = 0.1;
     static const float d_attractive_par_2 = 0.5;
 
-    nh_.param("pf/target_region", target_region, d_target_region);
-    nh_.param("pf/target_r0", target_r0, d_target_r0);
-    nh_.param("pf/target_stf", target_stf, d_target_stf);
-    nh_.param("pf/target_srf", target_srf, d_target_srf);
-    nh_.param("pf/multi_region", multi_region, d_multi_region);
-    nh_.param("pf/multi_r0", multi_r0, d_multi_r0);
-    nh_.param("pf/multi_stf", multi_stf, d_multi_stf);
-    nh_.param("pf/multi_srf", multi_srf, d_multi_srf);
-    nh_.param("pf/shrink_time", shrink_time, d_shrink_time);
-    nh_.param("pf/inside_time", inside_time, d_inside_time);
-    nh_.param("pf/x_center", x_center, d_x_center);
-    nh_.param("pf/y_center", y_center, d_y_center);
-    nh_.param("pf/attractive_par_1", attractive_par_1, d_attractive_par_1);
-    nh_.param("pf/attractive_par_2", attractive_par_2, d_attractive_par_2);
+    nh_.param("pf_vel_node/target_region", target_region, d_target_region);
+    nh_.param("pf_vel_node/target_r0", target_r0, d_target_r0);
+    nh_.param("pf_vel_node/target_stf", target_stf, d_target_stf);
+    nh_.param("pf_vel_node/target_srf", target_srf, d_target_srf);
+    nh_.param("pf_vel_node/multi_region", multi_region, d_multi_region);
+    nh_.param("pf_vel_node/multi_r0", multi_r0, d_multi_r0);
+    nh_.param("pf_vel_node/multi_stf", multi_stf, d_multi_stf);
+    nh_.param("pf_vel_node/multi_srf", multi_srf, d_multi_srf);
+    nh_.param("pf_vel_node/shrink_time", shrink_time, d_shrink_time);
+    nh_.param("pf_vel_node/inside_time", inside_time, d_inside_time);
+    nh_.param("pf_vel_node/x_center", x_center, d_x_center);
+    nh_.param("pf_vel_node/y_center", y_center, d_y_center);
+    nh_.param("pf_vel_node/attractive_par_1", attractive_par_1, d_attractive_par_1);
+    nh_.param("pf_vel_node/attractive_par_2", attractive_par_2, d_attractive_par_2);
 
     pose << 0.0, 0.0;
     number_of_robots = 0;
@@ -245,7 +245,7 @@ void PotentialField::timeStep(polygon_t _shape)
     repulsive_force << 0.0, 0.0;
     Fr << 0.0, 0.0;
     Ftheta << 0.0, 0.0;
-    if (attractive_flag == 1){
+    //if (attractive_flag == 1){
         for (int i = 0; i < number_of_robots; i++)
         {
             current_det_pose << robots_detected[i][0], robots_detected[i][1];
@@ -256,8 +256,13 @@ void PotentialField::timeStep(polygon_t _shape)
             inverted_pose << -pose_difference(1), pose_difference(0);
             Ftheta = sin(4 * theta_dir) * (inverted_pose / r) / r + Ftheta;
         }
-        repulsive_force = srf * Fr + stf * Ftheta;
-    }
+        if (attractive_flag == 1){
+            repulsive_force = srf * Fr + stf * Ftheta;
+        }
+        else if ((attractive_flag == 2) && (distance >= 0.25)){
+            repulsive_force = srf * Fr + stf * Ftheta;
+        }
+    //}
     // ROS_FATAL_STREAM("rep_f = " << repulsive_force);
     linear_force = attractive_force + repulsive_force; // add attractive and repulsive forces
 

@@ -27,16 +27,16 @@ class Test:
         self.ref_mb4 = Pose2D()
 
         #I will modify this later to use the swarm node data
-        rospy.Subscriber("/miniboat8/shrink_flag", Float64, self.flag_callback)
-        rospy.Subscriber("/miniboat8/odometry/filtered", Odometry, self.mb1_callback)
-        rospy.Subscriber("/miniboat7/odometry/filtered", Odometry, self.mb2_callback)
-        rospy.Subscriber("/miniboat6/odometry/filtered", Odometry, self.mb3_callback)
-        rospy.Subscriber("/miniboat4/odometry/filtered", Odometry, self.mb4_callback)
+        rospy.Subscriber("/miniboat1/shrink_flag", Float64, self.flag_callback)
+        rospy.Subscriber("/miniboat1/odometry/filtered", Odometry, self.mb1_callback)
+        rospy.Subscriber("/miniboat2/odometry/filtered", Odometry, self.mb2_callback)
+        rospy.Subscriber("/miniboat3/odometry/filtered", Odometry, self.mb3_callback)
+        rospy.Subscriber("/miniboat5/odometry/filtered", Odometry, self.mb4_callback)
 
-        self.d_mb1_pub = rospy.Publisher("/miniboat8/assignment/reference_pose", Pose2D, queue_size=10)
-        self.d_mb2_pub = rospy.Publisher("/miniboat7/assignment/reference_pose", Pose2D, queue_size=10)
-        self.d_mb3_pub = rospy.Publisher("/miniboat6/assignment/reference_pose", Pose2D, queue_size=10)
-        self.d_mb4_pub = rospy.Publisher("/miniboat4/assignment/reference_pose", Pose2D, queue_size=10)
+        self.d_mb1_pub = rospy.Publisher("/miniboat1/assignment/reference_pose", Pose2D, queue_size=10)
+        self.d_mb2_pub = rospy.Publisher("/miniboat2/assignment/reference_pose", Pose2D, queue_size=10)
+        self.d_mb3_pub = rospy.Publisher("/miniboat3/assignment/reference_pose", Pose2D, queue_size=10)
+        self.d_mb4_pub = rospy.Publisher("/miniboat5/assignment/reference_pose", Pose2D, queue_size=10)
 
     def compute_distance(self, x1, y1, x2, y2):
         xc = x1 - x2
@@ -81,7 +81,7 @@ def main():
     rospy.init_node('assignment_4', anonymous=False)
     rate = rospy.Rate(50)
     t = Test()
-    goals = np.array([[2.9,1.1],[3.1,1.1],[2.9,0.9],[3.1,0.9]])
+    goals = np.array([[2.88,1.12],[3.12,1.12],[2.88,0.88],[3.12,0.88]])
     number_of_robots = len(goals)
     distance_squared_matrix = np.zeros([number_of_robots,number_of_robots])
     assigned_goals = np.zeros([number_of_robots,2])
