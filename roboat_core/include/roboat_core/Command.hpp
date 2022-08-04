@@ -21,6 +21,7 @@ private:
   ros::Publisher latch_pub;
   int command_priority = 4, stop_force_priority = 4;
   unsigned char latchingaction[1] = {0}; 
+  unsigned char prev_latchingaction[1] = {0}; 
   double force[4]; 
   double joy_max_force;
   const int pf_priority = 1;
