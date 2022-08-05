@@ -274,10 +274,10 @@ void PotentialField::timeStep(polygon_t _shape)
 
     max_vel = std::max(abs(body_force(0)),abs(body_force(1)));
     
-    if (max_vel > 0.07)
+    if (max_vel > 0.05)
     {
-        body_force(0) = body_force(0)*0.07/max_vel;
-        body_force(1) = body_force(1)*0.07/max_vel;
+        body_force(0) = body_force(0)*0.05/max_vel;
+        body_force(1) = body_force(1)*0.05/max_vel;
     }
 
     vel_ref.x = body_force(0);
