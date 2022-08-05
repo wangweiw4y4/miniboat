@@ -47,13 +47,14 @@ public:
 
     double pid_maxforce = 0.4;
     double max_r = 0.2;
+    double total_desired_vel;
     double base_force = 0.1;
     double a = 0.12;
     double d = 0.078; //distance between thruster and boat center
     double cs45;
     double minf;
     double maxf;
-    double Nr = -0.5;//-0.1571;
+    double Nr = -0.1;//-0.5;//-0.1571;
     double Nrr = -0.01356;
     double Iz = 0.02;
     double Nr_dot = -0.015;
@@ -248,12 +249,18 @@ public:
             Tv = (p_v * ev) + (i_v * evi) + (d_v * evd);
             Tr = ((p_r * er) + (i_r * eri) + (d_r * erd) - f_r)/g_r;
             
-            miniboat_tau << Tu, Tv, Tr;
-
             if (abs(Tr) >= 0.05)
             {
                 Tr = copysign(0.05,Tr);
             }
+
+            /*total_desired_vel = pow((pow(desired_u,2) + pow(desired_v,2)),0.5);
+            if ((total_desired_vel <= 0.005) && (abs(Tr) >= 0.002))
+            {
+                Tr = copysign(0.002,Tr);
+            }*/
+
+            miniboat_tau << Tu, Tv, Tr;
 
             B << cs45, cs45, -cs45, -cs45,
                 cs45, -cs45, cs45, -cs45,
@@ -340,10 +347,10 @@ public:
             if (force(3) < 0){
                 force(3) = 0;
             }
-            //ROS_WARN("pid desired r and psi error is %f, %f", desired_r, epsi);
-            //ROS_WARN("pid force:  %f,%f,%f,%f\n", force(0), force(1), force(2),force(3));
-            //ROS_WARN("PID error is %f, %f, %f", eu, ev, er);
-            //ROS_WARN("PID tau is %f, %f, %f", Tu, Tv, Tr);
+            //ROS_ERROR("pid desired r and psi error is %f, %f", desired_r, epsi);
+            //ROS_ERROR("pid force:  %f,%f,%f,%f\n", force(0), force(1), force(2),force(3));
+            //ROS_ERROR("PID error is %f, %f, %f", eu, ev, er);
+            //ROS_ERROR("PID tau is %f, %f, %f", Tu, Tv, Tr);
 
             Eigen::VectorXd::Map(&forceMsg.data[0], force.size()) = force;
             force_pub.publish(forceMsg);

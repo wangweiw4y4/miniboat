@@ -87,8 +87,8 @@
         <!--include file="$(find roboat_core)/launch/velocity_cascade_asmc.launch">
         </include-->
 
-        <include file="$(find roboat_core)/launch/pf_vel.launch">
-        </include>
+        <!--include file="$(find roboat_core)/launch/pf_vel.launch">
+        </include-->
         
         <!--node name="zigzag_test_r" pkg="roboat_core" type="zigzag_test_r.py" >
         </node-->
