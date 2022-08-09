@@ -39,7 +39,7 @@
             <arg name = "operation_mode" value="NDOF_FMC_OFF"/>
             <arg name = "oscillator" value="INTERNAL" />
             <arg name = "reset_orientation" value="true" />
-            <arg name = "frequency" value="50" /> 
+            <arg name = "frequency" value="100" /> 
             <arg name = "use_magnetometer" value="true" />
             <arg name = "use_temperature" value="true" /> 
         </include>
@@ -63,36 +63,19 @@
             <arg name="use_ekf"             value="$(arg use_ekf)"/>
         </include>
 
-        <!--include file="$(find roboat_core)/launch/position_pid.launch">
-        </include-->
-
         <!--include file="$(find roboat_core)/launch/velocity_pid.launch">
-        </include-->
-
-        <!--include file="$(find roboat_core)/launch/velocity_smc.launch">
-        </include-->
-
-        <!--include file="$(find roboat_core)/launch/velocity_st.launch">
-        </include-->
-
-        <!--include file="$(find roboat_core)/launch/velocity_asmc.launch">
         </include-->
 
         <include file="$(find roboat_core)/launch/velocity_cascade_pid.launch">
         </include>
-
-        <!--include file="$(find roboat_core)/launch/velocity_cascade_smc.launch">
-        </include-->
-
-        <!--include file="$(find roboat_core)/launch/velocity_cascade_asmc.launch">
-        </include-->
 
         <include file="$(find roboat_core)/launch/pf_vel.launch">
         </include>
         
         <!--node name="zigzag_test_r" pkg="roboat_core" type="zigzag_test_r.py" >
         </node-->
-        
+        <!--node name="acceleration_test_u" pkg="roboat_core" type="acceleration_test_u.py" >
+        </node-->
 
     </group>
      

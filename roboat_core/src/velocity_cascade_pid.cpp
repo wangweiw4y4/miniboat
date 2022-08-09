@@ -12,6 +12,7 @@
 #include <geometry_msgs/Pose.h>
 #include <geometry_msgs/Pose2D.h>
 #include <geometry_msgs/PoseArray.h>
+#include <sensor_msgs/Imu.h>
 #include <tf/transform_datatypes.h>
 #include <tf/transform_broadcaster.h>
 #include <tf/transform_listener.h>
@@ -46,7 +47,7 @@ public:
     double orientation_qw;
 
     double pid_maxforce = 0.4;
-    double max_r = 0.2;
+    double max_r = 0.4;
     double total_desired_vel;
     double base_force = 0.1;
     double a = 0.12;
@@ -79,7 +80,7 @@ public:
     double i_psi;
     double d_psi;
 
-    bool pid_flag = true;
+    bool pid_flag = false;
 
     double step = 0.02;
 
@@ -110,6 +111,26 @@ public:
     double epsid;
     double epsi_dif;
 
+    double o_dot_dot;
+    double o_dot;
+    double o;
+    double o_last;
+    double o_dot_last;
+    double o_dot_dot_last;
+    double f1 = 2;
+    double f2 = 2;
+    double f3 = 2;
+
+    double f_dot_dot;
+    double f_dot;
+    double f;
+    double f_last;
+    double f_dot_last;
+    double f_dot_dot_last;
+    double g1 = 2;
+    double g2 = 2;
+    double g3 = 2;
+
     double Tu;
     double Tv;
     double Tr;
@@ -125,6 +146,7 @@ public:
 
         force_pub = n.advertise<roboat_core::Force>("pid_force", 1);
         state_sub = n.subscribe("odometry/filtered", 1, &ProportionalIntegralDerivative::stateCallback, this);
+        imu_sub = n.subscribe("imu/data", 1, &ProportionalIntegralDerivative::imuCallback, this);
         reference_sub = n.subscribe("velocity_reference", 1, &ProportionalIntegralDerivative::referenceCallback, this);
 
         static const double dp_u = 0.5;
@@ -174,7 +196,18 @@ public:
         evi = 0;
         eri = 0;
         epsii = 0;
-        
+        o_dot_dot = 0;
+        o_dot = 0;
+        o = 0;
+        o_last = 0;
+        o_dot_last = 0;
+        o_dot_dot_last = 0;
+        f_dot_dot = 0;
+        f_dot = 0;
+        f = 0;
+        f_last = 0;
+        f_dot_last = 0;
+        f_dot_dot_last = 0;
         force = Eigen::VectorXd::Zero(4);
         cs45 = sqrt(2)/2;
     }
@@ -191,9 +224,14 @@ public:
         state[2] = yaw;
         state[3] = msg.twist.twist.linear.x;
         state[4] = -msg.twist.twist.linear.y;
-        state[5] = -msg.twist.twist.angular.z;
-
+        //state[5] = -msg.twist.twist.angular.z;
+        pid_flag = true;
         //ROS_WARN("miniboat state is %f, %f, %f, %f, %f, %f", state[0], state[1], state[2], state[3], state[4], state[5]);
+    }
+
+    void imuCallback(const sensor_msgs::Imu msg)
+    {
+        state[5] = -msg.angular_velocity.z;
     }
 
     void referenceCallback(const geometry_msgs::Pose2D msg)
@@ -238,17 +276,40 @@ public:
             ev_last = ev;
 
             er = desired_r - state[5];
+            /*o_dot_dot = (((abs(er) - o_last) * f1) - (f3 * o_dot_last)) * f2;
+            o_dot = (step)*(o_dot_dot + o_dot_dot_last)/2 + o_dot;
+            o = (step)*(o_dot + o_dot_last)/2 + o;
+            er = copysign(o,er);
+            o_last = o;
+            o_dot_last = o_dot;
+            o_dot_dot_last = o_dot_dot;*/
             eri = (step)*(er + er_last)/2 + eri; //integral of the sway speed error
             erd = (er - er_last) / step; //derivate of the sway speed error
+            /*f_dot_dot = (((abs(erd) - f_last) * g1) - (g3 * f_dot_last)) * g2;
+            f_dot = (step)*(f_dot_dot + f_dot_dot_last)/2 + f_dot;
+            f = (step)*(f_dot + f_dot_last)/2 + f;
+            erd = copysign(f,erd);
+            f_last = f;
+            f_dot_last = f_dot;
+            f_dot_dot_last = f_dot_dot;*/
+
             er_last = er;
             
             g_r = 1 / (Iz - Nr_dot);
             f_r = g_r*(((-Xu_dot + Yv_dot)*state[3]*state[4]) + (Nrr*state[5]*abs(state[5])) + (Nr*sqrt(state[3]*state[3] + state[4]*state[4])*state[5]));
+            //f_r = g_r*(((-Xu_dot + Yv_dot)*desired_u*desired_v) + (Nrr*desired_r*abs(desired_r)) + (Nr*sqrt(desired_u*desired_u + desired_v*desired_v)*desired_r));
 
             Tu = (p_u * eu) + (i_u * eui) + (d_u * eud);
             Tv = (p_v * ev) + (i_v * evi) + (d_v * evd);
-            Tr = ((p_r * er) + (i_r * eri) + (d_r * erd) - f_r)/g_r;
-            
+            /*if ((abs(epsi) <= 0.2) && (abs(er) <= 0.1))
+            {
+                Tr = ((p_r * er) + (i_r * eri) + (d_r * erd) - f_r)/g_r;
+            }
+            else //((abs(epsi) > 0.1) && (abs(er) > 0.05))
+            {
+                Tr = ((p_r * er) + (d_r * erd) - f_r)/g_r;
+            }*/
+            Tr = ((p_r * er) + (d_r * erd) - f_r)/g_r;
             if (abs(Tr) >= 0.05)
             {
                 Tr = copysign(0.05,Tr);
@@ -335,22 +396,22 @@ public:
             if (force(3) > pid_maxforce){
                 force(3) = pid_maxforce;
             }
-            if (force(0) < 0){
+            if (force(0) < 0.002){
                 force(0) = 0;
             }
-            if (force(1) < 0){
+            if (force(1) < 0.002){
                 force(1) = 0;
             }
-            if (force(2) < 0){
+            if (force(2) < 0.002){
                 force(2) = 0;
             }
-            if (force(3) < 0){
+            if (force(3) < 0.002){
                 force(3) = 0;
             }
-            //ROS_ERROR("pid desired r and psi error is %f, %f", desired_r, epsi);
+            ROS_ERROR("pid desired r and psi error is %f, %f", desired_r, epsi);
             //ROS_ERROR("pid force:  %f,%f,%f,%f\n", force(0), force(1), force(2),force(3));
-            //ROS_ERROR("PID error is %f, %f, %f", eu, ev, er);
-            //ROS_ERROR("PID tau is %f, %f, %f", Tu, Tv, Tr);
+            ROS_ERROR("PID error is %f, %f, %f", eu, ev, er);
+            ROS_ERROR("PID tau is %f, %f, %f", Tu, Tv, Tr);
 
             Eigen::VectorXd::Map(&forceMsg.data[0], force.size()) = force;
             force_pub.publish(forceMsg);
@@ -364,6 +425,7 @@ public:
         ros::Publisher force_pub;
 
         ros::Subscriber state_sub;
+        ros::Subscriber imu_sub;
         ros::Subscriber reference_sub;
 };
 

@@ -1,18 +1,18 @@
 <launch>
 
     <node name="velocity_cascade_pid" pkg="roboat_core" type="velocity_cascade_pid" >
-	<param name = "p_u" value = "4.0" />
+	<param name = "p_u" value = "2.0" />
 	<param name = "i_u" value = "0.001" />
-	<param name = "d_u" value = "2.0" />
-	<param name = "p_v" value = "4.0" />
+	<param name = "d_u" value = "1.0" />
+	<param name = "p_v" value = "2.0" />
 	<param name = "i_v" value = "0.001" />
-	<param name = "d_v" value = "2.0" />
-	<param name = "p_r" value = "1.0" />
-	<param name = "i_r" value = "0.00" />
-	<param name = "d_r" value = "2.0" />
-	<param name = "p_psi" value = "0.1" />
-	<param name = "i_psi" value = "0.0" />
-	<param name = "d_psi" value = "0.05" />
+	<param name = "d_v" value = "1.0" />
+	<param name = "p_r" value = "0.8" />
+	<param name = "i_r" value = "0.01" />
+	<param name = "d_r" value = "0.3" />
+	<param name = "p_psi" value = "0.2" />
+	<param name = "i_psi" value = "0.005" />
+	<param name = "d_psi" value = "0.1" />
     </node>
 
 </launch>
