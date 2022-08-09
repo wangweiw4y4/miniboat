@@ -26,7 +26,7 @@ imu0: data/imu0
 imu0_config: [false, false, false,
               false, false, false,
               false, false, false,
-              true,  true,  true,
+              false,  false,  true,
               false,  false,  false]
 imu0_differential: false
 imu0_queue_size: 10
@@ -48,7 +48,7 @@ imu0_queue_size: 10
 # -------------------------------------
 # paired Hedge beacons:
 odom0: data/paired_beacons
-odom0_config: [true,  true,  true,
+odom0_config: [true,  true,  false,
                false, false, true,
                false, false, false,
                false, false, false,
