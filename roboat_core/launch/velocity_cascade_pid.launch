@@ -1,10 +1,10 @@
 <launch>
 
     <node name="velocity_cascade_pid" pkg="roboat_core" type="velocity_cascade_pid" >
-	<param name = "p_u" value = "2.0" />
+	<param name = "p_u" value = "3.0" />
 	<param name = "i_u" value = "0.001" />
 	<param name = "d_u" value = "1.0" />
-	<param name = "p_v" value = "2.0" />
+	<param name = "p_v" value = "3.0" />
 	<param name = "i_v" value = "0.001" />
 	<param name = "d_v" value = "1.0" />
 	<param name = "p_r" value = "0.8" />
