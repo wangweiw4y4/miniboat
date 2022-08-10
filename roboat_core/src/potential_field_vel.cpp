@@ -250,7 +250,7 @@ void PotentialField::timeStep(polygon_t _shape)
         {
             current_det_pose << robots_detected[i][0], robots_detected[i][1];
             r = pow((pow(pose(0) - current_det_pose(0), 2) + pow(pose(1) - current_det_pose(1), 2)), 0.5);
-            if (r <= 0.8){
+            if (r <= 0.6){
                 pose_difference = current_det_pose - pose;
                 Fr = ((pose_difference) / (r)) * (r0 / r * (1 - (r0 / r))) + Fr;
                 theta_dir = atan2(pose_difference(1), pose_difference(0));
