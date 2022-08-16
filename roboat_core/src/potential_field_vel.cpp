@@ -124,7 +124,7 @@ std::vector<point_t> PotentialField::updateShape(float shape_number_code)
     if (shape_number_code == 1)
     {
         // rectangle
-        shape_vert = {{-region / 2 + x_center, -2 * region / 2 + y_center}, {region / 2 + x_center, -2 * region / 2 + y_center}, {region / 2 + x_center, 2 * region / 2 + y_center}, {-region / 2 + x_center, 2 * region / 2 + y_center}};
+        shape_vert = {{-region / 2 + x_center, -0.5 * region / 2 + y_center}, {region / 2 + x_center, -0.5 * region / 2 + y_center}, {region / 2 + x_center, 0.5 * region / 2 + y_center}, {-region / 2 + x_center, 0.5 * region / 2 + y_center}};
     }
     else if (shape_number_code == 2)
     {
