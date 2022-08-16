@@ -38,14 +38,14 @@ def main():
     rate = rospy.Rate(50)
     t = Test()
     dir_name = os.path.dirname(__file__)
-    bag = rosbag.Bag(dir_name + '/accel_test_u/100.bag','w')
-    p = 100.0
+    bag = rosbag.Bag(dir_name + '/accel_test_u/50,0.bag','w')
+    p = 50.0
     f = Force()
     f1 = 0
     f2 = 0
     f3 = 0
     f4 = 0
-    time.sleep(10)
+    time.sleep(5)
     rospy.logwarn("Starting")
     if t.testing:
         start_time = rospy.Time.now().secs

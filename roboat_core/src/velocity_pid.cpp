@@ -12,6 +12,7 @@
 #include <geometry_msgs/Pose.h>
 #include <geometry_msgs/Pose2D.h>
 #include <geometry_msgs/PoseArray.h>
+#include <sensor_msgs/Imu.h>
 #include <tf/transform_datatypes.h>
 #include <tf/transform_broadcaster.h>
 #include <tf/transform_listener.h>
@@ -46,14 +47,19 @@ public:
     double orientation_qw;
 
     double pid_maxforce = 0.4;
-    double base_force = 0.1;
     double a = 0.12;
     double d = 0.078; //distance between thruster and boat center
     double cs45;
     double minf;
     double maxf;
-    double pid_aux_1 = -1.42;
-    double pid_aux_2 = -0.0063;
+    double Nr = -0.1;//-0.5;//-0.1571;
+    double Nrr = -0.01356;
+    double Iz = 0.02;
+    double Nr_dot = -0.015;
+    double Yv_dot = -1.57;
+    double Xu_dot = -1.57;
+    double g_r;
+    double f_r;
 
     double p_u;
     double i_u;
@@ -67,7 +73,7 @@ public:
     double i_psi;
     double d_psi;
 
-    bool pid_flag = true;
+    bool pid_flag = false;
 
     double step = 0.02;
 
@@ -75,7 +81,7 @@ public:
     double req_force = 0.25;
 
     double desired_yaw = 0.0;
-    double desired_angular_velocity = 0;
+    double desired_angular_velocity = 0.0;
     double desired_u = 0.0;
     double desired_v = 0.0;
 
@@ -91,6 +97,7 @@ public:
     double epsi_last = 0;
     double epsii;
     double epsid;
+    double epsi_dif;
 
     double Tu;
     double Tv;
@@ -107,6 +114,7 @@ public:
 
         force_pub = n.advertise<roboat_core::Force>("pid_force", 1);
         state_sub = n.subscribe("odometry/filtered", 1, &ProportionalIntegralDerivative::stateCallback, this);
+        imu_sub = n.subscribe("imu/data", 1, &ProportionalIntegralDerivative::imuCallback, this);
         reference_sub = n.subscribe("velocity_reference", 1, &ProportionalIntegralDerivative::referenceCallback, this);
 
         static const double dp_u = 0.5;
@@ -130,7 +138,7 @@ public:
         n.param("velocity_pid/d_psi", d_psi, dd_psi);
 
         desired_yaw = 0.0;
-        desired_angular_velocity = 0;
+        desired_angular_velocity = 0.0;
         desired_u = 0.0;
         desired_v = 0.0;
 
@@ -144,6 +152,9 @@ public:
         eu_last = 0;
         eu_last = 0;
         epsi_last = 0;
+        eui = 0;
+        evi = 0;
+        epsii = 0;
         
         force = Eigen::VectorXd::Zero(4);
         cs45 = sqrt(2)/2;
@@ -161,9 +172,14 @@ public:
         state[2] = yaw;
         state[3] = msg.twist.twist.linear.x;
         state[4] = -msg.twist.twist.linear.y;
-        state[5] = -msg.twist.twist.angular.z;
+        //state[5] = -msg.twist.twist.angular.z;
+        pid_flag = true;
+        //ROS_WARN("miniboat state is %f, %f, %f, %f, %f, %f", state[0], state[1], state[2], state[3], state[4], state[5]);
+    }
 
-        ROS_WARN("miniboat state is %f, %f, %f, %f, %f, %f", state[0], state[1], state[2], state[3], state[4], state[5]);
+    void imuCallback(const sensor_msgs::Imu msg)
+    {
+        state[5] = -msg.angular_velocity.z;
     }
 
     void referenceCallback(const geometry_msgs::Pose2D msg)
@@ -207,10 +223,18 @@ public:
             }
             epsi_last = epsi;
 
+            g_r = 1 / (Iz - Nr_dot);
+            f_r = g_r*(((-Xu_dot + Yv_dot)*state[3]*state[4]) + (Nrr*state[5]*abs(state[5])) + (Nr*sqrt(state[3]*state[3] + state[4]*state[4])*state[5]));
+
             Tu = (p_u * eu) + (i_u * eui) + (d_u * eud);
             Tv = (p_v * ev) + (i_v * evi) + (d_v * evd);
-            Tr = (p_psi * epsi) + (i_psi * epsii) + (d_psi * epsid) - (pid_aux_1*state[3]*state[4]) - (pid_aux_2*sqrt(state[3]*state[3] + state[4]*state[4])*state[5]);
-            
+            Tr = ((p_psi * epsi) + (i_psi * epsii) + (d_psi * epsid) - f_r)/g_r;
+
+            if (abs(Tr) >= 0.02)
+            {
+                Tr = copysign(0.02,Tr);
+            }
+
             miniboat_tau << Tu, Tv, Tr;
 
             B << cs45, cs45, -cs45, -cs45,
@@ -286,16 +310,16 @@ public:
             if (force(3) > pid_maxforce){
                 force(3) = pid_maxforce;
             }
-            if (force(0) < 0){
+            if (force(0) < 0.002){
                 force(0) = 0;
             }
-            if (force(1) < 0){
+            if (force(1) < 0.002){
                 force(1) = 0;
             }
-            if (force(2) < 0){
+            if (force(2) < 0.002){
                 force(2) = 0;
             }
-            if (force(3) < 0){
+            if (force(3) < 0.002){
                 force(3) = 0;
             }
             ROS_WARN("pid force:  %f,%f,%f,%f\n", force(0), force(1), force(2),force(3));
@@ -314,6 +338,7 @@ public:
         ros::Publisher force_pub;
 
         ros::Subscriber state_sub;
+        ros::Subscriber imu_sub;
         ros::Subscriber reference_sub;
 };
 
