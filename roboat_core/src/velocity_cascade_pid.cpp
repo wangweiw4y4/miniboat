@@ -408,10 +408,10 @@ public:
             if (force(3) < 0.002){
                 force(3) = 0;
             }
-            ROS_ERROR("pid desired r and psi error is %f, %f", desired_r, epsi);
+            //ROS_ERROR("pid desired r and psi error is %f, %f", desired_r, epsi);
             //ROS_ERROR("pid force:  %f,%f,%f,%f\n", force(0), force(1), force(2),force(3));
-            ROS_ERROR("PID error is %f, %f, %f", eu, ev, er);
-            ROS_ERROR("PID tau is %f, %f, %f", Tu, Tv, Tr);
+            //ROS_ERROR("PID error is %f, %f, %f", eu, ev, er);
+            //ROS_ERROR("PID tau is %f, %f, %f", Tu, Tv, Tr);
 
             Eigen::VectorXd::Map(&forceMsg.data[0], force.size()) = force;
             force_pub.publish(forceMsg);
