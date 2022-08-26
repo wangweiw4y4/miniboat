@@ -6,7 +6,9 @@ roboat_filter:
   # maxGPSCovTh: 0.9
 
   # Dual Beacon params
-  hedge_ref_pos_cov: 0.0004      #reference position covariance value (based on documentation, error is 0.02 so variance approx 0.02^2)
+  #hedge_ref_pos_cov: 0.0004      #reference position covariance value (based on documentation, error is 0.02 so variance approx 0.02^2)
+  hedge_ref_pos_cov: 0.0001      #reference position covariance value (based on documentation, error is 0.02 so variance approx 0.01^2)
+
   hedge_ref_acc_cov: 0.000001    #reference linear acceleration covariance value (when not computed)
   hedge_ref_gyr_cov: 0.000001    #reference angular velocity covariance value (when not computed)
   hedge_ref_compass_cov: 0.07    #reference compasss orientation covariance value (based on data, error is 15deg so variance (15*pi/180)^2)
