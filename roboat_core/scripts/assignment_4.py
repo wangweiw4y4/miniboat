@@ -17,7 +17,8 @@ class Test:
 
         self.flag = 0.0
 
-        self.shape_msg = Shape()
+        self.shape = 0
+        #self.shape_msg = Shape()
 
         self.pose_mb1 = Pose2D()
         self.pose_mb2 = Pose2D()
@@ -30,13 +31,14 @@ class Test:
         self.ref_mb4 = Pose2D()
 
         #I will modify this later to use the swarm node data
+        rospy.Subscriber("/shape", Shape, self.shape_callback)
         rospy.Subscriber("/miniboat1/shrink_flag", Float64, self.flag_callback)
         rospy.Subscriber("/miniboat1/odometry/filtered", Odometry, self.mb1_callback)
         rospy.Subscriber("/miniboat2/odometry/filtered", Odometry, self.mb2_callback)
         rospy.Subscriber("/miniboat3/odometry/filtered", Odometry, self.mb3_callback)
         rospy.Subscriber("/miniboat5/odometry/filtered", Odometry, self.mb4_callback)
 
-        self.d_shape_pub = rospy.Publisher("/shape", Shape, queue_size=10)
+        #self.d_shape_pub = rospy.Publisher("/shape", Shape, queue_size=10)
         self.d_mb1_pub = rospy.Publisher("/miniboat1/assignment/reference_pose", Pose2D, queue_size=10)
         self.d_mb2_pub = rospy.Publisher("/miniboat2/assignment/reference_pose", Pose2D, queue_size=10)
         self.d_mb3_pub = rospy.Publisher("/miniboat3/assignment/reference_pose", Pose2D, queue_size=10)
@@ -47,6 +49,9 @@ class Test:
         yc = y1 - y2
         distance_to_goal = xc*xc + yc*yc
         return distance_to_goal
+
+    def shape_callback(self, _shape):
+        self.shape = _shape.shape_code
 
     def flag_callback(self, _flag):
         self.flag = _flag.data
@@ -81,10 +86,6 @@ class Test:
         self.d_mb3_pub.publish(self.ref_mb3)
         self.d_mb4_pub.publish(self.ref_mb4)
 
-    def publish_shape(self, _shape):
-        self.shape_msg.shape_code = _shape
-        self.d_shape_pub.publish(self.shape_msg)
-
 def main():
     rospy.init_node('assignment_4', anonymous=False)
     rate = rospy.Rate(50)
@@ -94,9 +95,6 @@ def main():
     distance_squared_matrix = np.zeros([number_of_robots,number_of_robots])
     assigned_goals = np.zeros([number_of_robots,2])
     rospy.logwarn("Start")
-    t.publish_shape(0)
-    time.sleep(1)
-    t.publish_shape(0)
     while (not rospy.is_shutdown()):
         if t.flag == 1.0:
             rospy.logwarn("Assignment")

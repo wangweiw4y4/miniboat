@@ -95,6 +95,9 @@ void PotentialField::shapeCallback(const roboat_msgs::Shape &msg)
     stf = multi_stf * target_stf;          // initial lattice force coefficient
     srf = multi_srf * target_srf;          // initial repulsive force coefficient
     counter = 0;
+    attractive_flag = 1;
+    shrink_flag.data = 0;
+    centralized_pub_.publish(shrink_flag);
     // if no shape,
     if (des_shape < 0)
     {

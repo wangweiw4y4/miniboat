@@ -17,6 +17,7 @@ class Test:
 
         self.flag = 0.0
 
+        self.shape = 0
         self.shape_msg = Shape()
 
         self.pose_mb1 = Pose2D()
@@ -34,6 +35,7 @@ class Test:
         self.ref_mb6 = Pose2D()
 
         #I will modify this later to use the swarm node data
+        rospy.Subscriber("/shape", Shape, self.shape_callback)
         rospy.Subscriber("/miniboat1/shrink_flag", Float64, self.flag_callback)
         rospy.Subscriber("/miniboat1/odometry/filtered", Odometry, self.mb1_callback)
         rospy.Subscriber("/miniboat2/odometry/filtered", Odometry, self.mb2_callback)
@@ -42,7 +44,7 @@ class Test:
         rospy.Subscriber("/miniboat5/odometry/filtered", Odometry, self.mb5_callback)
         rospy.Subscriber("/miniboat6/odometry/filtered", Odometry, self.mb6_callback)
 
-        self.d_shape_pub = rospy.Publisher("/shape", Shape, queue_size=10)
+        #self.d_shape_pub = rospy.Publisher("/shape", Shape, queue_size=10)
         self.d_mb1_pub = rospy.Publisher("/miniboat1/assignment/reference_pose", Pose2D, queue_size=10)
         self.d_mb2_pub = rospy.Publisher("/miniboat2/assignment/reference_pose", Pose2D, queue_size=10)
         self.d_mb3_pub = rospy.Publisher("/miniboat3/assignment/reference_pose", Pose2D, queue_size=10)
@@ -55,6 +57,9 @@ class Test:
         yc = y1 - y2
         distance_to_goal = xc*xc + yc*yc
         return distance_to_goal
+
+    def shape_callback(self, _shape):
+        self.shape = _shape.shape_code
 
     def flag_callback(self, _flag):
         self.flag = _flag.data
@@ -103,29 +108,25 @@ class Test:
         self.d_mb5_pub.publish(self.ref_mb5)
         self.d_mb6_pub.publish(self.ref_mb6)
 
-    def publish_shape(self, _shape):
-        self.shape_msg.shape_code = _shape
-        self.d_shape_pub.publish(self.shape_msg)
-
 def main():
     rospy.init_node('assignment_6', anonymous=False)
     rate = rospy.Rate(50)
     t = Test()
-    shape = 1 #1 for rectangle, ONLY THIS IS REQUIRED TO CHANGE THE SHAPE (change only in the central computer)
     goals_0 = np.array([[3.22,0.78],[3.22,1.0],[3.22,1.22],[3.0,0.78],[3.0,1.22],[2.78,0.78]]) #TODO: think of new shapes, square not possible with 6
     goals_1 = np.array([[3.22,0.88],[3.22,1.12],[3.0,0.88],[3.0,1.12],[2.78,0.88],[2.78,1.12]])
-    if shape == 0:
+    if t.shape == 0:
         goals = goals_0
-    if shape == 1:
+    if t.shape == 1:
         goals = goals_1
     number_of_robots = len(goals)
     distance_squared_matrix = np.zeros([number_of_robots,number_of_robots])
     assigned_goals = np.zeros([number_of_robots,2])
     rospy.logwarn("Start")
-    t.publish_shape(shape)
-    time.sleep(1)
-    t.publish_shape(shape)
     while (not rospy.is_shutdown()):
+        if t.shape == 0:
+            goals = goals_0
+        if t.shape == 1:
+            goals = goals_1
         if t.flag == 1.0:
             rospy.logwarn("Assignment")
             robot_poses = np.array([[t.pose_mb1.x,t.pose_mb1.y],[t.pose_mb2.x,t.pose_mb2.y],[t.pose_mb3.x,t.pose_mb3.y],[t.pose_mb4.x,t.pose_mb4.y],[t.pose_mb5.x,t.pose_mb5.y],[t.pose_mb6.x,t.pose_mb6.y]])

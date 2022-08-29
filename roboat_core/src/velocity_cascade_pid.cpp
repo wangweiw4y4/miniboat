@@ -80,7 +80,9 @@ public:
     double i_psi;
     double d_psi;
 
-    bool pid_flag = false;
+    //bool pid_flag = false;
+    bool ref_flag = false;
+    bool odom_flag = false;
 
     double step = 0.02;
 
@@ -225,7 +227,7 @@ public:
         state[3] = msg.twist.twist.linear.x;
         state[4] = -msg.twist.twist.linear.y;
         //state[5] = -msg.twist.twist.angular.z;
-        pid_flag = true;
+        odom_flag = true;
         //ROS_WARN("miniboat state is %f, %f, %f, %f, %f, %f", state[0], state[1], state[2], state[3], state[4], state[5]);
     }
 
@@ -238,11 +240,12 @@ public:
     {
         desired_u = msg.x;
         desired_v = msg.y; 
+        ref_flag = true;
     }
 
     void control()
     {
-        if (pid_flag)
+        if (odom_flag && ref_flag)
         {
             epsi = desired_yaw - state[2];
             if (abs(epsi) >= M_PI)
