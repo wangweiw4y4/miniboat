@@ -1,0 +1,154 @@
+#!/usr/bin/env python3
+
+import os
+import time
+import rospy
+import math
+import numpy as np
+from scipy.optimize import linear_sum_assignment
+from geometry_msgs.msg import Pose2D
+from nav_msgs.msg import Odometry
+from std_msgs.msg import Float64
+from roboat_msgs.msg import Shape
+
+class Test:
+    def __init__(self):
+        self.testing = False
+
+        self.flag = 0.0
+
+        self.shape_msg = Shape()
+
+        self.pose_mb1 = Pose2D()
+        self.pose_mb2 = Pose2D()
+        self.pose_mb3 = Pose2D()
+        self.pose_mb4 = Pose2D()
+        self.pose_mb5 = Pose2D()
+        self.pose_mb6 = Pose2D()
+
+        self.ref_mb1 = Pose2D()
+        self.ref_mb2 = Pose2D()
+        self.ref_mb3 = Pose2D()
+        self.ref_mb4 = Pose2D()
+        self.ref_mb5 = Pose2D()
+        self.ref_mb6 = Pose2D()
+
+        #I will modify this later to use the swarm node data
+        rospy.Subscriber("/miniboat1/shrink_flag", Float64, self.flag_callback)
+        rospy.Subscriber("/miniboat1/odometry/filtered", Odometry, self.mb1_callback)
+        rospy.Subscriber("/miniboat2/odometry/filtered", Odometry, self.mb2_callback)
+        rospy.Subscriber("/miniboat3/odometry/filtered", Odometry, self.mb3_callback)
+        rospy.Subscriber("/miniboat4/odometry/filtered", Odometry, self.mb4_callback)
+        rospy.Subscriber("/miniboat5/odometry/filtered", Odometry, self.mb5_callback)
+        rospy.Subscriber("/miniboat6/odometry/filtered", Odometry, self.mb6_callback)
+
+        self.d_shape_pub = rospy.Publisher("/shape", Shape, queue_size=10)
+        self.d_mb1_pub = rospy.Publisher("/miniboat1/assignment/reference_pose", Pose2D, queue_size=10)
+        self.d_mb2_pub = rospy.Publisher("/miniboat2/assignment/reference_pose", Pose2D, queue_size=10)
+        self.d_mb3_pub = rospy.Publisher("/miniboat3/assignment/reference_pose", Pose2D, queue_size=10)
+        self.d_mb4_pub = rospy.Publisher("/miniboat4/assignment/reference_pose", Pose2D, queue_size=10)
+        self.d_mb5_pub = rospy.Publisher("/miniboat5/assignment/reference_pose", Pose2D, queue_size=10)
+        self.d_mb6_pub = rospy.Publisher("/miniboat6/assignment/reference_pose", Pose2D, queue_size=10)
+
+    def compute_distance(self, x1, y1, x2, y2):
+        xc = x1 - x2
+        yc = y1 - y2
+        distance_to_goal = xc*xc + yc*yc
+        return distance_to_goal
+
+    def flag_callback(self, _flag):
+        self.flag = _flag.data
+
+    def mb1_callback(self, _mb1):
+        self.pose_mb1.x = _mb1.pose.pose.position.x
+        self.pose_mb1.y = -_mb1.pose.pose.position.y
+
+    def mb2_callback(self, _mb2):
+        self.pose_mb2.x = _mb2.pose.pose.position.x
+        self.pose_mb2.y = -_mb2.pose.pose.position.y
+
+    def mb3_callback(self, _mb3):
+        self.pose_mb3.x = _mb3.pose.pose.position.x
+        self.pose_mb3.y = -_mb3.pose.pose.position.y
+
+    def mb4_callback(self, _mb4):
+        self.pose_mb4.x = _mb4.pose.pose.position.x
+        self.pose_mb4.y = -_mb4.pose.pose.position.y
+
+    def mb5_callback(self, _mb5):
+        self.pose_mb5.x = _mb5.pose.pose.position.x
+        self.pose_mb5.y = -_mb5.pose.pose.position.y
+
+    def mb6_callback(self, _mb6):
+        self.pose_mb6.x = _mb6.pose.pose.position.x
+        self.pose_mb6.y = -_mb6.pose.pose.position.y
+
+    def desired(self, _assigned):
+        self.ref_mb1.x = _assigned[0,0]
+        self.ref_mb1.y = _assigned[0,1]
+        self.ref_mb2.x = _assigned[1,0]
+        self.ref_mb2.y = _assigned[1,1]
+        self.ref_mb3.x = _assigned[2,0]
+        self.ref_mb3.y = _assigned[2,1]
+        self.ref_mb4.x = _assigned[3,0]
+        self.ref_mb4.y = _assigned[3,1]
+        self.ref_mb5.x = _assigned[4,0]
+        self.ref_mb5.y = _assigned[4,1]
+        self.ref_mb6.x = _assigned[5,0]
+        self.ref_mb6.y = _assigned[5,1]
+        self.d_mb1_pub.publish(self.ref_mb1)
+        self.d_mb2_pub.publish(self.ref_mb2)
+        self.d_mb3_pub.publish(self.ref_mb3)
+        self.d_mb4_pub.publish(self.ref_mb4)
+        self.d_mb5_pub.publish(self.ref_mb5)
+        self.d_mb6_pub.publish(self.ref_mb6)
+
+    def publish_shape(self, _shape):
+        self.shape_msg.shape_code = _shape
+        self.d_shape_pub.publish(self.shape_msg)
+
+def main():
+    rospy.init_node('assignment_6', anonymous=False)
+    rate = rospy.Rate(50)
+    t = Test()
+    shape = 1 #1 for rectangle, ONLY THIS IS REQUIRED TO CHANGE THE SHAPE (change only in the central computer)
+    goals_0 = np.array([[3.22,0.78],[3.22,1.0],[3.22,1.22],[3.0,0.78],[3.0,1.22],[2.78,0.78]]) #TODO: think of new shapes, square not possible with 6
+    goals_1 = np.array([[3.22,0.88],[3.22,1.12],[3.0,0.88],[3.0,1.12],[2.78,0.88],[2.78,1.12]])
+    if shape == 0:
+        goals = goals_0
+    if shape == 1:
+        goals = goals_1
+    number_of_robots = len(goals)
+    distance_squared_matrix = np.zeros([number_of_robots,number_of_robots])
+    assigned_goals = np.zeros([number_of_robots,2])
+    rospy.logwarn("Start")
+    t.publish_shape(shape)
+    time.sleep(1)
+    t.publish_shape(shape)
+    while (not rospy.is_shutdown()):
+        if t.flag == 1.0:
+            rospy.logwarn("Assignment")
+            robot_poses = np.array([[t.pose_mb1.x,t.pose_mb1.y],[t.pose_mb2.x,t.pose_mb2.y],[t.pose_mb3.x,t.pose_mb3.y],[t.pose_mb4.x,t.pose_mb4.y],[t.pose_mb5.x,t.pose_mb5.y],[t.pose_mb6.x,t.pose_mb6.y]])
+            for i in range(number_of_robots):
+                for j in range(number_of_robots):
+                    distance_squared_matrix[i,j] = t.compute_distance(robot_poses[i,0],robot_poses[i,1],goals[j,0],goals[j,1])
+            row_ind, col_ind = linear_sum_assignment(distance_squared_matrix)
+            for k in range(number_of_robots):
+                ind = col_ind[k]
+                assigned_goals[k] = goals[ind]
+            rospy.logwarn("Assigned")
+            t.desired(assigned_goals)
+            time.sleep(1)
+            t.desired(assigned_goals)
+            rospy.logwarn(assigned_goals)
+            t.flag = 0.0
+        rate.sleep()
+    t.testing = False
+    rospy.logwarn("Finished")
+    rospy.spin()
+
+if __name__ == "__main__":
+    try:
+        main()
+    except rospy.ROSInterruptException:
+        pass

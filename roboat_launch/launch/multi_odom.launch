@@ -21,11 +21,11 @@
 
         <include file="$(find roboat_core)/launch/master.launch">
             <arg name="sim_node"            value="false"/>
-            <arg name="serial_node"         value="true"/>
+            <arg name="serial_node"         value="false"/>
             <arg name="csv_path_node"       value="false"/>
             <arg name="mpc_node"            value="false"/>
             <arg name="pf_node"             value="false"/>
-            <arg name="command_node"        value="true"/>
+            <arg name="command_node"        value="false"/>
             <arg name="joy_node"            value="false"/>
             <arg name="pid_node"            value="false"/>
             <arg name="swarm_node"          value="true"/>
@@ -55,20 +55,11 @@
     -->    
         
 
-        <!--include file="$(find pid)/launch/headingpid.launch">
-        </include-->
-
         <include file="$(find roboat_localization)/launch/localization.launch" >
             <arg name="id"                  value="$(arg id)"/>
             <arg name="use_ekf"             value="$(arg use_ekf)"/>
         </include>
 
-        <include file="$(find roboat_core)/launch/velocity_cascade_pid.launch">
-        </include>
-
-        <include file="$(find roboat_core)/launch/pf_vel_6.launch">
-        </include>
-        
     </group>
      
 </launch>
