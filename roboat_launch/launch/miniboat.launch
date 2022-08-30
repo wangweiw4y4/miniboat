@@ -13,7 +13,7 @@
         <param name="mcast_group" type="str" value="224.0.0.1" />
     </node>
     <node if="$(arg use_multimaster)" name="master_sync"  pkg="fkie_master_sync"   type="master_sync"    output="screen">
-        <param name="ignore_topics" type="array" value="['/tf']" />
+        <param name="ignore_topics" value="['/tf']" />
     </node>    
     <!-- package namespace -->
     <group ns="$(arg id)">
