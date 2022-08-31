@@ -17,12 +17,12 @@
 
     <!-- visualization node -->
     <!-- only one node instance in the whole network should run for all RVIZ windows, reason why it is loaded by the server -->
-    <!--include file="$(find roboat_visualization)/launch/visualization_node.launch"/-->
+    <include file="$(find roboat_visualization)/launch/visualization_node.launch"/>
 
     <!-- RVIZ (since each RVIZ node should have a unique name, it is loaded within the namespace -->
-    <!--group ns="$(arg id)">
+    <group ns="$(arg id)">
         <include file="$(find roboat_visualization)/launch/rviz.launch"/>
-    </group-->
+    </group>
     <!-- I commented this only to test if the 8 boats are still struggling without rviz -->
 
     
