@@ -13,7 +13,8 @@
         <param name="mcast_group" type="str" value="224.0.0.1" />
     </node>
     <node if="$(arg use_multimaster)" name="master_sync"  pkg="fkie_master_sync"   type="master_sync"    output="screen">
-        <rosparam param="ignore_topics">['/tf']</rosparam>
+        <!--rosparam param="ignore_topics">['/tf']</rosparam-->
+        <rosparam param="ignore_nodes">['/miniboat1/hedge_rcv_bin','/miniboat2/hedge_rcv_bin','/miniboat3/hedge_rcv_bin','/miniboat4/hedge_rcv_bin','/miniboat5/hedge_rcv_bin','/miniboat6/hedge_rcv_bin','/miniboat7/hedge_rcv_bin','/miniboat8/hedge_rcv_bin','/miniboat1/ros_imu_bno055_node','/miniboat2/ros_imu_bno055_node','/miniboat3/ros_imu_bno055_node','/miniboat4/ros_imu_bno055_node','/miniboat5/ros_imu_bno055_node','/miniboat6/ros_imu_bno055_node','/miniboat7/ros_imu_bno055_node','/miniboat8/ros_imu_bno055_node','/miniboat1/velocity_cascade_pid','/miniboat2/velocity_cascade_pid','/miniboat3/velocity_cascade_pid','/miniboat4/velocity_cascade_pid','/miniboat5/velocity_cascade_pid','/miniboat6/velocity_cascade_pid','/miniboat7/velocity_cascade_pid','/miniboat8/velocity_cascade_pid']</rosparam>
     </node>    
     <!-- package namespace -->
     <group ns="$(arg id)">
