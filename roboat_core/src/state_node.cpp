@@ -62,7 +62,7 @@ int main(int argc, char *argv[])
     ros::Publisher state_pub;
     ros::Subscriber state_sub;
     ros::Subscriber imu_sub;
-    stateMsg.data.resize(6);
+    
 
 
     state_pub = n.advertise<std_msgs::Float64MultiArray>("boat_state", 10);
@@ -74,6 +74,7 @@ int main(int argc, char *argv[])
         ros::spinOnce();
 
         stateMsg.data.clear();
+        stateMsg.data.resize(6);
         for (int i = 0; i < 6; ++i)
             stateMsg.data[i] = state[i];
 
