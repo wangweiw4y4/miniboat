@@ -303,24 +303,41 @@ roslint_cpp()
 
 add_executable(position_pid src/position_pid.cpp)
 target_link_libraries(position_pid ${catkin_LIBRARIES})
+add_dependencies(position_pid      ${PROJECT_NAME}_generate_messages_cpp)
 
 add_executable(velocity_pid src/velocity_pid.cpp)
 target_link_libraries(velocity_pid ${catkin_LIBRARIES})
+add_dependencies(velocity_pid      ${PROJECT_NAME}_generate_messages_cpp)
+
 
 add_executable(velocity_smc src/velocity_smc.cpp)
 target_link_libraries(velocity_smc ${catkin_LIBRARIES})
+add_dependencies(velocity_smc      ${PROJECT_NAME}_generate_messages_cpp)
+
 
 add_executable(velocity_st src/velocity_st.cpp)
 target_link_libraries(velocity_st ${catkin_LIBRARIES})
+add_dependencies(velocity_st      ${PROJECT_NAME}_generate_messages_cpp)
+
 
 add_executable(velocity_asmc src/velocity_asmc.cpp)
 target_link_libraries(velocity_asmc ${catkin_LIBRARIES})
+add_dependencies(velocity_asmc      ${PROJECT_NAME}_generate_messages_cpp)
+
+
+
 
 add_executable(velocity_cascade_pid src/velocity_cascade_pid.cpp)
 target_link_libraries(velocity_cascade_pid ${catkin_LIBRARIES})
+add_dependencies(velocity_cascade_pid      ${PROJECT_NAME}_generate_messages_cpp)
+
+
 
 add_executable(velocity_cascade_smc src/velocity_cascade_smc.cpp)
 target_link_libraries(velocity_cascade_smc ${catkin_LIBRARIES})
+add_dependencies(velocity_cascade_smc      ${PROJECT_NAME}_generate_messages_cpp)
+
 
 add_executable(velocity_cascade_asmc src/velocity_cascade_asmc.cpp)
 target_link_libraries(velocity_cascade_asmc ${catkin_LIBRARIES})
+add_dependencies(velocity_cascade_asmc      ${PROJECT_NAME}_generate_messages_cpp)
