@@ -32,7 +32,7 @@
 std::vector<double> state(6);
 
 
-void stateCallback(const nav_msgs::Odometry::ConstPtr& msg)
+void stateCallback(const nav_msgs::Odometry msg)
 {
     double yaw;
 
@@ -49,7 +49,7 @@ void stateCallback(const nav_msgs::Odometry::ConstPtr& msg)
     // ROS_WARN("miniboat state is %f, %f, %f, %f, %f, %f", state[0], state[1], state[2], state[3], state[4], state[5]);
 }
 
-void imuCallback(const sensor_msgs::Imu::ConstPtr& msg)
+void imuCallback(const sensor_msgs::Imu msg)
 {
     state[5] = -msg.angular_velocity.z;
 }
@@ -65,7 +65,8 @@ int main(int argc, char *argv[])
     ros::Subscriber state_sub;
     ros::Subscriber imu_sub;
     
-    state_pub = n.advertise<roboat_core::State>("boat_state", 1);
+    //state_pub = n.advertise<roboat_core::State>("boat_state", 1);
+    state_pub = n.advertise<std_msgs::Float64MultiArray>("boat_state", 1);
     state_sub = n.subscribe("odometry/filtered", 1, stateCallback);
     imu_sub = n.subscribe("imu/data", 1, imuCallback);
 
@@ -73,8 +74,13 @@ int main(int argc, char *argv[])
     {  
         ros::spinOnce();
         
-        roboat_core::State state_msg;
-        std::copy(state.begin(), state.end(), &state_msg.data[0]);
+        //roboat_core::State state_msg;
+        //std::copy(state.begin(), state.end(), &state_msg.data[0]);
+
+        std_msgs::Float64MultiArray state_msg;
+        state_msg.data.resize(6);
+        state_msg.data = {state[0], state[1], state[2], state[3],state[4], state[5]};
+
         state_pub.publish(state_msg);
 
         
