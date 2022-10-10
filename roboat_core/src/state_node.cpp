@@ -25,10 +25,12 @@
 #include <algorithm>
 #include <vector>
 
+#include <roboat_core/State.h>
+
 #define ROS_NODE_NAME "state_node"
 
 std::vector<double> state(6);
-std_msgs::Float64MultiArray stateMsg;
+
 
 void stateCallback(const nav_msgs::Odometry msg)
 {
@@ -65,21 +67,18 @@ int main(int argc, char *argv[])
     
 
 
-    state_pub = n.advertise<std_msgs::Float64MultiArray>("boat_state", 10);
+    state_pub = n.advertise<roboat_core::State>("boat_state", 10);
     state_sub = n.subscribe("odometry/filtered", 1, stateCallback);
     imu_sub = n.subscribe("imu/data", 1, imuCallback);
 
     while (ros::ok())
     {
+        
+        roboat_core::State state_msg;
+        std::copy(state.begin(), state.end(), &state_msg.data[0]);
+        state_pub.publish(state_msg);
+
         ros::spinOnce();
-
-        stateMsg.data.clear();
-        stateMsg.data.resize(6);
-        for (int i = 0; i < 6; ++i)
-            stateMsg.data[i] = state[i];
-
-        state_pub.publish(stateMsg);
-
         loop_rate.sleep();
     }
     return 0;

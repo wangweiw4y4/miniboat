@@ -63,6 +63,7 @@ message("Libraries: ${ACADO_INCLUDE_DIRS}")
 add_message_files(
   FILES
   Force.msg
+  State.msg
   CommandToMicroController.msg
   SensorFromMicroController.msg
 )
