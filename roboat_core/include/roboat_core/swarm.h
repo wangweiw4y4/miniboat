@@ -14,6 +14,8 @@
 #include <geometry_msgs/Pose.h>
 #include <nav_msgs/Odometry.h>
 #include <tf/transform_datatypes.h>
+#include <roboat_core/State.h>
+
 
 class SwarmState
 {
@@ -23,7 +25,7 @@ private:
   std::vector<double>* state_;
   double* last_beat_; 
 
-  void stateCallback(const nav_msgs::Odometry msg);
+  void stateCallback(const roboat_core::State msg);
 
 public:
   SwarmState();

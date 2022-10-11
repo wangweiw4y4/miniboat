@@ -203,7 +203,8 @@ void PotentialField::timeStep(polygon_t _shape)
     for (int i = 0; i < swarm_size_; i++)
     {
         // if self or neighbor is not updating its position properly, skipped
-        if (i == idx_ || curr_time - swarm_.last_beat_[i] > detection_max_lapse_)
+       // if (i == idx_ || curr_time - swarm_.last_beat_[i] > detection_max_lapse_)
+        if (i == idx_)
         {
             continue;
         }

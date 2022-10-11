@@ -74,36 +74,48 @@ void SwarmState::initialize(ros::NodeHandle &nh, std::string id, std::vector<dou
   state_ = state;
   last_beat_ = last_beat;
   // subscribe to the topic (keep "/" apart so topic name is relative as in the rest of code)
-  std::string topic = "/" + id + "/" + "odometry/filtered";
+  //std::string topic = "/" + id + "/" + "odometry/filtered";
+  std::string topic = "/" + id + "/" + "boat_state";
   // ROS_INFO("rostopic subscribed: %s", topic.c_str());
   state_sub_ = nh_.subscribe(topic, 1, &SwarmState::stateCallback, this);
   return;
 }
 
-void SwarmState::stateCallback(const nav_msgs::Odometry msg)
+void SwarmState::stateCallback(const roboat_core::State msg)
 {
 
   /*If state is advertised as an array, data can just be copied */
   // for(int i=0; i<6; i++) state[i] = array.data[i];
   // pose_received = true;
 
-  *last_beat_ = msg.header.stamp.toSec();
+
+  (*state_)[0] = msg.data[0];
+  (*state_)[1] = msg.data[1]; //
+  (*state_)[2] = msg.data[2];
+
+  // convert from map to roboat map reference (negative y and yaw)
+  (*state_)[3] = msg.data[3];
+  (*state_)[4] = msg.data[4];
+  (*state_)[5] = msg.data[5];
+
+
+  //*last_beat_ = msg.header.stamp.toSec();
 
   /*If state is advertised as odometry, easier to visualize in rviz*/
-  double yaw;
+  //double yaw;
 
   // convert from map to roboat map reference (negative y and yaw)
-  (*state_)[0] = msg.pose.pose.position.x;
-  (*state_)[1] = -msg.pose.pose.position.y; //
+  //(*state_)[0] = msg.pose.pose.position.x;
+  //(*state_)[1] = -msg.pose.pose.position.y; //
 
-  yaw = -tf::getYaw(tf::Quaternion(msg.pose.pose.orientation.x, msg.pose.pose.orientation.y,
-                                   msg.pose.pose.orientation.z, msg.pose.pose.orientation.w));
-  (*state_)[2] = yaw;
+  //yaw = -tf::getYaw(tf::Quaternion(msg.pose.pose.orientation.x, msg.pose.pose.orientation.y,
+  //                                 msg.pose.pose.orientation.z, msg.pose.pose.orientation.w));
+  //(*state_)[2] = yaw;
 
   // convert from map to roboat map reference (negative y and yaw)
-  (*state_)[3] = msg.twist.twist.linear.x;
-  (*state_)[4] = -msg.twist.twist.linear.y;
-  (*state_)[5] = -msg.twist.twist.angular.z;
+  //(*state_)[3] = msg.twist.twist.linear.x;
+  //(*state_)[4] = -msg.twist.twist.linear.y;
+  //(*state_)[5] = -msg.twist.twist.angular.z;
 
   return;
 }
