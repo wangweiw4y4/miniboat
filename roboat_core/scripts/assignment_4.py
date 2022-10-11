@@ -69,7 +69,7 @@ class Test:
 
     def mb2_callback(self, _mb2):
         self.pose_mb2.x = _mb2.data[0]#_mb2.pose.pose.position.x
-        self.pose_mb2.y = -_mb2.pose.pose.position.y
+        self.pose_mb2.y = _mb2.data[1]#-_mb2.pose.pose.position.y
 
     def mb3_callback(self, _mb3):
         self.pose_mb3.x = _mb3.data[0]#_mb3.pose.pose.position.x
