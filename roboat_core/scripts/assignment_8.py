@@ -10,6 +10,7 @@ from geometry_msgs.msg import Pose2D
 from nav_msgs.msg import Odometry
 from std_msgs.msg import Float64
 from roboat_msgs.msg import Shape
+from roboat_core.msg import State
 
 class Test:
     def __init__(self):
@@ -41,6 +42,7 @@ class Test:
         #I will modify this later to use the swarm node data
         rospy.Subscriber("/shape", Shape, self.shape_callback)
         rospy.Subscriber("/miniboat1/shrink_flag", Float64, self.flag_callback)
+        '''
         rospy.Subscriber("/miniboat1/odometry/filtered", Odometry, self.mb1_callback)
         rospy.Subscriber("/miniboat2/odometry/filtered", Odometry, self.mb2_callback)
         rospy.Subscriber("/miniboat3/odometry/filtered", Odometry, self.mb3_callback)
@@ -49,6 +51,15 @@ class Test:
         rospy.Subscriber("/miniboat6/odometry/filtered", Odometry, self.mb6_callback)
         rospy.Subscriber("/miniboat7/odometry/filtered", Odometry, self.mb7_callback)
         rospy.Subscriber("/miniboat8/odometry/filtered", Odometry, self.mb8_callback)
+        '''
+        rospy.Subscriber("/miniboat1/boat_state", State, self.mb1_callback)
+        rospy.Subscriber("/miniboat2/boat_state", State, self.mb2_callback)
+        rospy.Subscriber("/miniboat3/boat_state", State, self.mb3_callback)
+        rospy.Subscriber("/miniboat4/boat_state", State, self.mb4_callback)
+        rospy.Subscriber("/miniboat5/boat_state", State, self.mb5_callback)
+        rospy.Subscriber("/miniboat6/boat_state", State, self.mb6_callback)
+        rospy.Subscriber("/miniboat7/boat_state", State, self.mb7_callback)
+        rospy.Subscriber("/miniboat8/boat_state", State, self.mb8_callback)
 
         #self.d_shape_pub = rospy.Publisher("/shape", Shape, queue_size=10)
         self.d_mb1_pub = rospy.Publisher("/miniboat1/assignment/reference_pose", Pose2D, queue_size=10)
@@ -73,36 +84,36 @@ class Test:
         self.flag = _flag.data
 
     def mb1_callback(self, _mb1):
-        self.pose_mb1.x = _mb1.pose.pose.position.x
-        self.pose_mb1.y = -_mb1.pose.pose.position.y
+        self.pose_mb1.x = _mb1.data[0]#_mb1.pose.pose.position.x
+        self.pose_mb1.y = _mb1.data[1]#-_mb1.pose.pose.position.y
 
     def mb2_callback(self, _mb2):
-        self.pose_mb2.x = _mb2.pose.pose.position.x
+        self.pose_mb2.x = _mb2.data[0]#_mb2.pose.pose.position.x
         self.pose_mb2.y = -_mb2.pose.pose.position.y
 
     def mb3_callback(self, _mb3):
-        self.pose_mb3.x = _mb3.pose.pose.position.x
-        self.pose_mb3.y = -_mb3.pose.pose.position.y
+        self.pose_mb3.x = _mb3.data[0]#_mb3.pose.pose.position.x
+        self.pose_mb3.y = _mb3.data[1]#-_mb3.pose.pose.position.y
 
     def mb4_callback(self, _mb4):
-        self.pose_mb4.x = _mb4.pose.pose.position.x
-        self.pose_mb4.y = -_mb4.pose.pose.position.y
+        self.pose_mb4.x = _mb4.data[0]#_mb4.pose.pose.position.x
+        self.pose_mb4.y = _mb4.data[1]#-_mb4.pose.pose.position.y
 
     def mb5_callback(self, _mb5):
-        self.pose_mb5.x = _mb5.pose.pose.position.x
-        self.pose_mb5.y = -_mb5.pose.pose.position.y
+        self.pose_mb5.x = _mb5.data[0]#_mb5.pose.pose.position.x
+        self.pose_mb5.y = _mb5.data[1]#-_mb5.pose.pose.position.y
 
     def mb6_callback(self, _mb6):
-        self.pose_mb6.x = _mb6.pose.pose.position.x
-        self.pose_mb6.y = -_mb6.pose.pose.position.y
+        self.pose_mb6.x = _mb6.data[0]#_mb6.pose.pose.position.x
+        self.pose_mb6.y = _mb6.data[1]#-_mb6.pose.pose.position.y
 
     def mb7_callback(self, _mb7):
-        self.pose_mb7.x = _mb7.pose.pose.position.x
-        self.pose_mb7.y = -_mb7.pose.pose.position.y
+        self.pose_mb7.x = _mb7.data[0]#_mb7.pose.pose.position.x
+        self.pose_mb7.y = _mb7.data[1]#-_mb7.pose.pose.position.y
 
     def mb8_callback(self, _mb8):
-        self.pose_mb8.x = _mb8.pose.pose.position.x
-        self.pose_mb8.y = -_mb8.pose.pose.position.y
+        self.pose_mb8.x = _mb8.data[0]#_mb8.pose.pose.position.x
+        self.pose_mb8.y = _mb8.data[1]#-_mb8.pose.pose.position.y
 
     def desired(self, _assigned):
         self.ref_mb1.x = _assigned[0,0]
