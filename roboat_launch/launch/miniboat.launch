@@ -73,7 +73,7 @@
         <include file="$(find roboat_core)/launch/velocity_cascade_pid.launch">
         </include>
 
-        <include file="$(find roboat_core)/launch/pf_vel_6.launch">
+        <include file="$(find roboat_core)/launch/pf_vel_8.launch">
         </include>
         
     </group>
