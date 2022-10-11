@@ -259,6 +259,7 @@ install(
   acado_mpc
   command_node
   pid_node
+  state_node
   csv_path_node
   mpc_node
   pf_node

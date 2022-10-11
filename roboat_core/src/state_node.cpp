@@ -29,7 +29,7 @@
 
 #define ROS_NODE_NAME "state_node"
 
-std::vector<double> state(6);
+std::vector<double> state(6,0);
 
 
 void stateCallback(const nav_msgs::Odometry msg)
@@ -46,7 +46,7 @@ void stateCallback(const nav_msgs::Odometry msg)
     state[4] = -msg.twist.twist.linear.y;
     // state[5] = -msg.twist.twist.angular.z;
 
-    // ROS_WARN("miniboat state is %f, %f, %f, %f, %f, %f", state[0], state[1], state[2], state[3], state[4], state[5]);
+     //ROS_WARN("miniboat state is %f, %f, %f, %f, %f, %f", state[0], state[1], state[2], state[3], state[4], state[5]);
 }
 
 void imuCallback(const sensor_msgs::Imu msg)
@@ -56,30 +56,27 @@ void imuCallback(const sensor_msgs::Imu msg)
 
 int main(int argc, char *argv[])
 {
-    ros::init(argc, argv, ROS_NODE_NAME);
+    ros::init(argc, argv, ROS_NODE_NAME);  
+    ros::NodeHandle n;
+    
+    ros::Publisher state_pub = n.advertise<roboat_core::State>("boat_state", 1);
+    //ros::Publisher state_pub  = n.advertise<std_msgs::Float64MultiArray>("boat_state", 1);
+    ros::Subscriber state_sub = n.subscribe("odometry/filtered", 1, stateCallback);
+    ros::Subscriber imu_sub = n.subscribe("imu/data", 1, imuCallback);
     int rate = 50;
     ros::Rate loop_rate(rate);
-
-    ros::NodeHandle n;
-    ros::Publisher state_pub;
-    ros::Subscriber state_sub;
-    ros::Subscriber imu_sub;
-    
-    //state_pub = n.advertise<roboat_core::State>("boat_state", 1);
-    state_pub = n.advertise<std_msgs::Float64MultiArray>("boat_state", 1);
-    state_sub = n.subscribe("odometry/filtered", 1, stateCallback);
-    imu_sub = n.subscribe("imu/data", 1, imuCallback);
+    ros::Time::init();
 
     while (ros::ok())
     {  
-        ros::spinOnce();
         
-        //roboat_core::State state_msg;
-        //std::copy(state.begin(), state.end(), &state_msg.data[0]);
+        ros ::spinOnce();
+        roboat_core::State state_msg;
+        std::copy(state.begin(), state.end(), &state_msg.data[0]);
 
-        std_msgs::Float64MultiArray state_msg;
-        state_msg.data.resize(6);
-        state_msg.data = {state[0], state[1], state[2], state[3],state[4], state[5]};
+        //std_msgs::Float64MultiArray state_msg;
+        //state_msg.data.resize(6);
+        //state_msg.data = {state[0], state[1], state[2], state[3],state[4], state[5]};
 
         state_pub.publish(state_msg);
 

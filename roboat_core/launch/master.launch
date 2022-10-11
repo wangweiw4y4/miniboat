@@ -39,7 +39,7 @@
     <node if="$(arg csv_path_node)"            name="csv_path_node"           pkg="roboat_core"       type="csv_path_node"/>
     <node if="$(arg joy_node)"                 name="joy_node"                pkg="joy"               type="joy_node"/>
     <node if="$(arg pid_node)"                 name="pid_node"                pkg="roboat_core"       type="pid_node"           output="screen"/>
-    <node if="$(arg state_node)"               name="state_node"              pkg="roboat_core"       type="state_node"/>         
+    <node if="$(arg state_node)"               name="state_node"              pkg="roboat_core"       type="state_node"         output="screen"/>         
     <node if="$(arg swarm_node)"               name="swarm_node"              pkg="roboat_core"       type="swarm_node"/>
     <node if="$(arg bag_node)"		           name="robot_bag"               pkg="rosbag"            type="record"             args="-a -o /home/ubuntu/bagfiles/" />
     <node if="$(arg capacitive_node)"          name="capacitive_node"         pkg="roboat_core"       type="capacitive_node"  />
