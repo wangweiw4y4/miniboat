@@ -3,6 +3,10 @@
 #define ROBOAT_VISUALIZATION_H
 
 #include <ros/ros.h>
+#include "std_msgs/String.h"
+
+#include <ros/package.h>
+
 
 #include <tf/tf.h>
 #include <tf/transform_listener.h>
@@ -13,9 +17,16 @@
 #include <geometry_msgs/PoseStamped.h>
 #include <roboat_msgs/ThrustState.h>
 #include <roboat_core/Force.h>
+#include <roboat_core/State.h>
 #include <visualization_msgs/Marker.h>
 #include <cmath>
 #include <iomanip>
+
+//#include <Eigen/Dense>
+#include <iostream>
+#include <algorithm>
+#include <vector>
+
 
 // These are the strings to display for different priorities. Based on roboat_utils/IThrustersManager.h TH_CMD_PRIORITY
 static const std::string TH_CMD_PRIORITY_STRING[5] = { "Idle", "PID", "MPC", "Joy" };
@@ -51,7 +62,8 @@ public:
   void initialize(ros::NodeHandle &nh, std::string id="");
 
   void thrustStateCallback(const roboat_msgs::ThrustState& msg);
-  void odometryCallback(const nav_msgs::Odometry& msg);
+  //void odometryCallback(const nav_msgs::Odometry& msg);
+  void odometryCallback(const roboat_core::State& msg);
   void forceCallback(const roboat_core::Force& msg);
   void pathHandler(const ros::TimerEvent& event);
   void visualizeRobot(geometry_msgs::PoseStamped pose_stamped);

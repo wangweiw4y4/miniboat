@@ -33,9 +33,10 @@ void RoboatVisualization::initialize(ros::NodeHandle &nh, std::string id)
 
   sub_priority = nh.subscribe(ns+"thrust_state", 1, &RoboatVisualization::thrustStateCallback, this);
   sub_force = nh.subscribe(ns+"force", 1, &RoboatVisualization::forceCallback, this);
-  current_odometry = nh.subscribe(ns+"odometry/filtered", 1, &RoboatVisualization::odometryCallback, this);
+  //current_odometry = nh.subscribe(ns+"odometry/filtered", 1, &RoboatVisualization::odometryCallback, this);
+   current_odometry = nh.subscribe(ns+"boat_state", 1, &RoboatVisualization::odometryCallback, this);
 
-  path_update_timer = nh.createTimer(ros::Duration(1.0/update_rate), &RoboatVisualization::pathHandler, this);
+  //path_update_timer = nh.createTimer(ros::Duration(1.0/update_rate), &RoboatVisualization::pathHandler, this);
 }
 
 void RoboatVisualization::thrustStateCallback(const roboat_msgs::ThrustState& msg)
@@ -43,6 +44,33 @@ void RoboatVisualization::thrustStateCallback(const roboat_msgs::ThrustState& ms
   current_thrust_state = msg;
 }
 
+void RoboatVisualization::odometryCallback(const roboat_core::State& msg)
+{
+  //pose_stamped_.header = msg.header;
+ 
+  pose_stamped_.pose.position.x = msg.data[0];
+  pose_stamped_.pose.position.y = -msg.data[1];
+
+  //double yaw;
+  tf2::Quaternion myQuaternion;
+  //yaw = -msg.data[2].
+
+  myQuaternion.setRPY( 0.0, 0.0, -msg.data[2] );
+  myQuaternion.normalize();
+
+  pose_stamped_.pose.orientation.x = myQuaternion.getX();
+  pose_stamped_.pose.orientation.y = myQuaternion.getY();
+  pose_stamped_.pose.orientation.z = myQuaternion.getZ();
+  pose_stamped_.pose.orientation.w = myQuaternion.getW();
+
+
+  dx = msg.data[3];
+  dy = msg.data[4];
+  dTheta = msg.data[5];
+  dx *= 3.6;
+  dy *= 3.6;
+}
+/*
 void RoboatVisualization::odometryCallback(const nav_msgs::Odometry& msg)
 {
   pose_stamped_.header = msg.header;
@@ -53,6 +81,9 @@ void RoboatVisualization::odometryCallback(const nav_msgs::Odometry& msg)
   dx *= 3.6;
   dy *= 3.6;
 }
+*/
+
+
 
 void RoboatVisualization::forceCallback(const roboat_core::Force& msg)
 {
