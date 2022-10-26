@@ -79,6 +79,7 @@ class Test:
 
     def shape_callback(self, _shape):
         self.shape = _shape.shape_code
+        rospy.logwarn("New Shape")
 
     def flag_callback(self, _flag):
         self.flag = _flag.data
@@ -145,8 +146,10 @@ def main():
     rospy.init_node('assignment_8', anonymous=False)
     rate = rospy.Rate(50)
     t = Test()
-    goals_0 = np.array([[3.22,0.78],[3.22,1.0],[3.22,1.22],[3.0,0.78],[3.0,1.22],[2.78,0.78],[2.78,1.0],[2.78,1.22]])
-    goals_1 = np.array([[3.36,0.88],[3.36,1.12],[3.12,0.88],[3.12,1.12],[2.88,0.88],[2.88,1.12],[2.64,0.88],[2.64,1.12]])
+    x_center = 2.0
+    y_center = 1.0
+    goals_0 = np.array([[x_center + 0.22, y_center - 0.22],[x_center + 0.22,y_center],[x_center + 0.22,y_center + 0.22],[x_center,y_center - 0.22],[x_center,y_center + 0.22],[x_center - 0.22,y_center - 0.22],[x_center - 0.22,y_center],[x_center - 0.22,y_center + 0.22]])
+    goals_1 = np.array([[x_center + 0.36,y_center - 0.12],[x_center + 0.36,y_center + 0.12],[x_center + 0.12,y_center - 0.12],[x_center + 0.12,y_center + 0.12],[x_center - 0.12,y_center - 0.12],[x_center - 0.12,y_center + 0.12],[x_center - 0.36,y_center - 0.12],[x_center - 0.36,y_center + 0.12]])
     if t.shape == 0:
         goals = goals_0
     if t.shape == 1:
@@ -154,6 +157,7 @@ def main():
     number_of_robots = len(goals)
     distance_squared_matrix = np.zeros([number_of_robots,number_of_robots])
     assigned_goals = np.zeros([number_of_robots,2])
+    miniboat_list = np.zeros([number_of_robots])
     rospy.logwarn("Start")
     while (not rospy.is_shutdown()):
         if t.shape == 0:
@@ -170,11 +174,13 @@ def main():
             for k in range(number_of_robots):
                 ind = col_ind[k]
                 assigned_goals[k] = goals[ind]
+                miniboat_list[k] = ind
             rospy.logwarn("Assigned")
             t.desired(assigned_goals)
             time.sleep(1)
             t.desired(assigned_goals)
-            rospy.logwarn(col_ind + 1)
+            rospy.logwarn(miniboat_list + 1)
+            rospy.logwarn(assigned_goals)
             t.flag = 0.0
         rate.sleep()
     t.testing = False
