@@ -20,6 +20,7 @@ class Test:
 
         self.shape = 0
         #self.shape_msg = Shape()
+        self.in_assignment = False
 
         self.pose_mb1 = Pose2D()
         self.pose_mb2 = Pose2D()
@@ -76,6 +77,22 @@ class Test:
         yc = y1 - y2
         distance_to_goal = xc*xc + yc*yc
         return distance_to_goal
+
+    def distance_to_assigned_position(self, x1, y1, x2, y2):
+        xc = x1 - x2
+        yc = y1 - y2
+        distance_to_goal = np.sqrt(xc*xc + yc*yc)
+        return distance_to_goal
+    
+    def is_in_assigned(self, _robot_poses, _assigned,_number_of_robots):
+        in_position = True
+        for i in range(_number_of_robots):
+            dist = distance_to_assigned_position(_robot_poses[i][0],_robot_poses[i][1],_assigned[i][0],_assigned[i][1])
+            if dist <= 0.05 and in_position == True:
+                in_position = True
+            else:
+                in_position = False
+        return in_position
 
     def shape_callback(self, _shape):
         self.shape = _shape.shape_code
@@ -150,10 +167,14 @@ def main():
     y_center = 1.5
     goals_0 = np.array([[x_center + 0.22, y_center - 0.22],[x_center + 0.22,y_center],[x_center + 0.22,y_center + 0.22],[x_center,y_center - 0.22],[x_center,y_center + 0.22],[x_center - 0.22,y_center - 0.22],[x_center - 0.22,y_center],[x_center - 0.22,y_center + 0.22]])
     goals_1 = np.array([[x_center + 0.36,y_center - 0.12],[x_center + 0.36,y_center + 0.12],[x_center + 0.12,y_center - 0.12],[x_center + 0.12,y_center + 0.12],[x_center - 0.12,y_center - 0.12],[x_center - 0.12,y_center + 0.12],[x_center - 0.36,y_center - 0.12],[x_center - 0.36,y_center + 0.12]])
+    goals_0b = np.array([[x_center + 0.42, y_center - 0.42],[x_center + 0.42,y_center],[x_center + 0.42,y_center + 0.42],[x_center,y_center - 0.42],[x_center,y_center + 0.42],[x_center - 0.42,y_center - 0.42],[x_center - 0.42,y_center],[x_center - 0.42,y_center + 0.42]])
+    goals_1b = np.array([[x_center + 0.66,y_center - 0.32],[x_center + 0.66,y_center + 0.32],[x_center + 0.32,y_center - 0.32],[x_center + 0.32,y_center + 0.32],[x_center - 0.32,y_center - 0.32],[x_center - 0.32,y_center + 0.32],[x_center - 0.66,y_center - 0.32],[x_center - 0.66,y_center + 0.12]])
     if t.shape == 0:
         goals = goals_0
+        goalsb = goals_0b
     if t.shape == 1:
         goals = goals_1
+        goalsb = goals_1b
     number_of_robots = len(goals)
     distance_squared_matrix = np.zeros([number_of_robots,number_of_robots])
     assigned_goals = np.zeros([number_of_robots,2])
@@ -162,8 +183,10 @@ def main():
     while (not rospy.is_shutdown()):
         if t.shape == 0:
             goals = goals_0
+            goalsb = goals_0b
         if t.shape == 1:
             goals = goals_1
+            goalsb = goals_1b
         if t.flag == 1.0:
             rospy.logwarn("Assignment")
             robot_poses = np.array([[t.pose_mb1.x,t.pose_mb1.y],[t.pose_mb2.x,t.pose_mb2.y],[t.pose_mb3.x,t.pose_mb3.y],[t.pose_mb4.x,t.pose_mb4.y],[t.pose_mb5.x,t.pose_mb5.y],[t.pose_mb6.x,t.pose_mb6.y],[t.pose_mb7.x,t.pose_mb7.y],[t.pose_mb8.x,t.pose_mb8.y]])
@@ -173,14 +196,29 @@ def main():
             row_ind, col_ind = linear_sum_assignment(distance_squared_matrix)
             for k in range(number_of_robots):
                 ind = col_ind[k]
-                assigned_goals[k] = goals[ind]
+                assigned_goals[k] = goalsb[ind]
                 miniboat_list[ind] = k
-            rospy.logwarn("Assigned")
+            rospy.logwarn("Assigned Out")
             t.desired(assigned_goals)
             time.sleep(1)
             t.desired(assigned_goals)
             rospy.logwarn(miniboat_list + 1)
             rospy.logwarn(assigned_goals)
+            t.in_assignment = is_in_assigned(robot_poses,assigned_goals,number_of_robots)
+            while (t.in_assignment == False):
+                robot_poses = np.array([[t.pose_mb1.x,t.pose_mb1.y],[t.pose_mb2.x,t.pose_mb2.y],[t.pose_mb3.x,t.pose_mb3.y],[t.pose_mb4.x,t.pose_mb4.y],[t.pose_mb5.x,t.pose_mb5.y],[t.pose_mb6.x,t.pose_mb6.y],[t.pose_mb7.x,t.pose_mb7.y],[t.pose_mb8.x,t.pose_mb8.y]])
+                t.in_assignment = is_in_assigned(robot_poses,assigned_goals,number_of_robots)
+                rate.sleep()
+            for k in range(number_of_robots):
+                ind = col_ind[k]
+                assigned_goals[k] = goals[ind]
+                miniboat_list[ind] = k
+            rospy.logwarn("Assigned In")
+            t.desired(assigned_goals)
+            time.sleep(1)
+            t.desired(assigned_goals)
+            rospy.logwarn(miniboat_list + 1)
+            rospy.logwarn(assigned_goals)            
             t.flag = 0.0
         rate.sleep()
     t.testing = False
