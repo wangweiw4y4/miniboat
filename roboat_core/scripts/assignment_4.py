@@ -41,15 +41,15 @@ class Test:
         rospy.Subscriber("/miniboat5/odometry/filtered", Odometry, self.mb4_callback)
         '''
         rospy.Subscriber("/miniboat1/boat_state", State, self.mb1_callback)
-        rospy.Subscriber("/miniboat2/boat_state", State, self.mb2_callback)
-        rospy.Subscriber("/miniboat3/boat_state", State, self.mb3_callback)
-        rospy.Subscriber("/miniboat4/boat_state", State, self.mb4_callback)
+        rospy.Subscriber("/miniboat6/boat_state", State, self.mb2_callback)
+        rospy.Subscriber("/miniboat7/boat_state", State, self.mb3_callback)
+        rospy.Subscriber("/miniboat8/boat_state", State, self.mb4_callback)
 
         #self.d_shape_pub = rospy.Publisher("/shape", Shape, queue_size=10)
         self.d_mb1_pub = rospy.Publisher("/miniboat1/assignment/reference_pose", Pose2D, queue_size=10)
-        self.d_mb2_pub = rospy.Publisher("/miniboat2/assignment/reference_pose", Pose2D, queue_size=10)
-        self.d_mb3_pub = rospy.Publisher("/miniboat3/assignment/reference_pose", Pose2D, queue_size=10)
-        self.d_mb4_pub = rospy.Publisher("/miniboat5/assignment/reference_pose", Pose2D, queue_size=10)
+        self.d_mb2_pub = rospy.Publisher("/miniboat6/assignment/reference_pose", Pose2D, queue_size=10)
+        self.d_mb3_pub = rospy.Publisher("/miniboat7/assignment/reference_pose", Pose2D, queue_size=10)
+        self.d_mb4_pub = rospy.Publisher("/miniboat8/assignment/reference_pose", Pose2D, queue_size=10)
 
     def compute_distance(self, x1, y1, x2, y2):
         xc = x1 - x2

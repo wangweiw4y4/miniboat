@@ -174,7 +174,7 @@ def main():
             t.desired(assigned_goals)
             time.sleep(1)
             t.desired(assigned_goals)
-            rospy.logwarn(assigned_goals)
+            rospy.logwarn(col_ind + 1)
             t.flag = 0.0
         rate.sleep()
     t.testing = False
