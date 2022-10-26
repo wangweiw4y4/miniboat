@@ -174,7 +174,7 @@ def main():
             for k in range(number_of_robots):
                 ind = col_ind[k]
                 assigned_goals[k] = goals[ind]
-                miniboat_list[k] = ind
+                miniboat_list[ind] = k
             rospy.logwarn("Assigned")
             t.desired(assigned_goals)
             time.sleep(1)
