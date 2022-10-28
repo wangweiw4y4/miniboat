@@ -87,7 +87,7 @@ class Test:
     def is_in_assigned(self, _robot_poses, _assigned,_number_of_robots):
         in_position = True
         for i in range(_number_of_robots):
-            dist = distance_to_assigned_position(_robot_poses[i][0],_robot_poses[i][1],_assigned[i][0],_assigned[i][1])
+            dist = self.distance_to_assigned_position(_robot_poses[i][0],_robot_poses[i][1],_assigned[i][0],_assigned[i][1])
             if dist <= 0.05 and in_position == True:
                 in_position = True
             else:
@@ -96,6 +96,7 @@ class Test:
 
     def shape_callback(self, _shape):
         self.shape = _shape.shape_code
+        self.flag = 0.0
         rospy.logwarn("New Shape")
 
     def flag_callback(self, _flag):
@@ -167,8 +168,8 @@ def main():
     y_center = 1.5
     goals_0 = np.array([[x_center + 0.22, y_center - 0.22],[x_center + 0.22,y_center],[x_center + 0.22,y_center + 0.22],[x_center,y_center - 0.22],[x_center,y_center + 0.22],[x_center - 0.22,y_center - 0.22],[x_center - 0.22,y_center],[x_center - 0.22,y_center + 0.22]])
     goals_1 = np.array([[x_center + 0.36,y_center - 0.12],[x_center + 0.36,y_center + 0.12],[x_center + 0.12,y_center - 0.12],[x_center + 0.12,y_center + 0.12],[x_center - 0.12,y_center - 0.12],[x_center - 0.12,y_center + 0.12],[x_center - 0.36,y_center - 0.12],[x_center - 0.36,y_center + 0.12]])
-    goals_0b = np.array([[x_center + 0.42, y_center - 0.42],[x_center + 0.42,y_center],[x_center + 0.42,y_center + 0.42],[x_center,y_center - 0.42],[x_center,y_center + 0.42],[x_center - 0.42,y_center - 0.42],[x_center - 0.42,y_center],[x_center - 0.42,y_center + 0.42]])
-    goals_1b = np.array([[x_center + 0.66,y_center - 0.32],[x_center + 0.66,y_center + 0.32],[x_center + 0.32,y_center - 0.32],[x_center + 0.32,y_center + 0.32],[x_center - 0.32,y_center - 0.32],[x_center - 0.32,y_center + 0.32],[x_center - 0.66,y_center - 0.32],[x_center - 0.66,y_center + 0.12]])
+    goals_0b = np.array([[x_center + 0.32, y_center - 0.32],[x_center + 0.32,y_center],[x_center + 0.32,y_center + 0.32],[x_center,y_center - 0.32],[x_center,y_center + 0.32],[x_center - 0.32,y_center - 0.32],[x_center - 0.32,y_center],[x_center - 0.32,y_center + 0.32]])
+    goals_1b = np.array([[x_center + 0.56,y_center - 0.32],[x_center + 0.56,y_center + 0.32],[x_center + 0.22,y_center - 0.22],[x_center + 0.22,y_center + 0.22],[x_center - 0.22,y_center - 0.22],[x_center - 0.22,y_center + 0.22],[x_center - 0.56,y_center - 0.32],[x_center - 0.56,y_center + 0.12]])
     if t.shape == 0:
         goals = goals_0
         goalsb = goals_0b
@@ -204,10 +205,10 @@ def main():
             t.desired(assigned_goals)
             rospy.logwarn(miniboat_list + 1)
             rospy.logwarn(assigned_goals)
-            t.in_assignment = is_in_assigned(robot_poses,assigned_goals,number_of_robots)
-            while (t.in_assignment == False):
+            t.in_assignment = t.is_in_assigned(robot_poses,assigned_goals,number_of_robots)
+            while (t.in_assignment == False and t.flag == 1.0):
                 robot_poses = np.array([[t.pose_mb1.x,t.pose_mb1.y],[t.pose_mb2.x,t.pose_mb2.y],[t.pose_mb3.x,t.pose_mb3.y],[t.pose_mb4.x,t.pose_mb4.y],[t.pose_mb5.x,t.pose_mb5.y],[t.pose_mb6.x,t.pose_mb6.y],[t.pose_mb7.x,t.pose_mb7.y],[t.pose_mb8.x,t.pose_mb8.y]])
-                t.in_assignment = is_in_assigned(robot_poses,assigned_goals,number_of_robots)
+                t.in_assignment = t.is_in_assigned(robot_poses,assigned_goals,number_of_robots)
                 rate.sleep()
             for k in range(number_of_robots):
                 ind = col_ind[k]

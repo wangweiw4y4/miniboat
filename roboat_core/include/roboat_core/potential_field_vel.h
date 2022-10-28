@@ -63,6 +63,7 @@ public:
     float multi_stf; //multiplier for initial lattice coefficient
     float attractive_par_1; //attractive force parameter 1
     float attractive_par_2; //attractive force parameter 2
+    float neighbour_radius; //radius to account for neighbours
     float max_vel; //maximum velocity
 
     Vector2f pose; //miniboat pose

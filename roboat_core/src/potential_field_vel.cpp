@@ -58,6 +58,7 @@ PotentialField::PotentialField(ros::NodeHandle nh) : nh_(nh)
     static const float d_y_center = 1.0;
     static const float d_attractive_par_1 = 0.1;
     static const float d_attractive_par_2 = 0.5;
+    static const float d_neighbour_radius = 0.5;
 
     nh_.param("pf_vel_node/target_region", target_region, d_target_region);
     nh_.param("pf_vel_node/target_r0", target_r0, d_target_r0);
@@ -73,6 +74,7 @@ PotentialField::PotentialField(ros::NodeHandle nh) : nh_(nh)
     nh_.param("pf_vel_node/y_center", y_center, d_y_center);
     nh_.param("pf_vel_node/attractive_par_1", attractive_par_1, d_attractive_par_1);
     nh_.param("pf_vel_node/attractive_par_2", attractive_par_2, d_attractive_par_2);
+    nh_.param("pf_vel_node/neighbour_radius", neighbour_radius, d_neighbour_radius);
 
     pose << 0.0, 0.0;
     number_of_robots = 0;
@@ -250,24 +252,24 @@ void PotentialField::timeStep(polygon_t _shape)
     Fr << 0.0, 0.0;
     Ftheta << 0.0, 0.0;
     //if (attractive_flag == 1){
-        for (int i = 0; i < number_of_robots; i++)
-        {
-            current_det_pose << robots_detected[i][0], robots_detected[i][1];
-            r = pow((pow(pose(0) - current_det_pose(0), 2) + pow(pose(1) - current_det_pose(1), 2)), 0.5);
-            if (r <= 0.6){
-                pose_difference = current_det_pose - pose;
-                Fr = ((pose_difference) / (r)) * (r0 / r * (1 - (r0 / r))) + Fr;
-                theta_dir = atan2(pose_difference(1), pose_difference(0));
-                inverted_pose << -pose_difference(1), pose_difference(0);
-                Ftheta = sin(4 * theta_dir) * (inverted_pose / r) / r + Ftheta;
-            }
+    for (int i = 0; i < number_of_robots; i++)
+    {
+        current_det_pose << robots_detected[i][0], robots_detected[i][1];
+        r = pow((pow(pose(0) - current_det_pose(0), 2) + pow(pose(1) - current_det_pose(1), 2)), 0.5);
+        if (r <= neighbour_radius){
+            pose_difference = current_det_pose - pose;
+            Fr = ((pose_difference) / (r)) * (r0 / r * (1 - (r0 / r))) + Fr;
+            theta_dir = atan2(pose_difference(1), pose_difference(0));
+            inverted_pose << -pose_difference(1), pose_difference(0);
+            Ftheta = sin(4 * theta_dir) * (inverted_pose / r) / r + Ftheta;
         }
-        if (attractive_flag == 1){
-            repulsive_force = srf * Fr + stf * Ftheta;
-        }
-        else if ((attractive_flag == 2) && (distance >= 0.25)){
-            repulsive_force = srf * Fr + stf * Ftheta;
-        }
+    }
+    if (attractive_flag == 1){
+        repulsive_force = srf * Fr + stf * Ftheta;
+    }
+    else if ((attractive_flag == 2) && (distance >= 0.25)){
+        repulsive_force = srf * Fr + stf * Ftheta;
+    }
     //}
     // ROS_FATAL_STREAM("rep_f = " << repulsive_force);
     linear_force = attractive_force + repulsive_force; // add attractive and repulsive forces
