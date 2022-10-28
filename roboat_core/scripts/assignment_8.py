@@ -206,7 +206,7 @@ def main():
             rospy.logwarn(miniboat_list + 1)
             rospy.logwarn(assigned_goals)
             t.in_assignment = t.is_in_assigned(robot_poses,assigned_goals,number_of_robots)
-            while (t.in_assignment == False and t.flag == 1.0):
+            while ((t.in_assignment == False) and (t.flag == 1.0) and (not rospy.is_shutdown())):
                 robot_poses = np.array([[t.pose_mb1.x,t.pose_mb1.y],[t.pose_mb2.x,t.pose_mb2.y],[t.pose_mb3.x,t.pose_mb3.y],[t.pose_mb4.x,t.pose_mb4.y],[t.pose_mb5.x,t.pose_mb5.y],[t.pose_mb6.x,t.pose_mb6.y],[t.pose_mb7.x,t.pose_mb7.y],[t.pose_mb8.x,t.pose_mb8.y]])
                 t.in_assignment = t.is_in_assigned(robot_poses,assigned_goals,number_of_robots)
                 rate.sleep()
