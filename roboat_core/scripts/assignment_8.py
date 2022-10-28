@@ -108,9 +108,9 @@ class Test:
     def shape_callback(self, _shape):
         self.shape = _shape.shape_code
         self.flag = 0.0
-        self.latch_action(2.0)
+        self.latch_action(2)
         time.sleep(1)
-        self.latch_action(2.0)
+        self.latch_action(2)
         rospy.logwarn("New Shape")
 
     def flag_callback(self, _flag):
@@ -252,9 +252,9 @@ def main():
                     t.in_assignment = t.is_in_assigned(robot_poses,assigned_goals,number_of_robots)
                     rate.sleep()
                 if t.flag == 1.0:
-                    t.latch_action(1.0)
+                    t.latch_action(1)
                     time.sleep(1)
-                    t.latch_action(1.0)
+                    t.latch_action(1)
                     rospy.logwarn("Latching")
             t.flag = 0.0
         rate.sleep()
