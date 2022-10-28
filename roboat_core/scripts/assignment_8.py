@@ -8,7 +8,7 @@ import numpy as np
 from scipy.optimize import linear_sum_assignment
 from geometry_msgs.msg import Pose2D
 from nav_msgs.msg import Odometry
-from std_msgs.msg import Float64
+from std_msgs.msg import Float64, UInt16
 from roboat_msgs.msg import Shape
 from roboat_core.msg import State
 
@@ -39,6 +39,8 @@ class Test:
         self.ref_mb6 = Pose2D()
         self.ref_mb7 = Pose2D()
         self.ref_mb8 = Pose2D()
+
+        self.latch = UInt16()
 
         #I will modify this later to use the swarm node data
         rospy.Subscriber("/shape", Shape, self.shape_callback)
@@ -72,6 +74,15 @@ class Test:
         self.d_mb7_pub = rospy.Publisher("/miniboat7/assignment/reference_pose", Pose2D, queue_size=10)
         self.d_mb8_pub = rospy.Publisher("/miniboat8/assignment/reference_pose", Pose2D, queue_size=10)
 
+        self.l_mb1_pub = rospy.Publisher("/miniboat1/latching", UInt16, queue_size=10)
+        self.l_mb2_pub = rospy.Publisher("/miniboat2/latching", UInt16, queue_size=10)
+        self.l_mb3_pub = rospy.Publisher("/miniboat3/latching", UInt16, queue_size=10)
+        self.l_mb4_pub = rospy.Publisher("/miniboat4/latching", UInt16, queue_size=10)
+        self.l_mb5_pub = rospy.Publisher("/miniboat5/latching", UInt16, queue_size=10)
+        self.l_mb6_pub = rospy.Publisher("/miniboat6/latching", UInt16, queue_size=10)
+        self.l_mb7_pub = rospy.Publisher("/miniboat7/latching", UInt16, queue_size=10)
+        self.l_mb8_pub = rospy.Publisher("/miniboat8/latching", UInt16, queue_size=10)
+
     def compute_distance(self, x1, y1, x2, y2):
         xc = x1 - x2
         yc = y1 - y2
@@ -97,6 +108,9 @@ class Test:
     def shape_callback(self, _shape):
         self.shape = _shape.shape_code
         self.flag = 0.0
+        self.latch_action(2.0)
+        time.sleep(1)
+        self.latch_action(2.0)
         rospy.logwarn("New Shape")
 
     def flag_callback(self, _flag):
@@ -160,6 +174,17 @@ class Test:
         self.d_mb7_pub.publish(self.ref_mb7)
         self.d_mb8_pub.publish(self.ref_mb8)
 
+    def latch_action(self, _action):
+        self.latch.data = _action
+        self.l_mb1_pub.publish(self.latch)
+        self.l_mb2_pub.publish(self.latch)
+        self.l_mb3_pub.publish(self.latch)
+        self.l_mb4_pub.publish(self.latch)
+        self.l_mb5_pub.publish(self.latch)
+        self.l_mb6_pub.publish(self.latch)
+        self.l_mb7_pub.publish(self.latch)
+        self.l_mb8_pub.publish(self.latch)
+
 def main():
     rospy.init_node('assignment_8', anonymous=False)
     rate = rospy.Rate(50)
@@ -210,16 +235,27 @@ def main():
                 robot_poses = np.array([[t.pose_mb1.x,t.pose_mb1.y],[t.pose_mb2.x,t.pose_mb2.y],[t.pose_mb3.x,t.pose_mb3.y],[t.pose_mb4.x,t.pose_mb4.y],[t.pose_mb5.x,t.pose_mb5.y],[t.pose_mb6.x,t.pose_mb6.y],[t.pose_mb7.x,t.pose_mb7.y],[t.pose_mb8.x,t.pose_mb8.y]])
                 t.in_assignment = t.is_in_assigned(robot_poses,assigned_goals,number_of_robots)
                 rate.sleep()
-            for k in range(number_of_robots):
-                ind = col_ind[k]
-                assigned_goals[k] = goals[ind]
-                miniboat_list[ind] = k
-            rospy.logwarn("Assigned In")
-            t.desired(assigned_goals)
-            time.sleep(1)
-            t.desired(assigned_goals)
-            rospy.logwarn(miniboat_list + 1)
-            rospy.logwarn(assigned_goals)            
+            if t.flag == 1.0:
+                for k in range(number_of_robots):
+                    ind = col_ind[k]
+                    assigned_goals[k] = goals[ind]
+                    miniboat_list[ind] = k
+                rospy.logwarn("Assigned In")
+                t.desired(assigned_goals)
+                time.sleep(1)
+                t.desired(assigned_goals)
+                rospy.logwarn(miniboat_list + 1)
+                rospy.logwarn(assigned_goals)            
+                t.in_assignment = t.is_in_assigned(robot_poses,assigned_goals,number_of_robots)
+                while ((t.in_assignment == False) and (t.flag == 1.0) and (not rospy.is_shutdown())):
+                    robot_poses = np.array([[t.pose_mb1.x,t.pose_mb1.y],[t.pose_mb2.x,t.pose_mb2.y],[t.pose_mb3.x,t.pose_mb3.y],[t.pose_mb4.x,t.pose_mb4.y],[t.pose_mb5.x,t.pose_mb5.y],[t.pose_mb6.x,t.pose_mb6.y],[t.pose_mb7.x,t.pose_mb7.y],[t.pose_mb8.x,t.pose_mb8.y]])
+                    t.in_assignment = t.is_in_assigned(robot_poses,assigned_goals,number_of_robots)
+                    rate.sleep()
+                if t.flag == 1.0:
+                    t.latch_action(1.0)
+                    time.sleep(1)
+                    t.latch_action(1.0)
+                    rospy.logwarn("Latching")
             t.flag = 0.0
         rate.sleep()
     t.testing = False
