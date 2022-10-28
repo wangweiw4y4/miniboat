@@ -267,7 +267,7 @@ void PotentialField::timeStep(polygon_t _shape)
     if (attractive_flag == 1){
         repulsive_force = srf * Fr + stf * Ftheta;
     }
-    else if ((attractive_flag == 2) && (distance >= 0.25)){
+    else if ((attractive_flag == 2) && (distance >= 0.3)){
         repulsive_force = srf * Fr + stf * Ftheta;
     }
     //}
@@ -282,7 +282,7 @@ void PotentialField::timeStep(polygon_t _shape)
 
     max_vel = std::max(abs(body_force(0)),abs(body_force(1)));
     
-    if (max_vel > 0.05)
+    if (max_vel > 0.04)
     {
         body_force(0) = body_force(0)*0.05/max_vel;
         body_force(1) = body_force(1)*0.05/max_vel;
