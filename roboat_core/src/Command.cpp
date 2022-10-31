@@ -79,8 +79,10 @@ void Command::joyCallback(sensor_msgs::Joy msg)
     }
     if (msg.buttons[3] == 1)
       latchingaction[0] = 1;
+      prev_latchingaction[0] = 1;
     else if (msg.buttons[0] == 1)
       latchingaction[0] = 2;
+      prev_latchingaction[0] = 2;
     else
       latchingaction[0] = 0;
     // start using the joypad command force
@@ -138,7 +140,7 @@ Command::Command(ros::NodeHandle n)
     std::copy(std::begin(force), std::end(force), std::begin(command_force_msg.data));
     command_force_pub.publish(command_force_msg);
     command_pub.publish(commandMsg(force, latchingaction));
-
+    latchingaction[0] = 0;
     // reset command to stop as default if joypad is not in use
     if (command_priority != 0)
     {

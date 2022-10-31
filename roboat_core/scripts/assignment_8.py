@@ -109,8 +109,6 @@ class Test:
         self.shape = _shape.shape_code
         self.flag = 0.0
         self.latch_action(2)
-        time.sleep(1)
-        self.latch_action(2)
         rospy.logwarn("New Shape")
 
     def flag_callback(self, _flag):
@@ -235,6 +233,7 @@ def main():
                 robot_poses = np.array([[t.pose_mb1.x,t.pose_mb1.y],[t.pose_mb2.x,t.pose_mb2.y],[t.pose_mb3.x,t.pose_mb3.y],[t.pose_mb4.x,t.pose_mb4.y],[t.pose_mb5.x,t.pose_mb5.y],[t.pose_mb6.x,t.pose_mb6.y],[t.pose_mb7.x,t.pose_mb7.y],[t.pose_mb8.x,t.pose_mb8.y]])
                 t.in_assignment = t.is_in_assigned(robot_poses,assigned_goals,number_of_robots)
                 rate.sleep()
+            rospy.logwarn("First positions")
             if t.flag == 1.0:
                 for k in range(number_of_robots):
                     ind = col_ind[k]
@@ -251,6 +250,7 @@ def main():
                     robot_poses = np.array([[t.pose_mb1.x,t.pose_mb1.y],[t.pose_mb2.x,t.pose_mb2.y],[t.pose_mb3.x,t.pose_mb3.y],[t.pose_mb4.x,t.pose_mb4.y],[t.pose_mb5.x,t.pose_mb5.y],[t.pose_mb6.x,t.pose_mb6.y],[t.pose_mb7.x,t.pose_mb7.y],[t.pose_mb8.x,t.pose_mb8.y]])
                     t.in_assignment = t.is_in_assigned(robot_poses,assigned_goals,number_of_robots)
                     rate.sleep()
+                rospy.logwarn("Second positions")
                 if t.flag == 1.0:
                     t.latch_action(1)
                     time.sleep(1)
