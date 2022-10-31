@@ -77,14 +77,17 @@ void Command::joyCallback(sensor_msgs::Joy msg)
         force[1] = 0;
       }
     }
-    if (msg.buttons[3] == 1)
+    if (msg.buttons[3] == 1){
       latchingaction[0] = 1;
       prev_latchingaction[0] = 1;
-    else if (msg.buttons[0] == 1)
+    }
+    else if (msg.buttons[0] == 1){
       latchingaction[0] = 2;
       prev_latchingaction[0] = 2;
-    else
+    }
+    else{
       latchingaction[0] = 0;
+    }
     // start using the joypad command force
     command_priority = 0;
     ROS_DEBUG("[COMMAND_NODE] joypad force received start");
