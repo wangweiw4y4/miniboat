@@ -59,6 +59,7 @@ PotentialField::PotentialField(ros::NodeHandle nh) : nh_(nh)
     static const float d_attractive_par_1 = 0.1;
     static const float d_attractive_par_2 = 0.5;
     static const float d_neighbour_radius = 0.5;
+    static const float d_k = 0.5;
 
     nh_.param("pf_vel_node/target_region", target_region, d_target_region);
     nh_.param("pf_vel_node/target_r0", target_r0, d_target_r0);
@@ -75,13 +76,13 @@ PotentialField::PotentialField(ros::NodeHandle nh) : nh_(nh)
     nh_.param("pf_vel_node/attractive_par_1", attractive_par_1, d_attractive_par_1);
     nh_.param("pf_vel_node/attractive_par_2", attractive_par_2, d_attractive_par_2);
     nh_.param("pf_vel_node/neighbour_radius", neighbour_radius, d_neighbour_radius);
+    nh_.param("pf_vel_node/k", k, d_k);
 
     pose << 0.0, 0.0;
     number_of_robots = 0;
     counter = 0;
     des_shape = -1; // starts with no active shape being tracked
     // des_shape = 0;
-    k = 0.5;
     scale = 1;
     attractive_flag = 1;
     reference << 0.0, 0.0;
@@ -267,7 +268,7 @@ void PotentialField::timeStep(polygon_t _shape)
     if (attractive_flag == 1){
         repulsive_force = srf * Fr + stf * Ftheta;
     }
-    else if ((attractive_flag == 2) && (distance >= 0.3)){
+    else if ((attractive_flag == 2) && (distance >= 0.4)){
         repulsive_force = srf * Fr + stf * Ftheta;
     }
     //}

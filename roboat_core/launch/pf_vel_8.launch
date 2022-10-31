@@ -4,7 +4,7 @@
 	<param name = "target_region" value = "1.2" />
 	<param name = "target_r0" value = "0.5" />
 	<param name = "target_stf" value = "0.01" />
-	<param name = "target_srf" value = "150.0" />
+	<param name = "target_srf" value = "100.0" />
 	<param name = "multi_region" value = "2.0" />
 	<param name = "multi_r0" value = "2.0" />
 	<param name = "multi_stf" value = "0.00001" />
@@ -16,6 +16,7 @@
 	<param name = "attractive_par_1" value = "0.1" />
 	<param name = "attractive_par_2" value = "0.5" />
 	<param name = "neighbour_radius" value = "0.5" />
+	<param name = "k" value = "0.3" />
     </node>
 
 </launch>
