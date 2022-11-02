@@ -254,7 +254,7 @@ void PotentialField::timeStep(polygon_t _shape)
     Fr << 0.0, 0.0;
     Ftheta << 0.0, 0.0;
     //if (attractive_flag == 1){
-    max_allowed_vel = 0.04;
+    max_allowed_vel = 0.05;
     for (int i = 0; i < number_of_robots; i++)
     {
         current_det_pose << robots_detected[i][0], robots_detected[i][1];
@@ -263,7 +263,8 @@ void PotentialField::timeStep(polygon_t _shape)
         if (r <= neighbour_radius){
             if ((attractive_flag == 1) && (r <= 0.25)){
                 Fr_multi = 1000.0;
-                max_allowed_vel = 0.2;
+                max_allowed_vel = 0.3;
+                ROS_WARN("Delatching");
             }
             pose_difference = current_det_pose - pose;
             Fr = Fr_multi*(((pose_difference) / (r)) * (r0 / r * (1 - (r0 / r)))) + Fr;
