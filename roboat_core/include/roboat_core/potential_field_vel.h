@@ -47,7 +47,6 @@ public:
     float scale;
     float distance;
     float attractive_flag;
-    float Fr_multi; //multipler to have extra delatching force
 
     //user parameters
     float x_center; //region center in x
@@ -66,6 +65,8 @@ public:
     float attractive_par_2; //attractive force parameter 2
     float neighbour_radius; //radius to account for neighbours
     float max_vel; //maximum velocity
+    float Fr_multi; //multipler to have extra delatching force
+    float max_allowed_vel; //maximum allowed velocity
 
     Vector2f pose; //miniboat pose
     Vector2f attractive_force; //attractive force

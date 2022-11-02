@@ -85,6 +85,7 @@ PotentialField::PotentialField(ros::NodeHandle nh) : nh_(nh)
     // des_shape = 0;
     scale = 1;
     attractive_flag = 1;
+    max_allowed_vel = 0.04;
     reference << 0.0, 0.0;
 }
 
@@ -253,6 +254,7 @@ void PotentialField::timeStep(polygon_t _shape)
     Fr << 0.0, 0.0;
     Ftheta << 0.0, 0.0;
     //if (attractive_flag == 1){
+    max_allowed_vel = 0.04;
     for (int i = 0; i < number_of_robots; i++)
     {
         current_det_pose << robots_detected[i][0], robots_detected[i][1];
@@ -261,6 +263,7 @@ void PotentialField::timeStep(polygon_t _shape)
         if (r <= neighbour_radius){
             if ((attractive_flag == 1) && (r <= 0.25)){
                 Fr_multi = 1000.0;
+                max_allowed_vel = 0.2;
             }
             pose_difference = current_det_pose - pose;
             Fr = Fr_multi*(((pose_difference) / (r)) * (r0 / r * (1 - (r0 / r)))) + Fr;
@@ -287,10 +290,10 @@ void PotentialField::timeStep(polygon_t _shape)
 
     max_vel = std::max(abs(body_force(0)),abs(body_force(1)));
     
-    if (max_vel > 0.04)
+    if (max_vel > max_allowed_vel)
     {
-        body_force(0) = body_force(0)*0.05/max_vel;
-        body_force(1) = body_force(1)*0.05/max_vel;
+        body_force(0) = body_force(0)*max_allowed_vel/max_vel;
+        body_force(1) = body_force(1)*max_allowed_vel/max_vel;
     }
 
     vel_ref.x = body_force(0);
