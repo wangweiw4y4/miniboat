@@ -47,6 +47,7 @@ public:
     float scale;
     float distance;
     float attractive_flag;
+    float Fr_multi; //multipler to have extra delatching force
 
     //user parameters
     float x_center; //region center in x
