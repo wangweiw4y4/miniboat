@@ -212,7 +212,7 @@ void PotentialField::timeStep(polygon_t _shape)
         {
             continue;
         }
-        det_robot_pose << swarm_.state_[i][0], swarm_.state_[idx_][1];
+        det_robot_pose << swarm_.state_[i][0], swarm_.state_[i][1];
         robots_detected.push_back(det_robot_pose);
         number_of_robots++;
     }
