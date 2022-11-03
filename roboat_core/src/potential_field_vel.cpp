@@ -268,7 +268,7 @@ void PotentialField::timeStep(polygon_t _shape)
             if ((r <= 0.24) && (r >= 0.18) && (attractive_flag == 1)){
                 Fr_multi = 1000.0;
                 max_allowed_vel = 0.3;
-                desired_psi = theta_dir;
+                desired_psi = -theta_dir;
                 ROS_WARN("Delatching %f, %f", pose_difference(0), pose_difference(1)); // possible alternative: array of flags to check twice if miniboats are latched
             }
             Fr = Fr_multi*(((pose_difference) / (r)) * (r0 / r * (1 - (r0 / r)))) + Fr;
