@@ -3,7 +3,7 @@
     <node name="pf_vel_node" pkg="roboat_core" type="pf_vel_node" >
 	<param name = "target_region" value = "1.0" />
 	<param name = "target_r0" value = "0.5" />
-	<param name = "target_stf" value = "0.01" />
+	<param name = "target_stf" value = "0.001" />
 	<param name = "target_srf" value = "50.0" />
 	<param name = "multi_region" value = "1.5" />
 	<param name = "multi_r0" value = "2.0" />
@@ -13,7 +13,7 @@
 	<param name = "inside_time" value = "30" />
 	<param name = "x_center" value = "2.0" />
 	<param name = "y_center" value = "1.5" />
-	<param name = "attractive_par_1" value = "0.1" />
+	<param name = "attractive_par_1" value = "0.2" />
 	<param name = "attractive_par_2" value = "0.5" />
 	<param name = "neighbour_radius" value = "0.5" />
 	<param name = "k" value = "0.3" />
