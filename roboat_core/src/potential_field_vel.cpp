@@ -269,8 +269,7 @@ void PotentialField::timeStep(polygon_t _shape)
                 Fr_multi = 1000.0;
                 max_allowed_vel = 0.3;
                 desired_psi = -theta_dir;
-                ROS_WARN("Pose %f, %f", pose(0), pose(1));
-                ROS_WARN("Delatching %f, %f", current_det_pose(0), current_det_pose(1)); // possible alternative: array of flags to check twice if miniboats are latched
+                ROS_WARN("Delatching %f", desired_psi); // possible alternative: array of flags to check twice if miniboats are latched
             }
             Fr = Fr_multi*(((pose_difference) / (r)) * (r0 / r * (1 - (r0 / r)))) + Fr;
             Ftheta = sin(4 * theta_dir) * (inverted_pose / r) / r + Ftheta;
