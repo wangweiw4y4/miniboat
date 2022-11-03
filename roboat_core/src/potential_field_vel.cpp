@@ -255,21 +255,23 @@ void PotentialField::timeStep(polygon_t _shape)
     Ftheta << 0.0, 0.0;
     //if (attractive_flag == 1){
     max_allowed_vel = 0.03;
+    desired_psi = 0.0;
     for (int i = 0; i < number_of_robots; i++)
     {
         current_det_pose << robots_detected[i][0], robots_detected[i][1];
         r = pow((pow(pose(0) - current_det_pose(0), 2) + pow(pose(1) - current_det_pose(1), 2)), 0.5);
         Fr_multi = 1.0;
         if (r <= neighbour_radius){
+            pose_difference = current_det_pose - pose;
+            theta_dir = atan2(pose_difference(1), pose_difference(0));
+            inverted_pose << -pose_difference(1), pose_difference(0);
             if ((r <= 0.24) && (r >= 0.18) && (attractive_flag == 1)){
                 Fr_multi = 1000.0;
                 max_allowed_vel = 0.3;
-                ROS_WARN("Delatching %f", r); // possible alternative: array of flags to check twice if miniboats are latched
+                desired_psi = theta_dir;
+                ROS_WARN("Delatching %f, %f", pose_difference(0), pose_difference(1)); // possible alternative: array of flags to check twice if miniboats are latched
             }
-            pose_difference = current_det_pose - pose;
             Fr = Fr_multi*(((pose_difference) / (r)) * (r0 / r * (1 - (r0 / r)))) + Fr;
-            theta_dir = atan2(pose_difference(1), pose_difference(0));
-            inverted_pose << -pose_difference(1), pose_difference(0);
             Ftheta = sin(4 * theta_dir) * (inverted_pose / r) / r + Ftheta;
         }
     }
@@ -299,7 +301,7 @@ void PotentialField::timeStep(polygon_t _shape)
 
     vel_ref.x = body_force(0);
     vel_ref.y = body_force(1);
-    vel_ref.theta = 0.0;
+    vel_ref.theta = desired_psi;
 
     // Data publishing
     vel_ref_pub_.publish(vel_ref); // send the velocity references

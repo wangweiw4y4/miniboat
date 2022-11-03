@@ -240,6 +240,7 @@ public:
     {
         desired_u = msg.x;
         desired_v = msg.y; 
+        desired_yaw = msg.theta;
         ref_flag = true;
     }
 

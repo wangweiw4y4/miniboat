@@ -31,6 +31,7 @@ public:
     float r; //distance between robots
     float theta_dir; //angle between robots
     float psi; //miniboat heading
+    float desired_psi;
 
     float r0; //desired distance between robots
     float stf; //coefficient for lattice force
