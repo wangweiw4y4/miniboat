@@ -44,19 +44,19 @@ PotentialField::PotentialField(ros::NodeHandle nh) : nh_(nh)
     }
     shape_pub_ = nh_.advertise<nav_msgs::Path>("visual/shape", 1);
 
-    static const float d_target_region = 0.8; // half of the target square side
-    static const float d_target_r0 = 1.0;     // target r0
+    static const float d_target_region = 1.0; // half of the target square side
+    static const float d_target_r0 = 0.4;     // target r0
     static const float d_target_stf = 0.00001;  // target lattice force coefficient
-    static const float d_target_srf = 0.5;  // target repulsive force coefficient
-    static const float d_multi_region = 2.0;
-    static const float d_multi_r0 = 10.0;
+    static const float d_target_srf = 25.0;  // target repulsive force coefficient
+    static const float d_multi_region = 1.5;
+    static const float d_multi_r0 = 1.5;
     static const float d_multi_stf = 0.00001;
-    static const float d_multi_srf = 0.01;
+    static const float d_multi_srf = 0.001;
     static const int d_shrink_time = 30;
     static const int d_inside_time = 60;
-    static const float d_x_center = 3.0;
-    static const float d_y_center = 1.0;
-    static const float d_attractive_par_1 = 0.1;
+    static const float d_x_center = 2.0;
+    static const float d_y_center = 1.5;
+    static const float d_attractive_par_1 = 0.2;
     static const float d_attractive_par_2 = 0.5;
     static const float d_neighbour_radius = 0.5;
     static const float d_k = 0.5;
@@ -254,17 +254,17 @@ void PotentialField::timeStep(polygon_t _shape)
     Fr << 0.0, 0.0;
     Ftheta << 0.0, 0.0;
     //if (attractive_flag == 1){
-    max_allowed_vel = 0.05;
+    max_allowed_vel = 0.03;
     for (int i = 0; i < number_of_robots; i++)
     {
         current_det_pose << robots_detected[i][0], robots_detected[i][1];
         r = pow((pow(pose(0) - current_det_pose(0), 2) + pow(pose(1) - current_det_pose(1), 2)), 0.5);
         Fr_multi = 1.0;
         if (r <= neighbour_radius){
-            if ((r <= 0.25) && (attractive_flag == 1)){
+            if ((r <= 0.21) && (attractive_flag == 1)){
                 Fr_multi = 1000.0;
                 max_allowed_vel = 0.3;
-                ROS_WARN("Delatching"); //TODO: THIS CONDITION IS ALWAYS HAPPENNING
+                ROS_WARN("Delatching");
             }
             pose_difference = current_det_pose - pose;
             Fr = Fr_multi*(((pose_difference) / (r)) * (r0 / r * (1 - (r0 / r)))) + Fr;
