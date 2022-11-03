@@ -1,16 +1,16 @@
 <launch>
 
     <node name="pf_vel_node" pkg="roboat_core" type="pf_vel_node" >
-	<param name = "target_region" value = "1.0" />
-	<param name = "target_r0" value = "0.4" />
+	<param name = "target_region" value = "1.1" />
+	<param name = "target_r0" value = "0.3" />
 	<param name = "target_stf" value = "0.01" />
 	<param name = "target_srf" value = "5.0" />
 	<param name = "multi_region" value = "1.5" />
 	<param name = "multi_r0" value = "2.0" />
 	<param name = "multi_stf" value = "0.00001" />
 	<param name = "multi_srf" value = "0.01" />
-	<param name = "shrink_time" value = "90" />
-	<param name = "inside_time" value = "45" />
+	<param name = "shrink_time" value = "60" />
+	<param name = "inside_time" value = "30" />
 	<param name = "x_center" value = "2.0" />
 	<param name = "y_center" value = "1.5" />
 	<param name = "attractive_par_1" value = "0.2" />
