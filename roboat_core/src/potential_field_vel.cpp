@@ -261,8 +261,8 @@ void PotentialField::timeStep(polygon_t _shape)
         r = pow((pow(pose(0) - current_det_pose(0), 2) + pow(pose(1) - current_det_pose(1), 2)), 0.5);
         Fr_multi = 1.0;
         if (r <= neighbour_radius){
-            if ((r <= 0.21) && (attractive_flag == 1)){
-                Fr_multi = 1000.0;
+            if ((r <= 0.22) && (attractive_flag == 1)){
+                Fr_multi = 100.0;
                 max_allowed_vel = 0.3;
                 ROS_WARN("Delatching %f", r);
             }
