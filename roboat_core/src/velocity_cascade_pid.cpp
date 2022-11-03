@@ -248,6 +248,10 @@ public:
     {
         if (odom_flag && ref_flag)
         {
+            pid_maxforce = 0.4;
+            if (desired_yaw != 0.0){
+                pid_maxforce = 1.0;
+            }
             epsi = desired_yaw - state[2];
             if (abs(epsi) >= M_PI)
             {

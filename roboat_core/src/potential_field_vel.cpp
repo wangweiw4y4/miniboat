@@ -265,7 +265,7 @@ void PotentialField::timeStep(polygon_t _shape)
             pose_difference = current_det_pose - pose;
             theta_dir = atan2(pose_difference(1), pose_difference(0));
             inverted_pose << -pose_difference(1), pose_difference(0);
-            if ((r <= 0.24) && (r >= 0.18) && (attractive_flag == 1)){
+            if ((r <= 0.23) && (r >= 0.18) && (attractive_flag == 1)){ //HERE IS THE TRESHOLD FOR DELATCHING
                 Fr_multi = 10000.0;
                 max_allowed_vel = 0.5;
                 desired_psi = theta_dir;
