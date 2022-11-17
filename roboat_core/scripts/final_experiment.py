@@ -209,7 +209,7 @@ def main():
     goals_1 = np.array([[x_center + 0.36,y_center - 0.12],[x_center + 0.36,y_center + 0.12],[x_center + 0.12,y_center - 0.12],[x_center + 0.12,y_center + 0.12],[x_center - 0.12,y_center - 0.12],[x_center - 0.12,y_center + 0.12],[x_center - 0.36,y_center - 0.12],[x_center - 0.36,y_center + 0.12]])
     goals_1b = np.array([[x_center + 0.52,y_center - 0.28],[x_center + 0.52,y_center + 0.28],[x_center + 0.20,y_center - 0.20],[x_center + 0.20,y_center + 0.20],[x_center - 0.20,y_center - 0.20],[x_center - 0.20,y_center + 0.20],[x_center - 0.52,y_center - 0.28],[x_center - 0.52,y_center + 0.28]])
     t.shape = 0
-    number_of_robots = len(goals)
+    number_of_robots = len(goals_0)
     distance_squared_matrix = np.zeros([number_of_robots,number_of_robots])
     goals = np.zeros([number_of_robots,2])
     goalsb = np.zeros([number_of_robots,2])
