@@ -357,7 +357,7 @@ def main():
                 t.desired(assigned_goals)
                 rate.sleep
             state = 5
-        if state = 5
+        if state == 5:
             t.testing = False
             rospy.logwarn("Finished")
         rate.sleep()
