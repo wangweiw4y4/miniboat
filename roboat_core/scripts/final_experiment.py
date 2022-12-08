@@ -281,9 +281,12 @@ def main():
             rospy.logwarn("Remain in Square")
             time.sleep(10)
             state = 3
+            rospy.logwarn("Delatch")
             t.shape = 1
+            t.latch_action(2)
             t.shape_publish(t.shape)
             time.sleep(1)
+            t.latch_action(2)
             t.shape_publish(t.shape)
         if state == 3:
             rospy.logwarn("Begin Rectangle")
