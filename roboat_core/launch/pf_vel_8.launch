@@ -9,8 +9,8 @@
 	<param name = "multi_r0" value = "2.0" />
 	<param name = "multi_stf" value = "0.00001" />
 	<param name = "multi_srf" value = "0.01" />
-	<param name = "shrink_time" value = "45" />
-	<param name = "inside_time" value = "15" />
+	<param name = "shrink_time" value = "50" />
+	<param name = "inside_time" value = "20" />
 	<param name = "x_center" value = "2.0" />
 	<param name = "y_center" value = "1.5" />
 	<param name = "attractive_par_1" value = "0.2" />
