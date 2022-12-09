@@ -220,8 +220,10 @@ def main():
     rospy.logwarn("Start")
     while (not rospy.is_shutdown()):
         if state == 0: #publish square shape to begin
+            t.latch_action(2)
             t.shape_publish(t.shape)
             time.sleep(1)
+            t.latch_action(2)
             t.shape_publish(t.shape)
             state = 1
         if state == 1: #configurate into a square
