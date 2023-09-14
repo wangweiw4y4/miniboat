@@ -96,7 +96,7 @@ public:
         new_trajectory.clear();
         for (int i = 0; i < 80; i++)
         {
-            new_trajectory.push_back(0.0);
+            new_trajectory.push_back(idx_+1);
         } 
         trajectory.data = new_trajectory;
         trajectory_pub.publish(trajectory);
@@ -118,8 +118,8 @@ public:
         lambda_multipliers_pub.publish(lambda_multipliers);
 
         //TODO: Read trajectory array
-        //value_ = swarm_.trajectory_[0][0];
-        //ROS_ERROR("%f", value_);
+        value_ = swarm_.trajectory_[7][0];
+        ROS_ERROR("%f", value_);
 
         for (int k = 0; k < swarm_size_; k++) {
             if (k == idx_) {
