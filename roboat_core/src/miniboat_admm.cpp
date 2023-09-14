@@ -118,7 +118,11 @@ public:
         lambda_multipliers_pub.publish(lambda_multipliers);
 
         //TODO: Read trajectory array
-        value_ = swarm_.trajectory_[7][0];
+        int check = idx_+1;
+        if (check == 8){
+            check = 0;
+        }
+        value_ = swarm_.trajectory_[check][0];
         ROS_ERROR("%f", value_);
 
         for (int k = 0; k < swarm_size_; k++) {
