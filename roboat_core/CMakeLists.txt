@@ -66,6 +66,7 @@ add_message_files(
   State.msg
   CommandToMicroController.msg
   SensorFromMicroController.msg
+  FloatArray.msg  
 )
 
 ## Generate services in the 'srv' folder
@@ -343,3 +344,6 @@ add_dependencies(velocity_cascade_smc      ${PROJECT_NAME}_generate_messages_cpp
 add_executable(velocity_cascade_asmc src/velocity_cascade_asmc.cpp)
 target_link_libraries(velocity_cascade_asmc ${catkin_LIBRARIES})
 add_dependencies(velocity_cascade_asmc      ${PROJECT_NAME}_generate_messages_cpp)
+
+add_executable(miniboat_admm src/miniboat_admm.cpp src/swarm_admm.cpp)
+target_link_libraries(miniboat_admm ${catkin_LIBRARIES})
