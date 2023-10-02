@@ -24,6 +24,12 @@ find_package(catkin REQUIRED COMPONENTS
 
 find_package (Eigen3 REQUIRED)
 
+set(CASADI_DIR "/usr/local")
+set(CMAKE_PREFIX_PATH ${CASADI_DIR} ${CMAKE_PREFIX_PATH})
+set(PKG_CONFIG_PATH ${CASADI_DIR}/lib/pkgconfig ${PKG_CONFIG_PATH})
+find_package(PkgConfig REQUIRED)
+pkg_search_module(CASADI casadi REQUIRED)
+
 message("Libraries: ${ACADO_INCLUDE_DIRS}")
 
 ## System dependencies are found with CMake's conventions
@@ -345,5 +351,7 @@ add_executable(velocity_cascade_asmc src/velocity_cascade_asmc.cpp)
 target_link_libraries(velocity_cascade_asmc ${catkin_LIBRARIES})
 add_dependencies(velocity_cascade_asmc      ${PROJECT_NAME}_generate_messages_cpp)
 
+link_directories(${CASADI_LIBRARY_DIRS})
 add_executable(miniboat_admm src/miniboat_admm.cpp src/swarm_admm.cpp)
-target_link_libraries(miniboat_admm ${catkin_LIBRARIES})
+target_link_libraries(miniboat_admm ${catkin_LIBRARIES} ipopt ${CASADI_LIBRARIES})
+target_include_directories(miniboat_admm PUBLIC ${CASADI_INCLUDEDIR} ${EIGEN_INC})

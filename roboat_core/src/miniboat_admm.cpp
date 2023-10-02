@@ -1,18 +1,20 @@
 /** ----------------------------------------------------------------------------
- * @file:     miniboat_pf.cpp
+ * @file:     miniboat_admm.cpp
  * @date:     September 8, 2023
- * @datemod:  September 8, 2023
+ * @datemod:  September 27, 2023
  * @author:   Alejandro Gonzalez-Garcia
  * @email:    alexglzg97@gmail.com
  * 
- * @brief: Potential fields algortithm and PID for distributed formation control. 
+ * @brief: ADMM algorithm for distributed formation control. 
  * ---------------------------------------------------------------------------*/
 
 #include <iostream>
 #include "ros/ros.h"
 #include "geometry_msgs/Pose2D.h"
+#include "geometry_msgs/PoseStamped.h"
 #include "geometry_msgs/Vector3.h"
 #include "nav_msgs/Odometry.h"
+#include "nav_msgs/Path.h"
 #include "std_msgs/Float64.h"
 #include "std_msgs/UInt8.h"
 #include <math.h>
@@ -20,8 +22,10 @@
 #include <tf2/LinearMath/Quaternion.h>
 #include "roboat_core/swarm_admm.h"
 #include "roboat_core/FloatArray.h"
+#include <casadi/casadi.hpp>
 
 using namespace Eigen;
+using namespace casadi;
 
 class MiniboatADMM
 {
@@ -29,31 +33,89 @@ public:
 
     Vector2f reference;
     
-    float value_;
+    bool admm_initialized;
+    int counter;
+    int counter_mpc;
+    bool ocpX_flag;
+    bool ocpZ_flag;
 
-    int N;
+    int Nhor;
+    int Nhor_plus_one;
     int ocpX_states;
+    double mu;
     
     Swarm swarm_;
     int swarm_size_, idx_;
     double detection_max_lapse_;
 
+    std::string FUNCTIONS_DIR;
+    std::string FUNCTIONS_DIR_DEFAULT;
+    casadi::Function ocpX_function;
+    casadi::Function ocpZ_function;
+
     roboat_core::FloatArray trajectory;
     roboat_core::FloatArray local_copies;
     roboat_core::FloatArray lambda_multipliers;
+    geometry_msgs::Pose2D vel_ref;
+    //nav_msgs::Path horizon_path;
+    //geometry_msgs::PoseStamped horizon_pose;
+
+    // ocpX Parameters
+    MatrixXd xref;
+    MatrixXd yref;
+    MatrixXd multi_i;
+    MatrixXd copy_i;
+    MatrixXd multi_ji;
+    MatrixXd copy_ji;
+    MatrixXd X_0;
+
+    // ocpZ Parameters
+    MatrixXd z_x;
+    MatrixXd z_y;
+    MatrixXd copy_ij;
+    //multi_i is used again
+    MatrixXd traj_i;
+    MatrixXd multi_ij;
+    MatrixXd traj_ij;
+    MatrixXd boat_diam;
+
+    // ocpX Outputs
+    MatrixXd x_res;
+    MatrixXd y_res;
+    MatrixXd u_res;
+    MatrixXd v_res;
+
+    // ocpZ Outputs
+    MatrixXd zx_res;
+    MatrixXd zy_res;
+    MatrixXd copy_ij_res;
+
+    // ocpX vectors
+    std::vector<const double*> arg_ocpX;
+    std::vector<double*> res_ocpX;
+    std::vector<casadi_int> iw_ocpX;
+    std::vector<double> w_ocpX;
+    int mem_ocpX;
+
+    // ocpZ vectors
+    std::vector<const double*> arg_ocpZ;
+    std::vector<double*> res_ocpZ;
+    std::vector<casadi_int> iw_ocpZ;
+    std::vector<double> w_ocpZ;
+    int mem_ocpZ;
 
     std::vector<double> new_trajectory;
     std::vector<double> new_local_copies;
     std::vector<double> new_lambda_multipliers;
-    double zeta_ji[14][40];
-    double lambda_ji[14][40];
-
+    
     MiniboatADMM()
     {
         //ROS Publishers and Subscribers
         trajectory_pub = nh.advertise<roboat_core::FloatArray>("trajectory", 1);
         local_copies_pub = nh.advertise<roboat_core::FloatArray>("local_copies", 1);
         lambda_multipliers_pub = nh.advertise<roboat_core::FloatArray>("lambda_multipliers", 1);
+        vel_ref_pub = nh.advertise<geometry_msgs::Pose2D>("velocity_reference", 1);
+        path_pub = nh.advertise<nav_msgs::Path>("horizon_path", 1);
 
         reference_pose_sub = nh.subscribe("assignment/reference_pose", 1, &MiniboatADMM::reference_callback, this);
 
@@ -65,7 +127,6 @@ public:
             ROS_ERROR("wrong swarm definition");
             idx_ = 0;
         }
-        nh.param("/pf/detection_max_lapse_", detection_max_lapse_, 1.0);
 
         std::string id, ns;
         nh.param<std::string>("roboat_id", id, "");
@@ -80,8 +141,99 @@ public:
             // shape_msg_.header.frame_id = "odom";
         }
 
-        nh.param("swarm/N", N, 40);
+        FUNCTIONS_DIR_DEFAULT = "/home/alex/swarmsim_ws/src/roboat_core/scripts/ipopt_definitions";
+        nh.param("swarm/Nhor", Nhor, 20);
         nh.param("swarm/ocpX_states", ocpX_states, 2);
+        nh.param("swarm/mu", mu, 1.0);
+        nh.param("functions/path", FUNCTIONS_DIR, FUNCTIONS_DIR_DEFAULT);
+        Nhor_plus_one = Nhor + 1;
+
+        ocpX_function = casadi::Function::load(FUNCTIONS_DIR + "/ocpX.casadi");
+        ocpZ_function = casadi::Function::load(FUNCTIONS_DIR + "/ocpZ.casadi");
+
+        // initialize ocpX parameters
+        xref = MatrixXd::Zero(1,1);
+        yref = MatrixXd::Zero(1,1);
+        multi_i = MatrixXd::Zero(ocpX_states, Nhor_plus_one);
+        copy_i = MatrixXd::Zero(ocpX_states, Nhor_plus_one);
+        multi_ji = MatrixXd::Zero(ocpX_states*(swarm_size_-1), Nhor_plus_one);
+        copy_ji = MatrixXd::Zero(ocpX_states*(swarm_size_-1), Nhor_plus_one);
+        X_0 = MatrixXd::Zero(ocpX_states, 1);
+
+        // initialize ocpZ parameters
+        z_x = MatrixXd::Zero(1,Nhor_plus_one);
+        z_y = MatrixXd::Zero(1,Nhor_plus_one);
+        copy_ij = MatrixXd::Zero(ocpX_states*(swarm_size_-1), Nhor_plus_one);
+        // multi_i is already initialized in ocpZ
+        traj_i = MatrixXd::Zero(ocpX_states, Nhor_plus_one);
+        multi_ij = MatrixXd::Zero(ocpX_states*(swarm_size_-1), Nhor_plus_one);
+        traj_ij = MatrixXd::Zero(ocpX_states*(swarm_size_-1), Nhor_plus_one);
+        boat_diam = MatrixXd::Zero(1,1);
+        boat_diam(0,0) = 0.3;
+        
+        // initialize ocpX outputs
+        x_res = MatrixXd::Zero(1, Nhor_plus_one);
+        y_res = MatrixXd::Zero(1, Nhor_plus_one);
+        u_res = MatrixXd::Zero(1, Nhor);
+        v_res = MatrixXd::Zero(1, Nhor);
+
+        // initialize ocpZ outputs
+        zx_res = MatrixXd::Zero(1, Nhor_plus_one);
+        zy_res = MatrixXd::Zero(1, Nhor_plus_one);
+        copy_ij_res = MatrixXd::Zero(ocpX_states*(swarm_size_-1), Nhor_plus_one);
+
+        // initialize ocpX vectors
+        arg_ocpX = std::vector<const double*>(ocpX_function.sz_arg());
+        res_ocpX = std::vector<double*>(ocpX_function.sz_res());
+        iw_ocpX = std::vector<casadi_int>(ocpX_function.sz_iw());
+        w_ocpX = std::vector<double>(ocpX_function.sz_w());
+        mem_ocpX = ocpX_function.checkout();
+
+        //initialize ocpZ vectors
+        arg_ocpZ = std::vector<const double*>(ocpZ_function.sz_arg());
+        res_ocpZ = std::vector<double*>(ocpZ_function.sz_res());
+        iw_ocpZ = std::vector<casadi_int>(ocpZ_function.sz_iw());
+        w_ocpZ = std::vector<double>(ocpZ_function.sz_w());
+        mem_ocpZ = ocpZ_function.checkout();
+
+        // initialize ocpX args
+        arg_ocpX[0] = &xref(0,0);
+        arg_ocpX[1] = &yref(0,0);
+        arg_ocpX[2] = &multi_i(0,0);
+        arg_ocpX[3] = &copy_i(0,0);
+        arg_ocpX[4] = &multi_ji(0,0);
+        arg_ocpX[5] = &copy_ji(0,0);
+        arg_ocpX[6] = &X_0(0,0);
+
+        // initialize ocpZ args
+        arg_ocpZ[0] = &z_x(0,0);
+        arg_ocpZ[1] = &z_y(0,0);
+        arg_ocpZ[2] = &copy_ij(0,0);
+        arg_ocpZ[3] = &multi_i(0,0);
+        arg_ocpZ[4] = &traj_i(0,0);
+        arg_ocpZ[5] = &multi_ij(0,0);
+        arg_ocpZ[6] = &traj_ij(0,0);
+        arg_ocpZ[7] = &boat_diam(0,0);
+
+        // initialize ocpX results
+        res_ocpX[0] = &x_res(0,0);
+        res_ocpX[1] = &y_res(0,0);
+        res_ocpX[2] = &u_res(0,0);
+        res_ocpX[3] = &v_res(0,0);
+
+        // initialize ocpZ results
+        res_ocpZ[0] = &zx_res(0,0);
+        res_ocpZ[1] = &zy_res(0,0);
+        res_ocpZ[2] = &copy_ij_res(0,0);
+
+        admm_initialized = false;
+        counter = 0;
+        counter_mpc = 0;
+        ocpX_flag = true;
+        ocpZ_flag = false;
+
+        reference(0) = idx_;
+        reference(1) = idx_;
 
     }
 
@@ -89,76 +241,229 @@ public:
     {
         reference(0) = _ref->x; //ref in x
         reference(1) = _ref->y; //ref in y
+        boat_diam(0,0) = _ref->theta;
     }
 
     void time_step()
     {
-        new_trajectory.clear();
-        for (int i = 0; i < 80; i++)
-        {
-            new_trajectory.push_back(idx_+1);
-        } 
-        trajectory.data = new_trajectory;
-        trajectory_pub.publish(trajectory);
+        if (ocpX_flag){
+            // update ocpX parameters (reference and initial state)
+            xref(0,0) = reference(0);
+            yref(0,0) = reference(1);
+            X_0(0,0) = swarm_.state_[idx_][0];
+            X_0(1,0) = swarm_.state_[idx_][1];
 
-        new_local_copies.clear();
-        for (int i = 0; i < 560; i++)
-        {
-            new_local_copies.push_back(idx_);
+            // solve ocpX
+            ocpX_function(casadi::get_ptr(arg_ocpX), casadi::get_ptr(res_ocpX), casadi::get_ptr(iw_ocpX), casadi::get_ptr(w_ocpX), mem_ocpX);
+
+            // unpackage solved trajectory for communication with agents (x_i, y_i) and ocpZ parameter update (initial z_x, z_y, trajectory x_i,y_i)
+            new_trajectory.clear();
+            for (int i = 0; i < Nhor_plus_one; i++)
+            {
+                new_trajectory.push_back(x_res(0,i));
+                z_x(0,i) = x_res(0,i);
+                traj_i(0,i) = x_res(0,i);
+            } 
+            for (int i = 0; i < Nhor_plus_one; i++)
+            {
+                new_trajectory.push_back(y_res(0,i));
+                z_y(0,i) = y_res(0,i);
+                traj_i(1,i) = y_res(0,i);
+            }
+            if (admm_initialized == false){
+                new_trajectory.clear();
+                for (int i = 0; i < Nhor_plus_one; i++)
+                {
+                    new_trajectory.push_back(swarm_.state_[idx_][0]);
+                    z_x(0,i) = swarm_.state_[idx_][0];
+                    traj_i(0,i) = swarm_.state_[idx_][0];
+                } 
+                for (int i = 0; i < Nhor_plus_one; i++)
+                {
+                    new_trajectory.push_back(swarm_.state_[idx_][1]);
+                    z_y(0,i) = swarm_.state_[idx_][1];
+                    traj_i(1,i) = swarm_.state_[idx_][1];
+                }
+            }
+            trajectory.data = new_trajectory;
+            trajectory_pub.publish(trajectory);
+
+            nav_msgs::Path horizon_path;
+            geometry_msgs::PoseStamped horizon_pose;
+            for (int i = 0; i < Nhor_plus_one; i++){
+                horizon_pose.header.stamp = ros::Time::now();
+                horizon_pose.header.frame_id = "world";
+                horizon_pose.pose.position.x = traj_i(0,i);
+                horizon_pose.pose.position.y = -traj_i(1,i);
+                horizon_pose.pose.position.z = 0.0;
+
+                horizon_path.header.stamp = ros::Time::now();
+                horizon_path.header.frame_id = "world";
+                horizon_path.poses.push_back(horizon_pose);
+            }
+            path_pub.publish(horizon_path);
+
+        }        
+
+        if (ocpZ_flag){
+
+            // receive trajectories of other agents for ocpZ parameter (x_ij, y_ij)
+            for (int k = 0; k < swarm_size_; k++) {
+                if (k == idx_) {
+                    continue;
+                }
+                if (k < idx_) {
+                    for (int l = 0; l < Nhor_plus_one; l++) {
+                    traj_ij(2*k,l)     = swarm_.trajectory_[k][l];
+                    traj_ij((2*k)+1,l) = swarm_.trajectory_[k][l+Nhor_plus_one];
+                    }
+                }
+                if (k > idx_) {
+                    for (int l = 0; l < Nhor_plus_one; l++) {
+                    traj_ij(2*(k-1),l)   = swarm_.trajectory_[k][l];
+                    traj_ij(2*(k-1)+1,l) = swarm_.trajectory_[k][l+Nhor_plus_one];
+                    }
+                }
+            }
+            // update ocpZ initial guess (Z_ij) of other agents' trajectories
+            copy_ij = traj_ij;
+
+
+            if (admm_initialized == false){
+                for (int k = 0; k < swarm_size_; k++) {
+                    if (k == idx_) {
+                        continue;
+                    }
+                    if (k < idx_) {
+                        for (int l = 0; l < Nhor_plus_one; l++) {
+                        traj_ij(2*k,l)     = swarm_.state_[k][0];
+                        traj_ij((2*k)+1,l) = swarm_.state_[k][1];
+                        }
+                    }
+                    if (k > idx_) {
+                        for (int l = 0; l < Nhor_plus_one; l++) {
+                        traj_ij(2*(k-1),l)   = swarm_.state_[k][0];
+                        traj_ij(2*(k-1)+1,l) = swarm_.state_[k][1];
+                        }
+                    }
+                }
+            copy_ij = traj_ij;
+            }
+
+            // solve ocpZ
+            ocpZ_function(casadi::get_ptr(arg_ocpZ), casadi::get_ptr(res_ocpZ), casadi::get_ptr(iw_ocpZ), casadi::get_ptr(w_ocpZ), mem_ocpZ);
+
+            // unpackage new trajectory estimates/local copies (Z_ij) for communication with other agents
+            new_local_copies.clear();
+            for (int k = 0; k < ocpX_states*(swarm_size_-1); k++){
+                for (int l = 0; l < Nhor_plus_one; l++) {
+                        new_local_copies.push_back(copy_ij_res(k,l));
+                }
+            } 
+            if (admm_initialized == false){
+                new_local_copies.clear();
+                for (int i = 0; i < ((swarm_size_-1)*(Nhor_plus_one)); i++)
+                {
+                    new_local_copies.push_back(idx_);
+                }
+            }
+            local_copies.data = new_local_copies;
+            local_copies_pub.publish(local_copies);
+
+            // update lambda multipliers i and ij
+            new_lambda_multipliers.clear();        
+            for (int i = 0; i < Nhor_plus_one; i++){
+                multi_i(0,i) = multi_i(0,i) + mu*(zx_res(0,i)-x_res(0,i)); 
+                multi_i(1,i) = multi_i(1,i) + mu*(zy_res(0,i)-y_res(0,i)); 
+            }
+            for (int k = 0; k < ocpX_states*(swarm_size_-1); k++){
+                for (int l = 0; l < Nhor_plus_one; l++) {
+                    multi_ij(k,l) = multi_ij(k,l) + mu*(copy_ij_res(k,l) - traj_ij(k,l));
+                }
+            }
+            if (admm_initialized == false){
+                for (int i = 0; i < Nhor_plus_one; i++){
+                    multi_i(0,i) = 0.0; 
+                    multi_i(1,i) = 0.0; 
+                }
+                for (int k = 0; k < ocpX_states*(swarm_size_-1); k++){
+                    for (int l = 0; l < Nhor_plus_one; l++) {
+                        multi_ij(k,l) = 0.0;
+                    }
+                }
+                admm_initialized = true;
+            }
+            for (int k = 0; k < ocpX_states*(swarm_size_-1); k++){
+                for (int l = 0; l < Nhor_plus_one; l++) {
+                    new_lambda_multipliers.push_back(multi_ij(k,l));
+                }
+            }
+            lambda_multipliers.data = new_lambda_multipliers;
+            lambda_multipliers_pub.publish(lambda_multipliers);
         }
-        local_copies.data = new_local_copies;
-        local_copies_pub.publish(local_copies);
 
-        new_lambda_multipliers.clear();
-        for (int i = 0; i < 560; i++)
-        {
-            new_lambda_multipliers.push_back(idx_);
-        }
-        lambda_multipliers.data = new_lambda_multipliers;
-        lambda_multipliers_pub.publish(lambda_multipliers);
-
-        //TODO: Read trajectory array
-        int check = idx_+1;
-        if (check == 8){
-            check = 0;
-        }
-        value_ = swarm_.trajectory_[check][0];
-        ROS_ERROR("%f", value_);
-
+        // update other agents' guesses of current agent trajectory (Z_ji) ocpX parameter
         for (int k = 0; k < swarm_size_; k++) {
             if (k == idx_) {
                 continue;
             }
             if (k < idx_) {
-                for (int l = 0; l < N; l++) {
-                zeta_ji[2*k][l]     = swarm_.copy_[k][2*(idx_-1)*N+l];
-                zeta_ji[(2*k)+1][l] = swarm_.copy_[k][2*(idx_-1)*N+l+N];
+                for (int l = 0; l < Nhor_plus_one; l++) {
+                copy_ji(2*k,l)     = swarm_.copy_[k][2*(idx_-1)*Nhor_plus_one+l];
+                copy_ji((2*k)+1,l) = swarm_.copy_[k][2*(idx_-1)*Nhor_plus_one+l+Nhor_plus_one];
                 }
             }
             if (k > idx_) {
-                for (int l = 0; l < N; l++) {
-                zeta_ji[2*(k-1)][l]   = swarm_.copy_[k][2*(idx_)*N+l];
-                zeta_ji[2*(k-1)+1][l] = swarm_.copy_[k][2*(idx_)*N+l+N];
+                for (int l = 0; l < Nhor_plus_one; l++) {
+                copy_ji(2*(k-1),l)   = swarm_.copy_[k][2*(idx_)*Nhor_plus_one+l];
+                copy_ji(2*(k-1)+1,l) = swarm_.copy_[k][2*(idx_)*Nhor_plus_one+l+Nhor_plus_one];
                 }
             }
         }
 
+        // update other agents' multipliers (lambda_ji) ocpX parameter
         for (int k = 0; k < swarm_size_; k++) {
             if (k == idx_) {
                 continue;
             }
             if (k < idx_) {
-                for (int l = 0; l < N; l++) {
-                lambda_ji[2*k][l]     = swarm_.multiplier_[k][2*(idx_-1)*N+l];
-                lambda_ji[(2*k)+1][l] = swarm_.multiplier_[k][2*(idx_-1)*N+l+N];
+                for (int l = 0; l < Nhor_plus_one; l++) {
+                multi_ji(2*k,l)     = swarm_.multiplier_[k][2*(idx_-1)*Nhor_plus_one+l];
+                multi_ji((2*k)+1,l) = swarm_.multiplier_[k][2*(idx_-1)*Nhor_plus_one+l+Nhor_plus_one];
                 }
             }
             if (k > idx_) {
-                for (int l = 0; l < N; l++) {
-                lambda_ji[2*(k-1)][l]   = swarm_.multiplier_[k][2*(idx_)*N+l];
-                lambda_ji[2*(k-1)+1][l] = swarm_.multiplier_[k][2*(idx_)*N+l+N];
+                for (int l = 0; l < Nhor_plus_one; l++) {
+                multi_ji(2*(k-1),l)   = swarm_.multiplier_[k][2*(idx_)*Nhor_plus_one+l];
+                multi_ji(2*(k-1)+1,l) = swarm_.multiplier_[k][2*(idx_)*Nhor_plus_one+l+Nhor_plus_one];
                 }
             }
+        }
+
+        if (ocpX_flag){
+            ocpX_flag = false;
+            ocpZ_flag = true;
+        }
+        else{
+            ocpX_flag = true;
+            ocpZ_flag = false;
+        }
+
+        if (counter > 400){
+            if (counter_mpc > 3){
+                vel_ref.x = u_res(0,0);
+                vel_ref.y = v_res(0,0);
+                vel_ref.theta = 0.0;
+                vel_ref_pub.publish(vel_ref);
+                counter_mpc = 0;
+            }
+            counter_mpc += 1;
+        }
+        counter += 1;
+
+        if (counter == 400){
+            ROS_ERROR("ADMM initialized");
+            ROS_ERROR("miniboat %d, x_ref %f, y_ref %f", idx_+1, xref(0,0), yref(0,0));
         }
 
     }
@@ -168,6 +473,8 @@ private:
     ros::Publisher trajectory_pub;
     ros::Publisher local_copies_pub;
     ros::Publisher lambda_multipliers_pub;
+    ros::Publisher vel_ref_pub;
+    ros::Publisher path_pub;
     ros::Subscriber reference_pose_sub;
 
 };
@@ -177,9 +484,9 @@ int main(int argc, char *argv[])
 {
     ros::init(argc, argv, "miniboat_admm");
     MiniboatADMM miniboatADMM;
-    int rate = 10;
+    int rate = 40;
     ros::Rate loop_rate(rate);
-    ros::Duration(1).sleep();
+    ros::Duration(2).sleep();
 
   while (ros::ok())
   {
@@ -187,6 +494,8 @@ int main(int argc, char *argv[])
     ros::spinOnce();
     loop_rate.sleep();
   }
+  miniboatADMM.ocpX_function.release(miniboatADMM.mem_ocpX);
+  miniboatADMM.ocpZ_function.release(miniboatADMM.mem_ocpZ);
 
     return 0;
 }

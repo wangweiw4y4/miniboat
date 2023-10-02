@@ -11,9 +11,11 @@ void Swarm::initialize(ros::NodeHandle &nh)
 
   // Assumes all miniboats are properly identified int he YAML config file, with no repeated ids
   nh_.getParam("swarm/boat_ids", boat_ids_);
-  nh_.param("swarm/N", N_, 40);
+  nh_.param("swarm/N", N_, 20);
   nh_.param("swarm/ocpX_states", ocpX_states_, 2);
   n_boats_ = boat_ids_.size();
+
+  N_ = N_+1;
 
   // identifies the index of the miniboat itself within the swarm (-1 if not found)
   idx_ = -1;
