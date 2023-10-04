@@ -13,7 +13,7 @@ Nhor  = 20                  # number of control intervals
 dt    = Tf/Nhor             # sample time
 number_of_robots = 3        # number of robots that are neighbors (without local)
 
-mu = 1
+mu = 10
 
 # Create OCP object
 ocpX = Ocp(T=Tf)
@@ -36,8 +36,11 @@ x_ref = ocpX.register_parameter(MX.sym('x_ref', 1))
 y_ref = ocpX.register_parameter(MX.sym('y_ref', 1))
 
 # Lagrange objective
-ocpX.add_objective(ocpX.sum(20*(x_ref-x)**2 + 20*(y_ref-y)**2))
-ocpX.add_objective(ocpX.at_tf(20*(x_ref-x)**2 + 20*(y_ref-y)**2))
+distance = sqrt( (x_ref - x)**2 + (y_ref - y)**2 )
+#ocpX.add_objective(ocpX.sum(20*(x_ref-x)**2 + 20*(y_ref-y)**2))
+#ocpX.add_objective(ocpX.at_tf(40*(x_ref-x)**2 + 40*(y_ref-y)**2))
+ocpX.add_objective(ocpX.sum(1*(distance)**2))
+ocpX.add_objective(ocpX.at_tf(1*(distance)**2))
 ocpX.add_objective(ocpX.sum(u**2 + v**2, include_last=True))
 ocpX.subject_to( (-max_speed_limit <= u) <= max_speed_limit )
 ocpX.subject_to( (-max_speed_limit <= v) <= max_speed_limit )

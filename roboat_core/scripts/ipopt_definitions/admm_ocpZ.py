@@ -12,7 +12,7 @@ Nhor  = 20                  # number of control intervals
 dt    = Tf/Nhor             # sample time
 number_of_robots = 3        # number of robots that are neighbors (without local)
 
-mu = 1
+mu = 10
 
 ## Create OCP object
 ocpZ = Ocp(T=Tf)
@@ -26,6 +26,7 @@ boat_diam = ocpZ.register_parameter(MX.sym('boat_diam', 1))
 
 ## Variables of neighbors
 Z_ij = ocpZ.variable(nx*number_of_robots, grid='control',include_last=True)
+s_ij = ocpZ.variable(number_of_robots, grid='control',include_last=True)
 
 ## Parameters for copies and multipliers
 lambda_i = ocpZ.register_parameter(MX.sym('lambda_i', nx), grid='control', include_last=True)
@@ -53,9 +54,11 @@ for j in range(number_of_robots):
     if ocpZ.is_signal(term_j):
         term_j = ocpZ.sum(term_j,include_last=True)
     ocpZ.add_objective(term_j)
+    ocpZ.add_objective(ocpZ.sum(s_ij[j]**2))
     distance_j = sqrt( (Z[0] - Z_j[0])**2 + (Z[1] - Z_j[1])**2 )
-    ocpZ.subject_to( distance_j >= boat_diam )
-
+    ocpZ.subject_to( (distance_j + s_ij[j]) >= (boat_diam) )
+    ocpZ.subject_to( s_ij[j] >= 0 )
+    
 options = {"ipopt": {
     "print_level": 3,
     # "linear_solver": "ma27",
@@ -136,6 +139,7 @@ ocp_function = ocpZ.to_function('ocpZ',
                                 input_names,
                                 output_names)
 
+
 ## Serialize function
 ocp_function.save('ocpZ.casadi')
 
@@ -143,3 +147,23 @@ ocp_function.save('ocpZ.casadi')
 ocp_function(trajectory_value[0,:], trajectory_value[1,:], trajectory_values, lambda_value, trajectory_value, 
               lambda_values, trajectory_values, 0.3)
 
+test_solver = False
+
+if test_solver:
+    import matplotlib.pyplot as plt
+    print(ocp_function)
+    arg = ocp_function.convert_in(ocp_function.generate_in('ocpZ.000631.in.txt'))
+
+    print(arg)
+
+    res = ocp_function(**arg)
+
+    print(res['z_x'])
+
+    fig2, ax3 = plt.subplots()
+    ax3.plot(res['z_y'].T, res['z_x'].T, 'r-')
+    ax3.set_xlabel('Y [m]')
+    ax3.set_ylabel('X [m]')
+    fig2.tight_layout()
+
+    plt.show()
