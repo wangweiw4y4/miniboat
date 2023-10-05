@@ -16,7 +16,7 @@
 #include "nav_msgs/Odometry.h"
 #include "nav_msgs/Path.h"
 #include "std_msgs/Float64.h"
-#include "std_msgs/UInt8.h"
+#include "std_msgs/UInt16.h"
 #include <math.h>
 #include <eigen3/Eigen/Dense>
 #include <tf2/LinearMath/Quaternion.h>
@@ -31,7 +31,20 @@ class MiniboatADMM
 {
 public:
 
-    Vector2f reference;
+    Vector2d reference;
+    Matrix2d rotation;
+    double psi;
+    Vector2d body_vel;
+    double max_allowed_vel;
+    double max_vel;
+    Vector2d global_vel;
+    
+    //Potential field position holder
+    double distance;
+    Vector2d last_reference;
+    Vector2d pose;
+    double k;
+    double scale;
     
     bool admm_initialized;
     int counter;
@@ -52,6 +65,7 @@ public:
     std::string FUNCTIONS_DIR_DEFAULT;
     casadi::Function ocpX_function;
     casadi::Function ocpZ_function;
+    casadi::Function ocpC_function;
 
     roboat_core::FloatArray trajectory;
     roboat_core::FloatArray local_copies;
@@ -79,6 +93,15 @@ public:
     MatrixXd traj_ij;
     MatrixXd boat_diam;
 
+    // CBF Parameters
+    // Reusing MatrixXd boat_diam;
+    MatrixXd x_i;
+    MatrixXd y_i;
+    MatrixXd u_mpc;
+    MatrixXd v_mpc;
+    MatrixXd C_j;
+    MatrixXd V_j;
+
     // ocpX Outputs
     MatrixXd x_res;
     MatrixXd y_res;
@@ -89,6 +112,10 @@ public:
     MatrixXd zx_res;
     MatrixXd zy_res;
     MatrixXd copy_ij_res;
+
+    // CBF Outputs
+    MatrixXd u_cbf;
+    MatrixXd v_cbf;
 
     // ocpX vectors
     std::vector<const double*> arg_ocpX;
@@ -104,6 +131,13 @@ public:
     std::vector<double> w_ocpZ;
     int mem_ocpZ;
 
+    // CBF vectors
+    std::vector<const double*> arg_ocpC;
+    std::vector<double*> res_ocpC;
+    std::vector<casadi_int> iw_ocpC;
+    std::vector<double> w_ocpC;
+    int mem_ocpC;
+
     std::vector<double> new_trajectory;
     std::vector<double> new_local_copies;
     std::vector<double> new_lambda_multipliers;
@@ -118,6 +152,7 @@ public:
         path_pub = nh.advertise<nav_msgs::Path>("horizon_path", 1);
 
         reference_pose_sub = nh.subscribe("assignment/reference_pose", 1, &MiniboatADMM::reference_callback, this);
+        counter_reset_sub = nh.subscribe("/counter_restart", 1, &MiniboatADMM::reset_callback, this);
 
         swarm_.initialize(nh);
         swarm_size_ = swarm_.getBoatN();
@@ -150,6 +185,7 @@ public:
 
         ocpX_function = casadi::Function::load(FUNCTIONS_DIR + "/ocpX.casadi");
         ocpZ_function = casadi::Function::load(FUNCTIONS_DIR + "/ocpZ.casadi");
+        ocpC_function = casadi::Function::load(FUNCTIONS_DIR + "/ocpCBF.casadi");
 
         // initialize ocpX parameters
         xref = MatrixXd::Zero(1,1);
@@ -170,6 +206,15 @@ public:
         traj_ij = MatrixXd::Zero(ocpX_states*(swarm_size_-1), Nhor_plus_one);
         boat_diam = MatrixXd::Zero(1,1);
         boat_diam(0,0) = 0.3;
+
+        // initialize CBF parameters
+        // boat_diam is already initialized in ocpZ
+        x_i = MatrixXd::Zero(1,1);
+        y_i = MatrixXd::Zero(1,1);
+        u_mpc = MatrixXd::Zero(1, 1);
+        v_mpc = MatrixXd::Zero(1, 1);
+        C_j = MatrixXd::Zero(ocpX_states*(swarm_size_-1), 1);
+        V_j = MatrixXd::Zero(ocpX_states*(swarm_size_-1), 1);
         
         // initialize ocpX outputs
         x_res = MatrixXd::Zero(1, Nhor_plus_one);
@@ -181,6 +226,10 @@ public:
         zx_res = MatrixXd::Zero(1, Nhor_plus_one);
         zy_res = MatrixXd::Zero(1, Nhor_plus_one);
         copy_ij_res = MatrixXd::Zero(ocpX_states*(swarm_size_-1), Nhor_plus_one);
+
+        // initialize CBF outputs
+        u_cbf = MatrixXd::Zero(1, 1);
+        v_cbf = MatrixXd::Zero(1, 1);
 
         // initialize ocpX vectors
         arg_ocpX = std::vector<const double*>(ocpX_function.sz_arg());
@@ -195,6 +244,13 @@ public:
         iw_ocpZ = std::vector<casadi_int>(ocpZ_function.sz_iw());
         w_ocpZ = std::vector<double>(ocpZ_function.sz_w());
         mem_ocpZ = ocpZ_function.checkout();
+
+        //initialize CBF vectors
+        arg_ocpC = std::vector<const double*>(ocpC_function.sz_arg());
+        res_ocpC = std::vector<double*>(ocpC_function.sz_res());
+        iw_ocpC = std::vector<casadi_int>(ocpC_function.sz_iw());
+        w_ocpC = std::vector<double>(ocpC_function.sz_w());
+        mem_ocpC = ocpC_function.checkout();
 
         // initialize ocpX args
         arg_ocpX[0] = &xref(0,0);
@@ -215,6 +271,15 @@ public:
         arg_ocpZ[6] = &traj_ij(0,0);
         arg_ocpZ[7] = &boat_diam(0,0);
 
+        // initialize ocpC args
+        arg_ocpC[0] = &boat_diam(0,0);
+        arg_ocpC[1] = &x_i(0,0);
+        arg_ocpC[2] = &y_i(0,0);
+        arg_ocpC[3] = &u_mpc(0,0);
+        arg_ocpC[4] = &v_mpc(0,0);
+        arg_ocpC[5] = &C_j(0,0);
+        //arg_ocpC[6] = &V_j(0,0);
+
         // initialize ocpX results
         res_ocpX[0] = &x_res(0,0);
         res_ocpX[1] = &y_res(0,0);
@@ -226,14 +291,26 @@ public:
         res_ocpZ[1] = &zy_res(0,0);
         res_ocpZ[2] = &copy_ij_res(0,0);
 
+        // initialize CBF results
+        res_ocpC[0] = &u_cbf(0,0);
+        res_ocpC[1] = &v_cbf(0,0);
+
         admm_initialized = false;
         counter = 0;
         counter_mpc = 0;
         ocpX_flag = true;
         ocpZ_flag = false;
 
-        reference(0) = idx_;
-        reference(1) = idx_;
+        reference(0) = swarm_.state_[idx_][0];//idx_;
+        reference(1) = swarm_.state_[idx_][1];//idx_;
+
+        last_reference(0) = swarm_.state_[idx_][0];//0.0;
+        last_reference(1) = swarm_.state_[idx_][1];//0.0;
+
+        pose << 0.0, 0.0;
+        max_allowed_vel = 0.04;
+        k = 0.4;
+        scale = 1.0;
 
     }
 
@@ -244,6 +321,17 @@ public:
         boat_diam(0,0) = _ref->theta;
     }
 
+    void reset_callback(const std_msgs::UInt16::ConstPtr& _counter)
+    {
+        counter = _counter->data;
+        counter_mpc = _counter->data;
+        last_reference(0) = swarm_.state_[idx_][0];
+        last_reference(1) = swarm_.state_[idx_][1];
+        //multi_i = MatrixXd::Zero(ocpX_states, Nhor_plus_one);
+        //multi_ij = MatrixXd::Zero(ocpX_states*(swarm_size_-1), Nhor_plus_one);
+        ROS_ERROR("Counter reset");
+    }
+
     void time_step()
     {
         if (ocpX_flag){
@@ -252,7 +340,8 @@ public:
             yref(0,0) = reference(1);
             X_0(0,0) = swarm_.state_[idx_][0];
             X_0(1,0) = swarm_.state_[idx_][1];
-
+            psi = swarm_.state_[idx_][2];
+            
             // solve ocpX
             ocpX_function(casadi::get_ptr(arg_ocpX), casadi::get_ptr(res_ocpX), casadi::get_ptr(iw_ocpX), casadi::get_ptr(w_ocpX), mem_ocpX);
 
@@ -316,18 +405,19 @@ public:
                     for (int l = 0; l < Nhor_plus_one; l++) {
                     traj_ij(2*k,l)     = swarm_.trajectory_[k][l];
                     traj_ij((2*k)+1,l) = swarm_.trajectory_[k][l+Nhor_plus_one];
+                    copy_ij(2*k,l)     = swarm_.trajectory_[k][l];
+                    copy_ij((2*k)+1,l) = swarm_.trajectory_[k][l+Nhor_plus_one];
                     }
                 }
                 if (k > idx_) {
                     for (int l = 0; l < Nhor_plus_one; l++) {
                     traj_ij(2*(k-1),l)   = swarm_.trajectory_[k][l];
                     traj_ij(2*(k-1)+1,l) = swarm_.trajectory_[k][l+Nhor_plus_one];
+                    copy_ij(2*(k-1),l)   = swarm_.trajectory_[k][l];
+                    copy_ij(2*(k-1)+1,l) = swarm_.trajectory_[k][l+Nhor_plus_one];
                     }
                 }
             }
-            // update ocpZ initial guess (Z_ij) of other agents' trajectories
-            copy_ij = traj_ij;
-
 
             if (admm_initialized == false){
                 for (int k = 0; k < swarm_size_; k++) {
@@ -338,16 +428,19 @@ public:
                         for (int l = 0; l < Nhor_plus_one; l++) {
                         traj_ij(2*k,l)     = swarm_.state_[k][0];
                         traj_ij((2*k)+1,l) = swarm_.state_[k][1];
+                        copy_ij(2*k,l)     = swarm_.state_[k][0];
+                        copy_ij((2*k)+1,l) = swarm_.state_[k][1];
                         }
                     }
                     if (k > idx_) {
                         for (int l = 0; l < Nhor_plus_one; l++) {
                         traj_ij(2*(k-1),l)   = swarm_.state_[k][0];
                         traj_ij(2*(k-1)+1,l) = swarm_.state_[k][1];
+                        copy_ij(2*(k-1),l)   = swarm_.state_[k][0];
+                        copy_ij(2*(k-1)+1,l) = swarm_.state_[k][1];
                         }
                     }
                 }
-            copy_ij = traj_ij;
             }
 
             // solve ocpZ
@@ -402,6 +495,16 @@ public:
             lambda_multipliers_pub.publish(lambda_multipliers);
         }
 
+        // update new trajectory estimate/local copy (Z_i) for ocpX
+        for (int i = 0; i < Nhor_plus_one; i++)
+        {
+            copy_i(0,i) = zx_res(0,i);
+        } 
+        for (int i = 0; i < Nhor_plus_one; i++)
+        {
+            copy_i(1,i) = zy_res(0,i);
+        }
+
         // update other agents' guesses of current agent trajectory (Z_ji) ocpX parameter
         for (int k = 0; k < swarm_size_; k++) {
             if (k == idx_) {
@@ -450,9 +553,69 @@ public:
         }
 
         if (counter > 400){
-            if (counter_mpc > 3){
-                vel_ref.x = u_res(0,0);
-                vel_ref.y = v_res(0,0);
+            if (counter_mpc > 1){
+                x_i(0,0) = swarm_.state_[idx_][0];
+                y_i(0,0) = swarm_.state_[idx_][1];
+                u_mpc(0,0) = u_res(0,0);
+                v_mpc(0,0) = v_res(0,0);
+                for (int k = 0; k < swarm_size_; k++) {
+                    if (k == idx_) {
+                        continue;
+                    }
+                    if (k < idx_) {
+                        C_j(2*k,0)     = swarm_.state_[k][0];
+                        C_j((2*k)+1,0) = swarm_.state_[k][1];
+                        V_j(2*k,0)     = swarm_.state_[k][3];
+                        V_j((2*k)+1,0) = swarm_.state_[k][4];
+                        }
+                    if (k > idx_) {
+                        C_j(2*(k-1),0)   = swarm_.state_[k][0];
+                        C_j(2*(k-1)+1,0) = swarm_.state_[k][1];
+                        V_j(2*(k-1),0)   = swarm_.state_[k][3];
+                        V_j(2*(k-1)+1,0) = swarm_.state_[k][4];
+                        }
+                }
+                ocpC_function(casadi::get_ptr(arg_ocpC), casadi::get_ptr(res_ocpC), casadi::get_ptr(iw_ocpC), casadi::get_ptr(w_ocpC), mem_ocpC);
+                
+                global_vel << u_cbf(0,0), v_cbf(0,0);
+                //global_vel << u_res(0,0), v_res(0,0); //if cbf wants to be avoided
+                rotation << cos(psi), -sin(psi),
+                            sin(psi), cos(psi);
+                body_vel = rotation.transpose() * global_vel;
+                max_vel = std::max(abs(body_vel(0)),abs(body_vel(1)));    
+                if (max_vel > max_allowed_vel)
+                {
+                    body_vel(0) = body_vel(0)*max_allowed_vel/max_vel;
+                    body_vel(1) = body_vel(1)*max_allowed_vel/max_vel;
+                }
+                vel_ref.x = body_vel(0);
+                vel_ref.y = body_vel(1);
+                vel_ref.theta = 0.0;
+                vel_ref_pub.publish(vel_ref);
+                counter_mpc = 0;
+            }
+            counter_mpc += 1;
+        }
+        else{
+            if (counter_mpc > 1){
+                /*vel_ref.x = 0.0;
+                vel_ref.y = 0.0;
+                vel_ref.theta = 0.0;*/
+                pose(0) = swarm_.state_[idx_][0];
+                pose(1) = swarm_.state_[idx_][1];
+                distance = pow((pow(pose(0)-last_reference(0),2) + pow(pose(1)-last_reference(1),2)),0.5);
+                global_vel = k * exp(distance / scale) * (last_reference - pose);
+                rotation << cos(psi), -sin(psi),
+                            sin(psi), cos(psi);
+                body_vel = rotation.transpose() * global_vel;
+                max_vel = std::max(abs(body_vel(0)),abs(body_vel(1)));    
+                if (max_vel > max_allowed_vel)
+                {
+                    body_vel(0) = body_vel(0)*max_allowed_vel/max_vel;
+                    body_vel(1) = body_vel(1)*max_allowed_vel/max_vel;
+                }
+                vel_ref.x = body_vel(0);
+                vel_ref.y = body_vel(1);
                 vel_ref.theta = 0.0;
                 vel_ref_pub.publish(vel_ref);
                 counter_mpc = 0;
@@ -476,6 +639,7 @@ private:
     ros::Publisher vel_ref_pub;
     ros::Publisher path_pub;
     ros::Subscriber reference_pose_sub;
+    ros::Subscriber counter_reset_sub;
 
 };
 
@@ -484,18 +648,19 @@ int main(int argc, char *argv[])
 {
     ros::init(argc, argv, "miniboat_admm");
     MiniboatADMM miniboatADMM;
-    int rate = 40;
+    int rate = 20;
     ros::Rate loop_rate(rate);
     ros::Duration(2).sleep();
 
-  while (ros::ok())
-  {
-    miniboatADMM.time_step();
-    ros::spinOnce();
-    loop_rate.sleep();
-  }
-  miniboatADMM.ocpX_function.release(miniboatADMM.mem_ocpX);
-  miniboatADMM.ocpZ_function.release(miniboatADMM.mem_ocpZ);
+    while (ros::ok())
+    {
+        miniboatADMM.time_step();
+        ros::spinOnce();
+        loop_rate.sleep();
+    }
+    miniboatADMM.ocpX_function.release(miniboatADMM.mem_ocpX);
+    miniboatADMM.ocpZ_function.release(miniboatADMM.mem_ocpZ);
+    miniboatADMM.ocpC_function.release(miniboatADMM.mem_ocpC);
 
     return 0;
 }
