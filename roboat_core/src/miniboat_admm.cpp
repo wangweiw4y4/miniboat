@@ -176,7 +176,7 @@ public:
             // shape_msg_.header.frame_id = "odom";
         }
 
-        FUNCTIONS_DIR_DEFAULT = "/home/alex/swarmsim_ws/src/roboat_core/scripts/ipopt_definitions";
+        FUNCTIONS_DIR_DEFAULT = "/home/ubuntu/catkin_ws/src/miniboat/roboat_core/scripts/ipopt_definitions";
         nh.param("swarm/Nhor", Nhor, 20);
         nh.param("swarm/ocpX_states", ocpX_states, 2);
         nh.param("swarm/mu", mu, 1.0);
