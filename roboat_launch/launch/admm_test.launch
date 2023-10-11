@@ -17,7 +17,7 @@
         <!--rosparam param="ignore_nodes">['/miniboat1/hedge_rcv_bin','/miniboat2/hedge_rcv_bin','/miniboat3/hedge_rcv_bin','/miniboat4/hedge_rcv_bin','/miniboat5/hedge_rcv_bin','/miniboat6/hedge_rcv_bin','/miniboat7/hedge_rcv_bin','/miniboat8/hedge_rcv_bin','/miniboat1/ros_imu_bno055_node','/miniboat2/ros_imu_bno055_node','/miniboat3/ros_imu_bno055_node','/miniboat4/ros_imu_bno055_node','/miniboat5/ros_imu_bno055_node','/miniboat6/ros_imu_bno055_node','/miniboat7/ros_imu_bno055_node','/miniboat8/ros_imu_bno055_node','/miniboat1/velocity_cascade_pid','/miniboat2/velocity_cascade_pid','/miniboat3/velocity_cascade_pid','/miniboat4/velocity_cascade_pid','/miniboat5/velocity_cascade_pid','/miniboat6/velocity_cascade_pid','/miniboat7/velocity_cascade_pid','/miniboat8/velocity_cascade_pid']</rosparam-->
         <!--rosparam param="sync_topics">['/tf','/tf_static','/shape','/$(arg id)/odometry/filtered','/$(arg id)/assignment/reference_pose','/$(arg id)/joy','/$(arg id)/shrink_flag','/$(arg id)/visual/shape',]</rosparam-->
         <!--rosparam param="sync_topics">['/tf','/tf_static','/shape','/miniboat1/shrink_flag','/miniboat1/odometry/filtered','/miniboat2/odometry/filtered','/miniboat3/odometry/filtered','/miniboat4/odometry/filtered','/miniboat5/odometry/filtered','/miniboat6/odometry/filtered','/miniboat7/odometry/filtered','/miniboat8/odometry/filtered','/miniboat1/assignment/reference_pose','/miniboat2/assignment/reference_pose','/miniboat3/assignment/reference_pose','/miniboat4/assignment/reference_pose','/miniboat5/assignment/reference_pose','/miniboat6/assignment/reference_pose','/miniboat7/assignment/reference_pose','/miniboat8/assignment/reference_pose','/miniboat1/joy','/miniboat2/joy','/miniboat3/joy','/miniboat4/joy','/miniboat5/joy','/miniboat6/joy','/miniboat7/joy','/miniboat8/joy']</rosparam-->
-        <rosparam param="sync_topics">['/tf','/tf_static',
+        <rosparam param="sync_topics">['/tf','/tf_static', '/counter_restart',
             '/miniboat1/boat_state','/miniboat2/boat_state','/miniboat3/boat_state','/miniboat4/boat_state',
             '/miniboat5/boat_state','/miniboat6/boat_state','/miniboat7/boat_state','/miniboat8/boat_state',
             '/miniboat1/assignment/reference_pose','/miniboat2/assignment/reference_pose','/miniboat3/assignment/reference_pose',
@@ -85,10 +85,10 @@
             <arg name="use_ekf"             value="$(arg use_ekf)"/>
         </include>
 
-        <!--include file="$(find roboat_core)/launch/velocity_cascade_pid.launch">
+        <include file="$(find roboat_core)/launch/velocity_cascade_pid.launch">
         </include>
 
-        <include file="$(find roboat_core)/launch/pf_vel_8.launch">
+        <!--include file="$(find roboat_core)/launch/pf_vel_8.launch">
         </include-->
 
         <node pkg="roboat_core" type="miniboat_admm" name="miniboat_admm"/>        
