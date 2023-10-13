@@ -648,7 +648,7 @@ int main(int argc, char *argv[])
 {
     ros::init(argc, argv, "miniboat_admm");
     MiniboatADMM miniboatADMM;
-    int rate = 20;
+    int rate = 10;
     ros::Rate loop_rate(rate);
     ros::Duration(2).sleep();
 
