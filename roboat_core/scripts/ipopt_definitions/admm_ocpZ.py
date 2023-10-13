@@ -8,7 +8,7 @@ import numpy as np
 ## Problem parameters
 nx    = 2                   # the system is composed of 2 states per robot
 Tf    = 2                   # control horizon [s]
-Nhor  = 20                  # number of control intervals
+Nhor  = 10                  # number of control intervals
 dt    = Tf/Nhor             # sample time
 number_of_robots = 3        # number of robots that are neighbors (without local)
 
