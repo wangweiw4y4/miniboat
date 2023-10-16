@@ -49,6 +49,8 @@ public:
     bool admm_initialized;
     int counter;
     int counter_mpc;
+    int counter_delatch;
+    double desired_yaw;
     bool ocpX_flag;
     bool ocpZ_flag;
 
@@ -153,6 +155,7 @@ public:
 
         reference_pose_sub = nh.subscribe("assignment/reference_pose", 1, &MiniboatADMM::reference_callback, this);
         counter_reset_sub = nh.subscribe("/counter_restart", 1, &MiniboatADMM::reset_callback, this);
+        latching_sub = nh.subscribe("latching", 1, &MiniboatADMM::latching_callback, this);
 
         swarm_.initialize(nh);
         swarm_size_ = swarm_.getBoatN();
@@ -298,6 +301,8 @@ public:
         admm_initialized = false;
         counter = 0;
         counter_mpc = 0;
+        counter_delatch = 10;
+        desired_yaw = 0.0;
         ocpX_flag = true;
         ocpZ_flag = false;
 
@@ -330,6 +335,14 @@ public:
         //multi_i = MatrixXd::Zero(ocpX_states, Nhor_plus_one);
         //multi_ij = MatrixXd::Zero(ocpX_states*(swarm_size_-1), Nhor_plus_one);
         ROS_ERROR("Counter reset");
+    }
+
+    void latching_callback(const std_msgs::UInt16::ConstPtr& _latch)
+    {
+        if (_latch->data == 2){
+            counter_delatch = 0;
+            desired_yaw = (idx_ % 2) - 0.5; 
+        }
     }
 
     void time_step()
@@ -552,6 +565,10 @@ public:
             ocpZ_flag = false;
         }
 
+        if (counter_delatch >= 10){
+            desired_yaw = 0.0;
+        }
+
         if (counter > 400){
             if (counter_mpc > 1){
                 x_i(0,0) = swarm_.state_[idx_][0];
@@ -590,7 +607,7 @@ public:
                 }
                 vel_ref.x = body_vel(0);
                 vel_ref.y = body_vel(1);
-                vel_ref.theta = 0.0;
+                vel_ref.theta = desired_yaw;
                 vel_ref_pub.publish(vel_ref);
                 counter_mpc = 0;
             }
@@ -616,13 +633,14 @@ public:
                 }
                 vel_ref.x = body_vel(0);
                 vel_ref.y = body_vel(1);
-                vel_ref.theta = 0.0;
+                vel_ref.theta = desired_yaw;
                 vel_ref_pub.publish(vel_ref);
                 counter_mpc = 0;
             }
             counter_mpc += 1;
         }
         counter += 1;
+        counter_delatch += 1;
 
         if (counter == 400){
             ROS_ERROR("ADMM initialized");
@@ -640,6 +658,7 @@ private:
     ros::Publisher path_pub;
     ros::Subscriber reference_pose_sub;
     ros::Subscriber counter_reset_sub;
+    ros::Subscriber latching_sub;
 
 };
 
