@@ -43,22 +43,22 @@ class Test:
         rospy.Subscriber("/miniboat5/odometry/filtered", Odometry, self.mb1_callback)
         rospy.Subscriber("/miniboat1/odometry/filtered", Odometry, self.mb2_callback)
         rospy.Subscriber("/miniboat3/odometry/filtered", Odometry, self.mb3_callback)
-        rospy.Subscriber("/miniboat4/odometry/filtered", Odometry, self.mb4_callback)
+        rospy.Subscriber("/miniboat6/odometry/filtered", Odometry, self.mb4_callback)
         '''
         rospy.Subscriber("/miniboat5/boat_state", State, self.mb1_callback)
         rospy.Subscriber("/miniboat1/boat_state", State, self.mb2_callback)
         rospy.Subscriber("/miniboat3/boat_state", State, self.mb3_callback)
-        rospy.Subscriber("/miniboat4/boat_state", State, self.mb4_callback)
+        rospy.Subscriber("/miniboat6/boat_state", State, self.mb4_callback)
 
         self.d_mb1_pub = rospy.Publisher("/miniboat5/assignment/reference_pose", Pose2D, queue_size=10)
         self.d_mb2_pub = rospy.Publisher("/miniboat1/assignment/reference_pose", Pose2D, queue_size=10)
         self.d_mb3_pub = rospy.Publisher("/miniboat3/assignment/reference_pose", Pose2D, queue_size=10)
-        self.d_mb4_pub = rospy.Publisher("/miniboat4/assignment/reference_pose", Pose2D, queue_size=10)
+        self.d_mb4_pub = rospy.Publisher("/miniboat6/assignment/reference_pose", Pose2D, queue_size=10)
 
         self.l_mb1_pub = rospy.Publisher("/miniboat5/latching", UInt16, queue_size=10)
         self.l_mb2_pub = rospy.Publisher("/miniboat1/latching", UInt16, queue_size=10)
         self.l_mb3_pub = rospy.Publisher("/miniboat3/latching", UInt16, queue_size=10)
-        self.l_mb4_pub = rospy.Publisher("/miniboat4/latching", UInt16, queue_size=10)
+        self.l_mb4_pub = rospy.Publisher("/miniboat6/latching", UInt16, queue_size=10)
 
         self.admm_restart_pub = rospy.Publisher("/counter_restart", UInt16, queue_size=10)
 

@@ -6,9 +6,9 @@ boat_ids: [
   "miniboat1",
   #"miniboat2",
   "miniboat3",
-  "miniboat4",
+  #"miniboat4",
   "miniboat5",
-  #"miniboat6",
+  "miniboat6",
   #"miniboat7",
   #"miniboat8",
 ]
