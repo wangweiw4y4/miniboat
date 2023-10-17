@@ -24,6 +24,13 @@ find_package(catkin REQUIRED COMPONENTS
 
 find_package (Eigen3 REQUIRED)
 
+set(CASADI_DIR "/usr/local")
+set(CMAKE_PREFIX_PATH ${CASADI_DIR} ${CMAKE_PREFIX_PATH})
+set(PKG_CONFIG_PATH ${CASADI_DIR}/lib/pkgconfig ${PKG_CONFIG_PATH})
+find_package(PkgConfig REQUIRED)
+pkg_search_module(CASADI casadi REQUIRED)
+link_directories(${CASADI_LIBRARY_DIRS})
+
 message("Libraries: ${ACADO_INCLUDE_DIRS}")
 
 ## System dependencies are found with CMake's conventions
@@ -197,7 +204,9 @@ add_executable(swarm_node               src/swarm_node.cxx                 src/s
 add_executable(capacitive_node          src/capacitive_node.cpp)
 add_executable(thruster_calibration_node                                   src/thruster_calibration_node.cpp)
 add_executable(thruster_multi_calibration_node                             src/thruster_multi_calibration_node.cpp)
-add_executable(pf_vel_node                  src/potential_field_vel_node.cxx       src/potential_field_vel.cpp   src/swarm.cpp)       
+add_executable(pf_vel_node                  src/potential_field_vel_node.cxx       src/potential_field_vel.cpp   src/swarm.cpp)
+add_executable(pf_cbf_node                  src/potential_field_cbf_node.cxx       src/potential_field_cbf.cpp   src/swarm.cpp)
+
 
 
 ## Rename C++ executable without prefix
@@ -220,6 +229,7 @@ add_dependencies(capacitive_node             ${PROJECT_NAME}_generate_messages_c
 add_dependencies(thruster_calibration_node   ${PROJECT_NAME}_generate_messages_cpp)
 add_dependencies(thruster_multi_calibration_node   ${PROJECT_NAME}_generate_messages_cpp)
 add_dependencies(pf_vel_node                     ${PROJECT_NAME}_generate_messages_cpp)
+add_dependencies(pf_cbf_node                     ${PROJECT_NAME}_generate_messages_cpp)
 
 
 ## Specify libraries to link a library or executable target against
@@ -237,6 +247,8 @@ target_link_libraries(capacitive_node            ${catkin_LIBRARIES})
 target_link_libraries(thruster_calibration_node  ${catkin_LIBRARIES})
 target_link_libraries(thruster_multi_calibration_node  ${catkin_LIBRARIES})
 target_link_libraries(pf_vel_node                    ${catkin_LIBRARIES} lib_VFF)
+target_link_libraries(pf_cbf_node                    ${catkin_LIBRARIES} lib_VFF ipopt ${CASADI_LIBRARIES})
+target_include_directories(pf_cbf_node PUBLIC ${CASADI_INCLUDEDIR} ${EIGEN_INC})
 
 #############
 ## Install ##

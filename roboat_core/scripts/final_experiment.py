@@ -153,23 +153,31 @@ class Test:
         self.pose_mb8.x = _mb8.data[0]#_mb8.pose.pose.position.x
         self.pose_mb8.y = _mb8.data[1]#-_mb8.pose.pose.position.y
 
-    def desired(self, _assigned):
-        self.ref_mb1.x = _assigned[0,0]
-        self.ref_mb1.y = _assigned[0,1]
-        self.ref_mb2.x = _assigned[1,0]
-        self.ref_mb2.y = _assigned[1,1]
-        self.ref_mb3.x = _assigned[2,0]
-        self.ref_mb3.y = _assigned[2,1]
-        self.ref_mb4.x = _assigned[3,0]
-        self.ref_mb4.y = _assigned[3,1]
-        self.ref_mb5.x = _assigned[4,0]
-        self.ref_mb5.y = _assigned[4,1]
-        self.ref_mb6.x = _assigned[5,0]
-        self.ref_mb6.y = _assigned[5,1]
-        self.ref_mb7.x = _assigned[6,0]
-        self.ref_mb7.y = _assigned[6,1]
-        self.ref_mb8.x = _assigned[7,0]
-        self.ref_mb8.y = _assigned[7,1]
+    def desired(self, _assigned, _diam):
+        self.ref_mb1.x      = _assigned[0,0]
+        self.ref_mb1.y      = _assigned[0,1]
+        self.ref_mb1.theta  = _diam
+        self.ref_mb2.x      = _assigned[1,0]
+        self.ref_mb2.y      = _assigned[1,1]
+        self.ref_mb2.theta  = _diam
+        self.ref_mb3.x      = _assigned[2,0]
+        self.ref_mb3.y      = _assigned[2,1]
+        self.ref_mb3.theta  = _diam
+        self.ref_mb4.x      = _assigned[3,0]
+        self.ref_mb4.y      = _assigned[3,1]
+        self.ref_mb4.theta  = _diam
+        self.ref_mb5.x      = _assigned[4,0]
+        self.ref_mb5.y      = _assigned[4,1]
+        self.ref_mb5.theta  = _diam
+        self.ref_mb6.x      = _assigned[5,0]
+        self.ref_mb6.y      = _assigned[5,1]
+        self.ref_mb6.theta  = _diam
+        self.ref_mb7.x      = _assigned[6,0]
+        self.ref_mb7.y      = _assigned[6,1]
+        self.ref_mb7.theta  = _diam
+        self.ref_mb8.x      = _assigned[7,0]
+        self.ref_mb8.y      = _assigned[7,1]
+        self.ref_mb8.theta  = _diam
         self.d_mb1_pub.publish(self.ref_mb1)
         self.d_mb2_pub.publish(self.ref_mb2)
         self.d_mb3_pub.publish(self.ref_mb3)
@@ -204,6 +212,8 @@ def main():
     x_final = 3.43
     y_final = 0.36
     p2p_time = 60
+    inner_diam = 0.18
+    outer_diam = 0.32
     goals_0 = np.array([[x_center + 0.22, y_center - 0.22],[x_center + 0.22,y_center],[x_center + 0.22,y_center + 0.22],[x_center,y_center - 0.22],[x_center,y_center + 0.22],[x_center - 0.22,y_center - 0.22],[x_center - 0.22,y_center],[x_center - 0.22,y_center + 0.22]])
     goals_0b = np.array([[x_center + 0.30, y_center - 0.30],[x_center + 0.30,y_center],[x_center + 0.30,y_center + 0.30],[x_center,y_center - 0.30],[x_center,y_center + 0.30],[x_center - 0.30,y_center - 0.30],[x_center - 0.30,y_center],[x_center - 0.30,y_center + 0.30]])
     goals_1 = np.array([[x_center + 0.36,y_center - 0.12],[x_center + 0.36,y_center + 0.12],[x_center + 0.12,y_center - 0.12],[x_center + 0.12,y_center + 0.12],[x_center - 0.12,y_center - 0.12],[x_center - 0.12,y_center + 0.12],[x_center - 0.36,y_center - 0.12],[x_center - 0.36,y_center + 0.12]])
@@ -243,9 +253,9 @@ def main():
                         assigned_goals[k] = goalsb[ind]
                         miniboat_list[ind] = k
                     rospy.logwarn("Square Assigned Out")
-                    t.desired(assigned_goals)
+                    t.desired(assigned_goals, outer_diam)
                     time.sleep(1)
-                    t.desired(assigned_goals)
+                    t.desired(assigned_goals, outer_diam)
                     rospy.logwarn(miniboat_list + 1)
                     rospy.logwarn(assigned_goals)
                     t.in_assignment = t.is_in_assigned(robot_poses,assigned_goals,number_of_robots)
@@ -260,9 +270,9 @@ def main():
                             assigned_goals[k] = goals[ind]
                             miniboat_list[ind] = k
                         rospy.logwarn("Square Assigned In")
-                        t.desired(assigned_goals)
+                        t.desired(assigned_goals, inner_diam)
                         time.sleep(1)
-                        t.desired(assigned_goals)
+                        t.desired(assigned_goals, inner_diam)
                         rospy.logwarn(miniboat_list + 1)
                         rospy.logwarn(assigned_goals)            
                         t.in_assignment = t.is_in_assigned(robot_poses,assigned_goals,number_of_robots)
@@ -307,9 +317,9 @@ def main():
                         assigned_goals[k] = goalsb[ind]
                         miniboat_list[ind] = k
                     rospy.logwarn("Rectangle Assigned Out")
-                    t.desired(assigned_goals)
+                    t.desired(assigned_goals, outer_diam)
                     time.sleep(1)
-                    t.desired(assigned_goals)
+                    t.desired(assigned_goals, outer_diam)
                     rospy.logwarn(miniboat_list + 1)
                     rospy.logwarn(assigned_goals)
                     t.in_assignment = t.is_in_assigned(robot_poses,assigned_goals,number_of_robots)
@@ -324,9 +334,9 @@ def main():
                             assigned_goals[k] = goals[ind]
                             miniboat_list[ind] = k
                         rospy.logwarn("Rectangle Assigned In")
-                        t.desired(assigned_goals)
+                        t.desired(assigned_goals, inner_diam)
                         time.sleep(1)
-                        t.desired(assigned_goals)
+                        t.desired(assigned_goals, inner_diam)
                         rospy.logwarn(miniboat_list + 1)
                         rospy.logwarn(assigned_goals)            
                         t.in_assignment = t.is_in_assigned(robot_poses,assigned_goals,number_of_robots)
@@ -359,7 +369,7 @@ def main():
                     ind = col_ind[k]
                     assigned_goals[k] = goals[ind]
                     miniboat_list[ind] = k
-                t.desired(assigned_goals)
+                t.desired(assigned_goals, inner_diam)
                 rate.sleep
             state = 5
         if state == 5:
