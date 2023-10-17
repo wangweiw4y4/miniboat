@@ -341,7 +341,8 @@ public:
     {
         if (_latch->data == 2){
             counter_delatch = 0;
-            desired_yaw = (idx_ % 2) - 0.5; 
+            desired_yaw = ((idx_ % 2) - 0.5)*3.0;
+            ROS_ERROR("delatch %f", desired_yaw);
         }
     }
 
@@ -565,7 +566,7 @@ public:
             ocpZ_flag = false;
         }
 
-        if (counter_delatch >= 10){
+        if (counter_delatch >= 40){
             desired_yaw = 0.0;
         }
 
