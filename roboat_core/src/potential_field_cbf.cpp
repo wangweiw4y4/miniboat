@@ -92,6 +92,7 @@ PotentialField::PotentialField(ros::NodeHandle nh) : nh_(nh)
     nh_.param("functions/path", FUNCTIONS_DIR, FUNCTIONS_DIR_DEFAULT);
     ocpC_function = casadi::Function::load(FUNCTIONS_DIR + "/ocpCBF.casadi");
     // initialize CBF parameters
+    boat_diam = MatrixXd::Zero(1,1);
     boat_diam(0,0) = 0.3;
     x_i = MatrixXd::Zero(1,1);
     y_i = MatrixXd::Zero(1,1);
