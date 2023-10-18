@@ -78,7 +78,7 @@ class Test:
         in_position = True
         for i in range(_number_of_robots):
             dist = self.distance_to_assigned_position(_robot_poses[i][0],_robot_poses[i][1],_assigned[i][0],_assigned[i][1])
-            if dist <= 0.07 and in_position == True:
+            if dist <= 0.05 and in_position == True:
                 in_position = True
             else:
                 in_position = False
@@ -152,11 +152,11 @@ def main():
     x_final = 3.43
     y_final = 0.36
     p2p_time = 60
-    outer_diam = 0.35
-    inner_diam = 0.2
-    goals_0 = np.array([[x_center + 0.12, y_center - 0.12],[x_center + 0.12,y_center + 0.12],[x_center - 0.12,y_center - 0.12],[x_center - 0.12,y_center + 0.12]])
+    outer_diam = 0.32
+    inner_diam = 0.18
+    goals_0 = np.array([[x_center + 0.11, y_center - 0.11],[x_center + 0.11,y_center + 0.11],[x_center - 0.11,y_center - 0.11],[x_center - 0.11,y_center + 0.11]])
     goals_0b = np.array([[x_center + 0.24, y_center - 0.24],[x_center + 0.24,y_center + 0.24],[x_center - 0.24,y_center - 0.24],[x_center - 0.24,y_center + 0.24]])
-    goals_1 = np.array([[x_center + 0.36,y_center],[x_center + 0.12,y_center],[x_center - 0.12,y_center],[x_center - 0.36,y_center]])
+    goals_1 = np.array([[x_center + 0.33,y_center],[x_center + 0.11,y_center],[x_center - 0.11,y_center],[x_center - 0.33,y_center]])
     goals_1b = np.array([[x_center + 0.54,y_center],[x_center + 0.24,y_center],[x_center - 0.24,y_center],[x_center - 0.54,y_center]])
     t.shape = 0
     number_of_robots = len(goals_0)
@@ -337,7 +337,7 @@ def main():
                 timer += 1/freq
                 x_pos = ap*timer + x_center
                 y_pos = bp*timer + y_center
-                goals = np.array([[x_pos + 0.36,y_pos - 0.12],[x_pos + 0.36,y_pos + 0.12],[x_pos + 0.12,y_pos - 0.12],[x_pos + 0.12,y_pos + 0.12],[x_pos - 0.12,y_pos - 0.12],[x_pos - 0.12,y_pos + 0.12],[x_pos - 0.36,y_pos - 0.12],[x_pos - 0.36,y_pos + 0.12]])
+                goals = np.array([[x_pos + 0.36,y_pos - 0.11],[x_pos + 0.36,y_pos + 0.11],[x_pos + 0.11,y_pos - 0.11],[x_pos + 0.11,y_pos + 0.11],[x_pos - 0.11,y_pos - 0.11],[x_pos - 0.11,y_pos + 0.11],[x_pos - 0.36,y_pos - 0.11],[x_pos - 0.36,y_pos + 0.11]])
                 for k in range(number_of_robots):
                     ind = col_ind[k]
                     assigned_goals[k] = goals[ind]
