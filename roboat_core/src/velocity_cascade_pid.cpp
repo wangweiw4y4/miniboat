@@ -48,6 +48,7 @@ public:
 
     double pid_maxforce = 0.4;
     double max_r = 0.4;
+    double max_Tr = 0.05;
     double total_desired_vel;
     double base_force = 0.1;
     double a = 0.12;
@@ -249,8 +250,12 @@ public:
         if (odom_flag && ref_flag)
         {
             pid_maxforce = 0.4;
+            max_r = 0.4;
+            max_Tr = 0.05;
             if (desired_yaw != 0.0){
                 pid_maxforce = 1.0;
+                max_r = 1.0;
+                max_Tr = 0.5;
             }
             epsi = desired_yaw - state[2];
             if (abs(epsi) >= M_PI)
@@ -318,9 +323,9 @@ public:
                 Tr = ((p_r * er) + (d_r * erd) - f_r)/g_r;
             }*/
             Tr = ((p_r * er) + (d_r * erd) - f_r)/g_r;
-            if (abs(Tr) >= 0.05)
+            if (abs(Tr) >= max_Tr)
             {
-                Tr = copysign(0.05,Tr);
+                Tr = copysign(max_Tr,Tr);
             }
 
             /*total_desired_vel = pow((pow(desired_u,2) + pow(desired_v,2)),0.5);
