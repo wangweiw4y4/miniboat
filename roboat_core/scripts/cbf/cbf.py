@@ -11,7 +11,7 @@ nx    = 2                   # the system is composed of 2 states per robot
 Tf    = 1                   # control horizon [s]
 Nhor  = 1                  # number of control intervals
 #dt    = Tf/Nhor             # sample time
-number_of_robots = 7        # number of robots that are neighbors (without local)
+number_of_robots = 3        # number of robots that are neighbors (without local)
 
 #mu = 1
 
