@@ -46,25 +46,25 @@ class Test:
         rospy.Subscriber("/miniboat1/shrink_flag", Float64, self.flag_callback)
         '''
         rospy.Subscriber("/miniboat1/odometry/filtered", Odometry, self.mb1_callback)
-        rospy.Subscriber("/miniboat2/odometry/filtered", Odometry, self.mb2_callback)
+        rospy.Subscriber("/miniboat5/odometry/filtered", Odometry, self.mb2_callback)
         rospy.Subscriber("/miniboat3/odometry/filtered", Odometry, self.mb3_callback)
-        rospy.Subscriber("/miniboat4/odometry/filtered", Odometry, self.mb4_callback)
+        rospy.Subscriber("/miniboat6/odometry/filtered", Odometry, self.mb4_callback)
         '''
         rospy.Subscriber("/miniboat1/boat_state", State, self.mb1_callback)
-        rospy.Subscriber("/miniboat2/boat_state", State, self.mb2_callback)
+        rospy.Subscriber("/miniboat5/boat_state", State, self.mb2_callback)
         rospy.Subscriber("/miniboat3/boat_state", State, self.mb3_callback)
-        rospy.Subscriber("/miniboat4/boat_state", State, self.mb4_callback)
+        rospy.Subscriber("/miniboat6/boat_state", State, self.mb4_callback)
 
         self.d_shape_pub = rospy.Publisher("/shape", Shape, queue_size=10)
         self.d_mb1_pub = rospy.Publisher("/miniboat1/assignment/reference_pose", Pose2D, queue_size=10)
-        self.d_mb2_pub = rospy.Publisher("/miniboat2/assignment/reference_pose", Pose2D, queue_size=10)
+        self.d_mb2_pub = rospy.Publisher("/miniboat5/assignment/reference_pose", Pose2D, queue_size=10)
         self.d_mb3_pub = rospy.Publisher("/miniboat3/assignment/reference_pose", Pose2D, queue_size=10)
-        self.d_mb4_pub = rospy.Publisher("/miniboat4/assignment/reference_pose", Pose2D, queue_size=10)
+        self.d_mb4_pub = rospy.Publisher("/miniboat6/assignment/reference_pose", Pose2D, queue_size=10)
 
         self.l_mb1_pub = rospy.Publisher("/miniboat1/latching", UInt16, queue_size=10)
-        self.l_mb2_pub = rospy.Publisher("/miniboat2/latching", UInt16, queue_size=10)
+        self.l_mb2_pub = rospy.Publisher("/miniboat5/latching", UInt16, queue_size=10)
         self.l_mb3_pub = rospy.Publisher("/miniboat3/latching", UInt16, queue_size=10)
-        self.l_mb4_pub = rospy.Publisher("/miniboat4/latching", UInt16, queue_size=10)
+        self.l_mb4_pub = rospy.Publisher("/miniboat6/latching", UInt16, queue_size=10)
 
     def compute_distance(self, x1, y1, x2, y2):
         xc = x1 - x2
@@ -181,7 +181,7 @@ def main():
             rospy.logwarn("Begin Square")
             goals = goals_0
             goalsb = goals_0b
-            while (not rospy.is_shutdown()):
+            while (not rospy.is_shutdown() and (state == 1)):
                 if t.flag == 1.0:
                     rospy.logwarn("Square Assignment")
                     robot_poses = np.array([[t.pose_mb1.x,t.pose_mb1.y],[t.pose_mb2.x,t.pose_mb2.y],[t.pose_mb3.x,t.pose_mb3.y],[t.pose_mb4.x,t.pose_mb4.y]])
@@ -245,7 +245,7 @@ def main():
             rospy.logwarn("Begin Rectangle")
             goals = goals_1
             goalsb = goals_1b
-            while (not rospy.is_shutdown()):
+            while (not rospy.is_shutdown() and (state == 3)):
                 if t.flag == 1.0:
                     rospy.logwarn("Rectangle Assignment")
                     robot_poses = np.array([[t.pose_mb1.x,t.pose_mb1.y],[t.pose_mb2.x,t.pose_mb2.y],[t.pose_mb3.x,t.pose_mb3.y],[t.pose_mb4.x,t.pose_mb4.y]])
