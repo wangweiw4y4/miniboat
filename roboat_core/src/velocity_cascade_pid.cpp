@@ -253,9 +253,9 @@ public:
             max_r = 0.4;
             max_Tr = 0.05;
             if (desired_yaw != 0.0){
-                pid_maxforce = 1.0;
-                max_r = 1.0;
-                max_Tr = 0.5;
+                pid_maxforce = 2.0;
+                max_r = 5.0;
+                max_Tr = 2.0;
             }
             epsi = desired_yaw - state[2];
             if (abs(epsi) >= M_PI)
