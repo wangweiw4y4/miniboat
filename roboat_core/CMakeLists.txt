@@ -206,6 +206,7 @@ add_executable(thruster_calibration_node                                   src/t
 add_executable(thruster_multi_calibration_node                             src/thruster_multi_calibration_node.cpp)
 add_executable(pf_vel_node                  src/potential_field_vel_node.cxx       src/potential_field_vel.cpp   src/swarm.cpp)
 add_executable(pf_cbf_node                  src/potential_field_cbf_node.cxx       src/potential_field_cbf.cpp   src/swarm.cpp)
+add_executable(pf_cbf_unit_node                  src/potential_field_cbf_unit_node.cxx       src/potential_field_cbf_unit.cpp   src/swarm.cpp)
 
 
 
@@ -230,6 +231,7 @@ add_dependencies(thruster_calibration_node   ${PROJECT_NAME}_generate_messages_c
 add_dependencies(thruster_multi_calibration_node   ${PROJECT_NAME}_generate_messages_cpp)
 add_dependencies(pf_vel_node                     ${PROJECT_NAME}_generate_messages_cpp)
 add_dependencies(pf_cbf_node                     ${PROJECT_NAME}_generate_messages_cpp)
+add_dependencies(pf_cbf_unit_node                     ${PROJECT_NAME}_generate_messages_cpp)
 
 
 ## Specify libraries to link a library or executable target against
@@ -249,6 +251,8 @@ target_link_libraries(thruster_multi_calibration_node  ${catkin_LIBRARIES})
 target_link_libraries(pf_vel_node                    ${catkin_LIBRARIES} lib_VFF)
 target_link_libraries(pf_cbf_node                    ${catkin_LIBRARIES} lib_VFF ipopt ${CASADI_LIBRARIES})
 target_include_directories(pf_cbf_node PUBLIC ${CASADI_INCLUDEDIR} ${EIGEN_INC})
+target_link_libraries(pf_cbf_unit_node                    ${catkin_LIBRARIES} lib_VFF ipopt ${CASADI_LIBRARIES})
+target_include_directories(pf_cbf_unit_node PUBLIC ${CASADI_INCLUDEDIR} ${EIGEN_INC})
 
 #############
 ## Install ##
