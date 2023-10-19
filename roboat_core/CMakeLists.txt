@@ -357,3 +357,8 @@ add_executable(miniboat_admm src/miniboat_admm.cpp src/swarm_admm.cpp)
 target_link_libraries(miniboat_admm ${catkin_LIBRARIES} ipopt ${CASADI_LIBRARIES})
 target_include_directories(miniboat_admm PUBLIC ${CASADI_INCLUDEDIR} ${EIGEN_INC})
 add_dependencies(miniboat_admm      ${PROJECT_NAME}_generate_messages_cpp)
+
+add_executable(miniboat_admm_cbf src/miniboat_admm_cbf.cpp src/swarm_admm.cpp)
+target_link_libraries(miniboat_admm_cbf ${catkin_LIBRARIES} ipopt ${CASADI_LIBRARIES})
+target_include_directories(miniboat_admm_cbf PUBLIC ${CASADI_INCLUDEDIR} ${EIGEN_INC})
+add_dependencies(miniboat_admm_cbf      ${PROJECT_NAME}_generate_messages_cpp)
