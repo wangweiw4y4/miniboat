@@ -95,6 +95,7 @@ public:
     double desired_u = 0.0;
     double desired_v = 0.0;
     double desired_r = 0.0;
+    double latching_multiplier = 1.0;
 
     double eu;
     double eu_last = 0;
@@ -252,12 +253,14 @@ public:
             pid_maxforce = 0.4;
             max_r = 0.4;
             max_Tr = 0.05;
+            latching_multiplier = 1.0;
             if (desired_yaw != 0.0){
                 pid_maxforce = 2.0;
                 max_r = 5.0;
                 max_Tr = 5.0;
-                desired_u = desired_u*10.0;
-                desired_v = desired_v*10.0;
+                //desired_u = desired_u*2.0;
+                //desired_v = desired_v*2.0;
+                latching_multiplier = 5.0;
             }
             epsi = desired_yaw - state[2];
             if (abs(epsi) >= M_PI)
@@ -274,7 +277,7 @@ public:
             epsii = (step)*(epsi + epsi_last)/2.0 + epsii;
             epsi_last = epsi;
             
-            desired_r = (p_psi * epsi) + (i_psi * copysign(epsii,epsi)) + (d_psi * epsid);
+            desired_r = (latching_multiplier*p_psi * epsi) + (i_psi * copysign(epsii,epsi)) + (d_psi * epsid);
 
             if (abs(desired_r) >= max_r){
                 desired_r = copysign(max_r,desired_r);
@@ -314,8 +317,8 @@ public:
             f_r = g_r*(((-Xu_dot + Yv_dot)*state[3]*state[4]) + (Nrr*state[5]*abs(state[5])) + (Nr*sqrt(state[3]*state[3] + state[4]*state[4])*state[5]));
             //f_r = g_r*(((-Xu_dot + Yv_dot)*desired_u*desired_v) + (Nrr*desired_r*abs(desired_r)) + (Nr*sqrt(desired_u*desired_u + desired_v*desired_v)*desired_r));
 
-            Tu = (p_u * eu) + (i_u * eui) + (d_u * eud);
-            Tv = (p_v * ev) + (i_v * evi) + (d_v * evd);
+            Tu = (latching_multiplier*p_u * eu) + (i_u * eui) + (d_u * eud);
+            Tv = (latching_multiplier*p_v * ev) + (i_v * evi) + (d_v * evd);
             /*if ((abs(epsi) <= 0.2) && (abs(er) <= 0.1))
             {
                 Tr = ((p_r * er) + (i_r * eri) + (d_r * erd) - f_r)/g_r;
@@ -324,7 +327,7 @@ public:
             {
                 Tr = ((p_r * er) + (d_r * erd) - f_r)/g_r;
             }*/
-            Tr = ((p_r * er) + (d_r * erd) - f_r)/g_r;
+            Tr = ((latching_multiplier*p_r * er) + (latching_multiplier*d_r * erd) - f_r)/g_r;
             if (abs(Tr) >= max_Tr)
             {
                 Tr = copysign(max_Tr,Tr);
@@ -430,6 +433,18 @@ public:
 
             Eigen::VectorXd::Map(&forceMsg.data[0], force.size()) = force;
             force_pub.publish(forceMsg);
+
+            if (desired_yaw != 0.0){
+                eu_last = 0.0;
+                eui = 0.0;
+                ev_last = 0.0;
+                evi = 0.0;
+                epsi_last = 0.0;
+                epsii = 0.0;
+                er_last = 0.0;
+                eri = 0.0;
+            }
+
 
         }
     }

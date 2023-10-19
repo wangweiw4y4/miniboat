@@ -5,7 +5,7 @@
  * @author:   Alejandro Gonzalez-Garcia
  * @email:    alexglzg97@gmail.com
  * 
- * @brief: ADMM algorithm for distributed formation control. 
+ * @brief: ADMM algorithm with safety CBF for distributed formation control. 
  * ---------------------------------------------------------------------------*/
 
 #include <iostream>
@@ -571,8 +571,32 @@ public:
         }
 
         if (counter > 400){
-            if (counter_mpc > 1){                
-                global_vel << u_res(0,0), v_res(0,0);
+            if (counter_mpc > 1){
+                x_i(0,0) = swarm_.state_[idx_][0];
+                y_i(0,0) = swarm_.state_[idx_][1];
+                u_mpc(0,0) = u_res(0,0);
+                v_mpc(0,0) = v_res(0,0);
+                for (int k = 0; k < swarm_size_; k++) {
+                    if (k == idx_) {
+                        continue;
+                    }
+                    if (k < idx_) {
+                        C_j(2*k,0)     = swarm_.state_[k][0];
+                        C_j((2*k)+1,0) = swarm_.state_[k][1];
+                        V_j(2*k,0)     = swarm_.state_[k][3];
+                        V_j((2*k)+1,0) = swarm_.state_[k][4];
+                        }
+                    if (k > idx_) {
+                        C_j(2*(k-1),0)   = swarm_.state_[k][0];
+                        C_j(2*(k-1)+1,0) = swarm_.state_[k][1];
+                        V_j(2*(k-1),0)   = swarm_.state_[k][3];
+                        V_j(2*(k-1)+1,0) = swarm_.state_[k][4];
+                        }
+                }
+                ocpC_function(casadi::get_ptr(arg_ocpC), casadi::get_ptr(res_ocpC), casadi::get_ptr(iw_ocpC), casadi::get_ptr(w_ocpC), mem_ocpC);
+                
+                global_vel << u_cbf(0,0), v_cbf(0,0);
+                //global_vel << u_res(0,0), v_res(0,0); //if cbf wants to be avoided
                 rotation << cos(psi), -sin(psi),
                             sin(psi), cos(psi);
                 body_vel = rotation.transpose() * global_vel;
@@ -642,7 +666,7 @@ private:
 //Main
 int main(int argc, char *argv[])
 {
-    ros::init(argc, argv, "miniboat_admm");
+    ros::init(argc, argv, "miniboat_admm_cbf");
     MiniboatADMM miniboatADMM;
     int rate = 10;
     ros::Rate loop_rate(rate);
