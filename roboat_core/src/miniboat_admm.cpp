@@ -566,7 +566,7 @@ public:
             ocpZ_flag = false;
         }
 
-        if (counter_delatch >= 10){
+        if (counter_delatch >= 5){
             desired_yaw = 0.0;
         }
 

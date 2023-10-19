@@ -255,9 +255,9 @@ public:
             max_Tr = 0.05;
             latching_multiplier = 1.0;
             if (desired_yaw != 0.0){
-                pid_maxforce = 2.0;
-                max_r = 5.0;
-                max_Tr = 5.0;
+                pid_maxforce = 1.0;
+                max_r = 2.0;
+                max_Tr = 2.0;
                 //desired_u = desired_u*2.0;
                 //desired_v = desired_v*2.0;
                 latching_multiplier = 5.0;
