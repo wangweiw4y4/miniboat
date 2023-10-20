@@ -53,6 +53,7 @@ public:
     double desired_yaw;
     bool ocpX_flag;
     bool ocpZ_flag;
+    bool ref_flag;
 
     int Nhor;
     int Nhor_plus_one;
@@ -311,6 +312,7 @@ public:
         desired_yaw = 0.0;
         ocpX_flag = true;
         ocpZ_flag = false;
+        ref_flag - false;
 
         reference(0) = swarm_.state_[idx_][0];//idx_;
         reference(1) = swarm_.state_[idx_][1];//idx_;
@@ -330,6 +332,7 @@ public:
         reference(0) = _ref->x; //ref in x
         reference(1) = _ref->y; //ref in y
         boat_diam(0,0) = _ref->theta;
+        ref_flag = true;
     }
 
     void reset_callback(const std_msgs::UInt16::ConstPtr& _counter)
@@ -354,6 +357,11 @@ public:
 
     void time_step()
     {
+        if (!ref_flag){
+            return;
+        }
+
+        
         if (ocpX_flag){
             // update ocpX parameters (reference and initial state)
             xref(0,0) = reference(0);
