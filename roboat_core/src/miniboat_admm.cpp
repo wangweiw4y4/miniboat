@@ -73,6 +73,8 @@ public:
     roboat_core::FloatArray local_copies;
     roboat_core::FloatArray lambda_multipliers;
     geometry_msgs::Pose2D vel_ref;
+    std_msgs::Float64 ocpX_time;
+    std_msgs::Float64 ocpZ_time;
     //nav_msgs::Path horizon_path;
     //geometry_msgs::PoseStamped horizon_pose;
 
@@ -152,6 +154,8 @@ public:
         lambda_multipliers_pub = nh.advertise<roboat_core::FloatArray>("lambda_multipliers", 1);
         vel_ref_pub = nh.advertise<geometry_msgs::Pose2D>("velocity_reference", 1);
         path_pub = nh.advertise<nav_msgs::Path>("horizon_path", 1);
+        ocpX_time_pub = nh.advertise<std_msgs::Float64>("ocpX_time", 1);
+        ocpZ_time_pub = nh.advertise<std_msgs::Float64>("ocpZ_time", 1);
 
         reference_pose_sub = nh.subscribe("assignment/reference_pose", 1, &MiniboatADMM::reference_callback, this);
         counter_reset_sub = nh.subscribe("/counter_restart", 1, &MiniboatADMM::reset_callback, this);
@@ -391,7 +395,10 @@ public:
             trajectory.data = new_trajectory;
             trajectory_pub.publish(trajectory);
 
-            nav_msgs::Path horizon_path;
+            ocpX_time.data = ocpX_function.stats().at("t_wall_total");
+            ocpX_time_pub.publish(ocpX_time);
+
+            /*nav_msgs::Path horizon_path;
             geometry_msgs::PoseStamped horizon_pose;
             for (int i = 0; i < Nhor_plus_one; i++){
                 horizon_pose.header.stamp = ros::Time::now();
@@ -404,7 +411,7 @@ public:
                 horizon_path.header.frame_id = "world";
                 horizon_path.poses.push_back(horizon_pose);
             }
-            path_pub.publish(horizon_path);
+            path_pub.publish(horizon_path);*/
 
         }        
 
@@ -507,6 +514,10 @@ public:
             }
             lambda_multipliers.data = new_lambda_multipliers;
             lambda_multipliers_pub.publish(lambda_multipliers);
+
+            ocpZ_time.data = ocpZ_function.stats().at("t_wall_total");
+            ocpZ_time_pub.publish(ocpZ_time);
+
         }
 
         // update new trajectory estimate/local copy (Z_i) for ocpX
@@ -633,6 +644,8 @@ private:
     ros::Publisher lambda_multipliers_pub;
     ros::Publisher vel_ref_pub;
     ros::Publisher path_pub;
+    ros::Publisher ocpX_time_pub;
+    ros::Publisher ocpZ_time_pub;
     ros::Subscriber reference_pose_sub;
     ros::Subscriber counter_reset_sub;
     ros::Subscriber latching_sub;

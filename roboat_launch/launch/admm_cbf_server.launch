@@ -1,0 +1,7 @@
+<launch>
+
+    <node name="miniboat_assignment_4b" pkg="swarmsimulation" type="miniboat_assignment_4b.py" />
+
+     <node type="record" pkg="rosbag" name="recorder" args="record -a -o $(find roboat_core)/bags/mpc_cbf/" />
+
+</launch>

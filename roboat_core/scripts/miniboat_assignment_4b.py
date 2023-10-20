@@ -4,6 +4,7 @@
 This script is an automated procedure for the expected paper experiments
 1. Shape-formation and latching of scathered miniboats into a square
 2. Reconfiguration (de-latching/formation/latching) into a 4x1 rectangle
+3. Reconfiguration (de-latching/formation/latching) into a 3-1 pyramid
 '''
 
 import os
@@ -158,6 +159,8 @@ def main():
     goals_0b = np.array([[x_center + 0.24, y_center - 0.24],[x_center + 0.24,y_center + 0.24],[x_center - 0.24,y_center - 0.24],[x_center - 0.24,y_center + 0.24]])
     goals_1 = np.array([[x_center + 0.33,y_center],[x_center + 0.11,y_center],[x_center - 0.11,y_center],[x_center - 0.33,y_center]])
     goals_1b = np.array([[x_center + 0.54,y_center],[x_center + 0.18,y_center],[x_center - 0.18,y_center],[x_center - 0.54,y_center]])
+    goals_2 = np.array([[x_center + 0.11, y_center ],[x_center - 0.11,y_center+0.22],[x_center - 0.11,y_center],[x_center - 0.11,y_center-0.22]])
+    goals_2b = np.array([[x_center + 0.18, y_center ],[x_center - 0.18,y_center+0.36],[x_center - 0.18,y_center],[x_center - 0.18,y_center-0.36]])
     t.shape = 0
     number_of_robots = len(goals_0)
     distance_squared_matrix = np.zeros([number_of_robots,number_of_robots])
@@ -231,6 +234,7 @@ def main():
                             t.flag = 0.0
                             state = 2
                 rate.sleep()
+
         if state == 2:
             rospy.logwarn("Remain in Square")
             time.sleep(10)
@@ -323,29 +327,105 @@ def main():
                             t.latch_action(1)
                             rospy.logwarn("Rectangle Latching")
                             t.flag = 0.0
-                            #state = 4
-                            state = 5
+                            state = 4
                 rate.sleep()
+
         if state == 4:
-            time.sleep(5)
-            rospy.logwarn("Begin Motion")
-            start_time = rospy.Time.now().secs
-            timer = 0
-            ap = (x_final - x_center)/p2p_time
-            bp = (y_final - y_center)/p2p_time
-            while (rospy.Time.now().secs - start_time) <= p2p_time and not rospy.is_shutdown():
-                timer += 1/freq
-                x_pos = ap*timer + x_center
-                y_pos = bp*timer + y_center
-                goals = np.array([[x_pos + 0.36,y_pos - 0.11],[x_pos + 0.36,y_pos + 0.11],[x_pos + 0.11,y_pos - 0.11],[x_pos + 0.11,y_pos + 0.11],[x_pos - 0.11,y_pos - 0.11],[x_pos - 0.11,y_pos + 0.11],[x_pos - 0.36,y_pos - 0.11],[x_pos - 0.36,y_pos + 0.11]])
-                for k in range(number_of_robots):
-                    ind = col_ind[k]
-                    assigned_goals[k] = goals[ind]
-                    miniboat_list[ind] = k
-                t.desired(assigned_goals, inner_diam)
-                rate.sleep
-            state = 5
+            rospy.logwarn("Remain in Rectangle")
+            time.sleep(10)
+            rospy.logwarn("Delatch")
+            t.latch_action(2)
+            #t.shape_publish(t.shape)
+            time.sleep(1)
+            t.latch_action(2)
+            t.flag = 1.0
+            while (not rospy.is_shutdown() and (state == 4)):
+                if t.flag == 1.0:
+                    #rospy.logwarn("Square Assignment")
+                    robot_poses = np.array([[t.pose_mb1.x,t.pose_mb1.y],[t.pose_mb2.x,t.pose_mb2.y],[t.pose_mb3.x,t.pose_mb3.y],[t.pose_mb4.x,t.pose_mb4.y]])
+                    for i in range(number_of_robots):
+                        for j in range(number_of_robots):
+                            distance_squared_matrix[i,j] = t.compute_distance(robot_poses[i,0],robot_poses[i,1],goals[j,0],goals[j,1])
+                    row_ind, col_ind = linear_sum_assignment(distance_squared_matrix)
+                    for k in range(number_of_robots):
+                        ind = col_ind[k]
+                        assigned_goals[k] = goalsb[ind]
+                        miniboat_list[ind] = k
+                    rospy.logwarn("Rectangle Assigned Out")
+                    #t.counter_publish(0)
+                    t.desired(assigned_goals, inner_diam)
+                    time.sleep(1)
+                    t.desired(assigned_goals, inner_diam)
+                    rospy.logwarn(miniboat_list + 1)
+                    rospy.logwarn(assigned_goals)
+                    t.in_assignment = t.is_in_assigned(robot_poses,assigned_goals,number_of_robots)
+                    while ((t.in_assignment == False) and (t.flag == 1.0) and (not rospy.is_shutdown())):
+                        robot_poses = np.array([[t.pose_mb1.x,t.pose_mb1.y],[t.pose_mb2.x,t.pose_mb2.y],[t.pose_mb3.x,t.pose_mb3.y],[t.pose_mb4.x,t.pose_mb4.y]])
+                        t.in_assignment = t.is_in_assigned(robot_poses,assigned_goals,number_of_robots)
+                        rate.sleep()
+                    rospy.logwarn("Rectangle first positions")
+                t.shape = 1
+                #t.shape_publish(t.shape)
+                state = 5
+                rate.sleep()
+
         if state == 5:
+            rospy.logwarn("Begin Pyramid")
+            goals = goals_2
+            goalsb = goals_2b
+            while (not rospy.is_shutdown() and (state == 5)):
+                if t.flag == 1.0:
+                    rospy.logwarn("Rectangle Assignment")
+                    robot_poses = np.array([[t.pose_mb1.x,t.pose_mb1.y],[t.pose_mb2.x,t.pose_mb2.y],[t.pose_mb3.x,t.pose_mb3.y],[t.pose_mb4.x,t.pose_mb4.y]])
+                    for i in range(number_of_robots):
+                        for j in range(number_of_robots):
+                            distance_squared_matrix[i,j] = t.compute_distance(robot_poses[i,0],robot_poses[i,1],goals[j,0],goals[j,1])
+                    row_ind, col_ind = linear_sum_assignment(distance_squared_matrix)
+                    for k in range(number_of_robots):
+                        ind = col_ind[k]
+                        assigned_goals[k] = goalsb[ind]
+                        miniboat_list[ind] = k
+                    rospy.logwarn("Rectangle Assigned Out")
+                    #t.counter_publish(0)
+                    t.desired(assigned_goals, outer_diam)
+                    time.sleep(1)
+                    t.desired(assigned_goals, outer_diam)
+                    rospy.logwarn(miniboat_list + 1)
+                    rospy.logwarn(assigned_goals)
+                    t.in_assignment = t.is_in_assigned(robot_poses,assigned_goals,number_of_robots)
+                    while ((t.in_assignment == False) and (t.flag == 1.0) and (not rospy.is_shutdown())):
+                        robot_poses = np.array([[t.pose_mb1.x,t.pose_mb1.y],[t.pose_mb2.x,t.pose_mb2.y],[t.pose_mb3.x,t.pose_mb3.y],[t.pose_mb4.x,t.pose_mb4.y]])
+                        t.in_assignment = t.is_in_assigned(robot_poses,assigned_goals,number_of_robots)
+                        rate.sleep()
+                    rospy.logwarn("Pyramid first positions")
+                    if t.flag == 1.0:
+                        for k in range(number_of_robots):
+                            ind = col_ind[k]
+                            assigned_goals[k] = goals[ind]
+                            miniboat_list[ind] = k
+                        rospy.logwarn("Pyramid Assigned In")
+                        #t.counter_publish(0)
+                        t.desired(assigned_goals, inner_diam)
+                        time.sleep(1)
+                        t.desired(assigned_goals, inner_diam)
+                        rospy.logwarn(miniboat_list + 1)
+                        rospy.logwarn(assigned_goals)            
+                        t.in_assignment = t.is_in_assigned(robot_poses,assigned_goals,number_of_robots)
+                        while ((t.in_assignment == False) and (t.flag == 1.0) and (not rospy.is_shutdown())):
+                            robot_poses = np.array([[t.pose_mb1.x,t.pose_mb1.y],[t.pose_mb2.x,t.pose_mb2.y],[t.pose_mb3.x,t.pose_mb3.y],[t.pose_mb4.x,t.pose_mb4.y]])
+                            t.in_assignment = t.is_in_assigned(robot_poses,assigned_goals,number_of_robots)
+                            rate.sleep()
+                        rospy.logwarn("Pyramid second positions")
+                        if t.flag == 1.0:
+                            t.latch_action(1)
+                            time.sleep(1)
+                            t.latch_action(1)
+                            rospy.logwarn("Pyramid Latching")
+                            t.flag = 0.0
+                            state = 6
+                rate.sleep()                
+
+        if state == 6:
             t.testing = False
             rospy.logwarn("Finished")
         rate.sleep()

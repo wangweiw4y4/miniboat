@@ -59,6 +59,7 @@ options = {"ipopt": {
     }}
 options["expand"] = True
 options["print_time"] = False
+options['record_time'] = True
 ocpC.solver('ipopt',options)
 ocpC.method(MultipleShooting(N=Nhor,M=1,intg='rk'))
 
